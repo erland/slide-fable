@@ -33,11 +33,12 @@ next_step:
   recommended: PR-02-final-review
 
 ux_redesign:
-  current: SF-UX-10
+  current: SF-UX-11
   state: implemented_verification_pending
-  focus: touch_primary_pointer_and_rotation_refit
+  focus: ribbon_keyboard_navigation_and_layout_review
   verification: pending_ci
   previous_step_sf_ux_07: pass_ci_runs_39317268130_39317235267
   previous_step_sf_ux_08: pass_ci_runs_39317922520_39317890949
   previous_step_sf_ux_09: pass_ci_runs_39318474081_39318444697
-  next_after_success: SF-UX-11
+  previous_step_sf_ux_10: pass_ci_runs_39319032269_39319006229
+  next_after_success: SF-UX-11-final-review
