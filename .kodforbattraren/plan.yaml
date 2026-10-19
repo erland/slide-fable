@@ -12,11 +12,11 @@ steps:
     status: implemented_verification_blocked
   - id: SF-UX-02
     title: Höjd- och breddbaserad zoom
-    status: implemented_verification_pending
+    status: completed
     depends_on: [SF-UX-01]
   - id: SF-UX-03
     title: Kompaktare verktygsrad
-    status: pending
+    status: implemented_verification_pending
     depends_on: [SF-UX-02]
   - id: SF-UX-04
     title: Direktredigering av text
