@@ -107,6 +107,19 @@ try{
  await ribbon.getByRole('tab',{name:'Infoga'}).click();
  assert.equal(await toolbar.getByRole('button',{name:'Text',exact:true}).isVisible(),true);
  pass('SF-UX-08:ribbon-tabs');
+ await ribbon.getByRole('tab',{name:'Infoga'}).focus();
+ await page.keyboard.press('ArrowRight');
+ assert.equal(await ribbon.getByRole('tab',{name:'Rita'}).getAttribute('aria-selected'),'true','Right arrow selects the next ribbon tab');
+ assert.equal(await ribbon.getByRole('tab',{name:'Rita'}).evaluate(el=>el===document.activeElement),true,'Focus follows selected ribbon tab');
+ await page.keyboard.press('End');
+ assert.equal(await ribbon.getByRole('tab',{name:'Visa'}).getAttribute('aria-selected'),'true','End selects last visible tab');
+ await page.keyboard.press('Home');
+ assert.equal(await ribbon.getByRole('tab',{name:'Start'}).getAttribute('aria-selected'),'true','Home selects first tab');
+ await page.keyboard.press('ArrowLeft');
+ assert.equal(await ribbon.getByRole('tab',{name:'Visa'}).getAttribute('aria-selected'),'true','Left arrow wraps to last tab');
+ await ribbon.getByRole('tab',{name:'Infoga'}).click();
+ pass('SF-UX-11:ribbon-keyboard-navigation');
+
  await page.evaluate(async()=> (await import('/src/core/editor.ts')).editorStore.select([]));
  assert.equal(await ribbon.getByRole('tab',{name:'Objekt'}).count(),0,'Contextual tab must be absent without selection');
  await page.locator('.editor-canvas-pane .stage .render-element.type-text').first().click();
