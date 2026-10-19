@@ -3,7 +3,7 @@ source: slide-fable-main.zip
 steps:
   - id: SF-UX-01
     title: Canvas-first-layout med döljbara paneler
-    status: implemented_verification_blocked
+    status: completed
   - id: SF-UX-01-node-compatibility
     title: Samordna Node-krav och GitHub Actions
     status: implemented_verification_blocked
@@ -12,7 +12,7 @@ steps:
     status: implemented_verification_blocked
   - id: SF-UX-02
     title: Höjd- och breddbaserad zoom
-    status: pending
+    status: implemented_verification_pending
     depends_on: [SF-UX-01]
   - id: SF-UX-03
     title: Kompaktare verktygsrad
