@@ -1,7 +1,9 @@
 # Slide Fable – Kodförbättraren
 
-Senaste åtgärd: nedgradering av `svg-pathdata` från 9.0.0 till 8.0.0 och återställning till Node 22.16.0 i manifest och GitHub Actions.
+**Senast genomfört:** SF-UX-01 CI-verifiering, inklusive webbläsartestets anpassning till hopfällbara talaranteckningar.
 
-**Status:** Ändringar genomförda, full verifiering återstår. Den lokala miljön når inte npm-registret och saknar nödvändiga cacheposter. `package-lock.json` innehåller rätt version och tarball-adress för `svg-pathdata@8.0.0`, men ingen integrity-kontrollsumma för just denna post. Kör `npm install --package-lock-only` på en maskin med registrynätverk för att regenerera den, följt av `npm ci`, `npm test`, `npm run lint` och `npm run build`.
+**CI:** Godkänd på Node 22.16.0 för commit `891d675` i körningarna [39295208457](https://github.com/erland/slide-fable/actions/runs/39295208457) och [39295217889](https://github.com/erland/slide-fable/actions/runs/39295217889).
 
-**Nästa steg:** SF-UX-01-verification. SF-UX-02 (zoom) inväntar lyckad verifiering.
+**Kvar:** Manuell visuell granskning av canvas och paneler på desktop och surfplatta. `package-lock.json` saknar `integrity` för `svg-pathdata@8.0.0`; npm CI-installationen har passerat, men kontrollsumman ska hämtas från npm-registret och inte konstrueras manuellt.
+
+**Nästa steg:** SF-UX-01-visual-review. Fortsätt därefter till SF-UX-02 (zoom som tar hänsyn till både höjd och bredd).
