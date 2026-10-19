@@ -1,0 +1,22 @@
+project: slide-fable
+source_version: 0.5.0
+latest_step: SF-UX-01-node22-dependency-rollback
+status: implemented_verification_blocked
+changes:
+  - Reverted minimum Node version to 22.16.0 in package manifest and lockfile.
+  - Downgraded svg-pathdata from 9.0.0 to 8.0.0 in manifest and lockfile.
+  - Restored GitHub Actions Node version to 22.16.0.
+verification:
+  manifests_consistent: pass
+  svg_pathdata_8_engine_upstream: ">=22.16.0 (verified via CDN metadata)"
+  local_node: v22.16.0
+  full_npm_install: blocked_network_and_cache
+  package_lock_integrity: pending_regeneration_with_registry_access
+  typecheck: not_run
+  browser_test: not_run
+blockers:
+  - npm registry is unreachable and missing cache entries prevent npm ci.
+  - Lock entry for svg-pathdata 8.0.0 has no integrity checksum; regenerate via npm install --package-lock-only after network access and commit updated lock.
+  - Full CI tests still need to run.
+next_step:
+  recommended: SF-UX-01-verification

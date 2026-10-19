@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "engines": {
-    "node": ">=22.12"
+    "node": ">=22.16.0"
   },
   "scripts": {
     "dev": "vite --host 0.0.0.0",
@@ -34,7 +34,7 @@
     "pptxgenjs": "4.0.1",
     "react": "19.3.1",
     "react-dom": "19.3.1",
-    "svg-pathdata": "9.0.0"
+    "svg-pathdata": "8.0.0"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

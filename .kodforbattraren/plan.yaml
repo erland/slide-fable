@@ -1,0 +1,29 @@
+project: slide-fable
+source: slide-fable-main.zip
+steps:
+  - id: SF-UX-01
+    title: Canvas-first-layout med döljbara paneler
+    status: implemented_verification_blocked
+  - id: SF-UX-01-node-compatibility
+    title: Samordna Node-krav och GitHub Actions
+    status: implemented_verification_blocked
+  - id: SF-UX-01-node22-dependency-rollback
+    title: Backa svg-pathdata för Node 22
+    status: implemented_verification_blocked
+  - id: SF-UX-02
+    title: Höjd- och breddbaserad zoom
+    status: pending
+    depends_on: [SF-UX-01]
+  - id: SF-UX-03
+    title: Kompaktare verktygsrad
+    status: pending
+    depends_on: [SF-UX-02]
+  - id: SF-UX-04
+    title: Direktredigering av text
+    status: pending
+  - id: SF-UX-05
+    title: Objektmanipulation
+    status: pending
+  - id: SF-UX-06
+    title: Responsivitet och tillgänglighet
+    status: pending
