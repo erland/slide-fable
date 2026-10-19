@@ -1,0 +1,101 @@
+{
+  "engine": "153.0.8010.0",
+  "binary": "explicit-executable",
+  "checks": [
+    {
+      "name": "desktop:cold-file-offline",
+      "result": "PASS"
+    },
+    {
+      "name": "desktop:responsive-shell",
+      "result": "PASS"
+    },
+    {
+      "name": "desktop:rich-text-canonical-bridge",
+      "result": "PASS"
+    },
+    {
+      "name": "desktop:svg-math-safety-probes",
+      "result": "PASS"
+    },
+    {
+      "name": "desktop:text-no-overflow",
+      "result": "PASS"
+    },
+    {
+      "name": "desktop:pdf-browser-download",
+      "result": "PASS"
+    },
+    {
+      "name": "desktop:pptx-browser-download",
+      "result": "PASS"
+    },
+    {
+      "name": "desktop:real-text-edit",
+      "result": "PASS"
+    },
+    {
+      "name": "tablet:cold-file-offline",
+      "result": "PASS"
+    },
+    {
+      "name": "tablet:responsive-shell",
+      "result": "PASS"
+    },
+    {
+      "name": "tablet:rich-text-canonical-bridge",
+      "result": "PASS"
+    },
+    {
+      "name": "tablet:svg-math-safety-probes",
+      "result": "PASS"
+    },
+    {
+      "name": "tablet:text-no-overflow",
+      "result": "PASS"
+    },
+    {
+      "name": "tablet:pdf-browser-download",
+      "result": "PASS"
+    },
+    {
+      "name": "tablet:pptx-browser-download",
+      "result": "PASS"
+    },
+    {
+      "name": "phone:cold-file-offline",
+      "result": "PASS"
+    },
+    {
+      "name": "phone:responsive-shell",
+      "result": "PASS"
+    },
+    {
+      "name": "phone:rich-text-canonical-bridge",
+      "result": "PASS"
+    },
+    {
+      "name": "phone:svg-math-safety-probes",
+      "result": "PASS"
+    },
+    {
+      "name": "phone:text-no-overflow",
+      "result": "PASS"
+    },
+    {
+      "name": "phone:pdf-browser-download",
+      "result": "PASS"
+    },
+    {
+      "name": "phone:pptx-browser-download",
+      "result": "PASS"
+    }
+  ],
+  "limitations": [
+    "Actual iPad/Safari pending",
+    "Actual PowerPoint Mac/Windows pending",
+    "Glass fallback approximation; full fidelity not claimed"
+  ],
+  "webkit": "deferred_missing_system_dependencies",
+  "result": "passed_with_deferred"
+}

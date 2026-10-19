@@ -1,0 +1,369 @@
+{
+  "format": "ppd",
+  "schemaVersion": "0.3.1",
+  "document": {
+    "id": "dev002-spike",
+    "title": "Slide Fable – exportprov",
+    "canvas": {
+      "width": 1600,
+      "height": 900,
+      "unit": "logical"
+    }
+  },
+  "theme": {
+    "id": "spike"
+  },
+  "slides": [
+    {
+      "id": "s1",
+      "content": {},
+      "view": {
+        "elements": [
+          {
+            "id": "title",
+            "type": "text",
+            "geometry": {
+              "x": 100,
+              "y": 110,
+              "width": 1380,
+              "height": 100
+            },
+            "style": {
+              "fontSize": 70,
+              "color": "#142533"
+            },
+            "text": {
+              "paragraphs": [
+                {
+                  "id": "title-p",
+                  "runs": [
+                    {
+                      "text": "Slide Fable",
+                      "marks": {
+                        "bold": true
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "id": "lead",
+            "type": "text",
+            "geometry": {
+              "x": 100,
+              "y": 280,
+              "width": 1380,
+              "height": 100
+            },
+            "style": {
+              "fontSize": 36,
+              "color": "#142533"
+            },
+            "text": {
+              "paragraphs": [
+                {
+                  "id": "lead-p",
+                  "runs": [
+                    {
+                      "text": "Sökbar svensk text: åäö ÅÄÖ – räksmörgås.",
+                      "marks": {
+                        "bold": false
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "id": "wrap",
+            "type": "text",
+            "geometry": {
+              "x": 100,
+              "y": 430,
+              "width": 1000,
+              "height": 250
+            },
+            "style": {
+              "fontSize": 36,
+              "color": "#142533"
+            },
+            "text": {
+              "paragraphs": [
+                {
+                  "id": "wrap-p",
+                  "runs": [
+                    {
+                      "text": "Långa texter behöver samma radbrytning i webbläsaren och vid export. Detta prov använder uppmätta textrader i stället för att låta varje exportmotor gissa layouten.",
+                      "marks": {
+                        "bold": false
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "s2",
+      "content": {},
+      "view": {
+        "elements": [
+          {
+            "id": "title2",
+            "type": "text",
+            "geometry": {
+              "x": 100,
+              "y": 80,
+              "width": 1380,
+              "height": 100
+            },
+            "style": {
+              "fontSize": 60,
+              "color": "#142533"
+            },
+            "text": {
+              "paragraphs": [
+                {
+                  "id": "title2-p",
+                  "runs": [
+                    {
+                      "text": "Redigerbara objekt",
+                      "marks": {
+                        "bold": true
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "id": "shape1",
+            "type": "shape",
+            "geometry": {
+              "x": 100,
+              "y": 250,
+              "width": 420,
+              "height": 170
+            },
+            "style": {
+              "fill": {
+                "color": "#c9e3e5"
+              }
+            }
+          },
+          {
+            "id": "shape-label",
+            "type": "text",
+            "geometry": {
+              "x": 130,
+              "y": 300,
+              "width": 360,
+              "height": 80
+            },
+            "style": {
+              "fontSize": 40,
+              "color": "#142533"
+            },
+            "text": {
+              "paragraphs": [
+                {
+                  "id": "shape-label-p",
+                  "runs": [
+                    {
+                      "text": "Beslut",
+                      "marks": {
+                        "bold": true
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "id": "table1",
+            "type": "table",
+            "geometry": {
+              "x": 680,
+              "y": 250,
+              "width": 800,
+              "height": 240
+            },
+            "cells": [
+              [
+                {
+                  "id": "c1",
+                  "text": "Objekt",
+                  "header": true
+                },
+                {
+                  "id": "c2",
+                  "text": "Värde",
+                  "header": true
+                }
+              ],
+              [
+                {
+                  "id": "c3",
+                  "text": "Rubrik"
+                },
+                {
+                  "id": "c4",
+                  "text": "Ändra mig"
+                }
+              ]
+            ]
+          },
+          {
+            "id": "hint",
+            "type": "text",
+            "geometry": {
+              "x": 100,
+              "y": 640,
+              "width": 1380,
+              "height": 120
+            },
+            "style": {
+              "fontSize": 32,
+              "color": "#142533"
+            },
+            "text": {
+              "paragraphs": [
+                {
+                  "id": "hint-p",
+                  "runs": [
+                    {
+                      "text": "Text, form och tabell exporteras som egna Office-objekt.",
+                      "marks": {
+                        "bold": false
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "s3",
+      "content": {},
+      "view": {
+        "elements": [
+          {
+            "id": "glass",
+            "type": "shape",
+            "geometry": {
+              "x": 90,
+              "y": 170,
+              "width": 1420,
+              "height": 540
+            },
+            "effects": [
+              {
+                "type": "backdropBlur",
+                "radius": 22
+              }
+            ]
+          },
+          {
+            "id": "glass-title",
+            "type": "text",
+            "geometry": {
+              "x": 150,
+              "y": 240,
+              "width": 1280,
+              "height": 120
+            },
+            "style": {
+              "fontSize": 60,
+              "color": "#142533"
+            },
+            "text": {
+              "paragraphs": [
+                {
+                  "id": "glass-title-p",
+                  "runs": [
+                    {
+                      "text": "Glaseffekt med redigerbar text",
+                      "marks": {
+                        "bold": true
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "id": "glass-body",
+            "type": "text",
+            "geometry": {
+              "x": 150,
+              "y": 420,
+              "width": 1160,
+              "height": 200
+            },
+            "style": {
+              "fontSize": 36,
+              "color": "#142533"
+            },
+            "text": {
+              "paragraphs": [
+                {
+                  "id": "glass-body-p",
+                  "runs": [
+                    {
+                      "text": "Bakgrund och effekt blir ett separat bildlager. Rubriken förblir text i PDF och PPTX.",
+                      "marks": {
+                        "bold": false
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ],
+        "background": {
+          "type": "gradient",
+          "style": {
+            "fill": {
+              "gradient": {
+                "type": "linear",
+                "stops": [
+                  {
+                    "offset": 0,
+                    "color": "#073b51"
+                  },
+                  {
+                    "offset": 0.45,
+                    "color": "#42a4ad"
+                  },
+                  {
+                    "offset": 0.7,
+                    "color": "#b4a7cc"
+                  },
+                  {
+                    "offset": 1,
+                    "color": "#132e4e"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "assets": {},
+  "presentation": {}
+}

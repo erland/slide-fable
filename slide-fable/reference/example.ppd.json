@@ -1,0 +1,65 @@
+{
+  "format": "ppd",
+  "schemaVersion": "0.3.0",
+  "document": {
+    "id": "sample-v03",
+    "title": "PPD v0.3 object sample",
+    "canvas": {
+      "width": 1600,
+      "height": 900,
+      "unit": "logical"
+    }
+  },
+  "theme": {
+    "id": "default"
+  },
+  "slides": [
+    {
+      "id": "slide-1",
+      "title": "Nya objekt",
+      "content": {
+        "kind": "standard",
+        "keyMessage": "Nya objekttyper"
+      },
+      "view": {
+        "elements": [
+          {
+            "id": "diagram-1",
+            "type": "semanticDiagram",
+            "semanticDiagram": {
+              "kind": "process",
+              "nodes": [
+                {
+                  "id": "n1",
+                  "label": "Start"
+                },
+                {
+                  "id": "n2",
+                  "label": "Mål"
+                }
+              ],
+              "edges": [
+                {
+                  "id": "e1",
+                  "from": "n1",
+                  "to": "n2"
+                }
+              ]
+            }
+          },
+          {
+            "id": "eq-1",
+            "type": "equation",
+            "equation": {
+              "sourceFormat": "latex",
+              "source": "E = mc^2",
+              "display": "block"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "assets": {},
+  "presentation": {}
+}

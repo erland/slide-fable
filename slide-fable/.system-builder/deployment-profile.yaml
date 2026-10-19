@@ -1,0 +1,9 @@
+schema_version: 1
+status: proposed
+target: static_https
+backend: not_required_for_core
+database: browser_indexeddb
+hosting: null
+repository: null
+optional_component: local Chromium PDF CLI if spike supports it
+secrets: []

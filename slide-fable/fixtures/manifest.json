@@ -1,0 +1,295 @@
+{
+  "contractVersion": "0.3.1",
+  "cases": [
+    {
+      "file": "valid-rich-master.json",
+      "profile": "core",
+      "error": null
+    },
+    {
+      "file": "duplicate-slide.json",
+      "profile": "core",
+      "error": "DUPLICATE_ID"
+    },
+    {
+      "file": "duplicate-element.json",
+      "profile": "core",
+      "error": "DUPLICATE_ID"
+    },
+    {
+      "file": "broken-content.json",
+      "profile": "core",
+      "error": "CONTENT_REF"
+    },
+    {
+      "file": "ambiguous-legacy-field-reference.json",
+      "profile": "core",
+      "error": "CONTENT_REF"
+    },
+    {
+      "file": "broken-master.json",
+      "profile": "core",
+      "error": "MASTER_REF"
+    },
+    {
+      "file": "broken-layout.json",
+      "profile": "core",
+      "error": "LAYOUT_REF"
+    },
+    {
+      "file": "broken-placeholder.json",
+      "profile": "core",
+      "error": "PLACEHOLDER_REF"
+    },
+    {
+      "file": "duplicate-binding.json",
+      "profile": "core",
+      "error": "BINDING_DUPLICATE"
+    },
+    {
+      "file": "broken-fragment.json",
+      "profile": "core",
+      "error": "FRAGMENT_REF"
+    },
+    {
+      "file": "broken-initial-slide.json",
+      "profile": "core",
+      "error": "SLIDE_REF"
+    },
+    {
+      "file": "broken-section.json",
+      "profile": "core",
+      "error": "SECTION_REF"
+    },
+    {
+      "file": "broken-style.json",
+      "profile": "core",
+      "error": "STYLE_REF"
+    },
+    {
+      "file": "broken-asset.json",
+      "profile": "core",
+      "error": "ASSET_REF"
+    },
+    {
+      "file": "missing-image-payload.json",
+      "profile": "core",
+      "error": "SCHEMA"
+    },
+    {
+      "file": "legacy-marks-array.json",
+      "profile": "core",
+      "error": "SCHEMA"
+    },
+    {
+      "file": "negative-size.json",
+      "profile": "core",
+      "error": "SCHEMA"
+    },
+    {
+      "file": "percent-geometry.json",
+      "profile": "core",
+      "error": "GEOMETRY_UNIT"
+    },
+    {
+      "file": "group-cycle.json",
+      "profile": "core",
+      "error": "GROUP_CYCLE"
+    },
+    {
+      "file": "missing-group-child.json",
+      "profile": "core",
+      "error": "CHILD_REF"
+    },
+    {
+      "file": "two-primary-groups.json",
+      "profile": "core",
+      "error": "MULTIPLE_PARENT"
+    },
+    {
+      "file": "broken-anchor.json",
+      "profile": "core",
+      "error": "ANCHOR_REF"
+    },
+    {
+      "file": "valid-connector.json",
+      "profile": "core",
+      "error": null
+    },
+    {
+      "file": "broken-component.json",
+      "profile": "core",
+      "error": "COMPONENT_REF"
+    },
+    {
+      "file": "component-cycle.json",
+      "profile": "core",
+      "error": "COMPONENT_CYCLE"
+    },
+    {
+      "file": "valid-hierarchy.json",
+      "profile": "core",
+      "error": null
+    },
+    {
+      "file": "hierarchy-cycle.json",
+      "profile": "core",
+      "error": "HIERARCHY_CYCLE"
+    },
+    {
+      "file": "broken-diagram-edge.json",
+      "profile": "core",
+      "error": "DIAGRAM_REF"
+    },
+    {
+      "file": "valid-equation.json",
+      "profile": "core",
+      "error": null
+    },
+    {
+      "file": "valid-vector-svg.json",
+      "profile": "core",
+      "error": null
+    },
+    {
+      "file": "unsafe-svg-script.json",
+      "profile": "core",
+      "error": "UNSAFE_SVG"
+    },
+    {
+      "file": "unsafe-svg-foreignobject.json",
+      "profile": "core",
+      "error": "UNSAFE_SVG"
+    },
+    {
+      "file": "unsafe-svg-event.json",
+      "profile": "core",
+      "error": "UNSAFE_SVG"
+    },
+    {
+      "file": "unsafe-svg-remote.json",
+      "profile": "core",
+      "error": "UNSAFE_SVG"
+    },
+    {
+      "file": "vector-format-payload-mismatch.json",
+      "profile": "core",
+      "error": "SCHEMA"
+    },
+    {
+      "file": "valid-vector-path.json",
+      "profile": "core",
+      "error": null
+    },
+    {
+      "file": "unsafe-javascript-url.json",
+      "profile": "core",
+      "error": "UNSAFE_URL"
+    },
+    {
+      "file": "missing-action-target.json",
+      "profile": "core",
+      "error": "ACTION_PAYLOAD"
+    },
+    {
+      "file": "broken-action-target.json",
+      "profile": "core",
+      "error": "ACTION_REF"
+    },
+    {
+      "file": "valid-action.json",
+      "profile": "core",
+      "error": null
+    },
+    {
+      "file": "future-version.json",
+      "profile": "core",
+      "mode": "read_only"
+    },
+    {
+      "file": "unknown-required-feature.json",
+      "profile": "core",
+      "mode": "blocked"
+    },
+    {
+      "file": "future-reader-version.json",
+      "profile": "core",
+      "mode": "blocked"
+    },
+    {
+      "file": "unknown-optional-object.json",
+      "profile": "core",
+      "mode": "read_only"
+    },
+    {
+      "file": "known-chart-outside-profile.json",
+      "profile": "core",
+      "mode": "read_only"
+    },
+    {
+      "file": "valid-published-model.json",
+      "profile": "offline-single-file",
+      "error": null
+    },
+    {
+      "file": "asset-wrong-hash.json",
+      "profile": "offline-single-file",
+      "error": "ASSET_HASH"
+    },
+    {
+      "file": "asset-mime-mismatch.json",
+      "profile": "offline-single-file",
+      "error": "ASSET_ENCODING"
+    },
+    {
+      "file": "asset-external.json",
+      "profile": "offline-single-file",
+      "error": "EXTERNAL_RESOURCE"
+    },
+    {
+      "file": "model-stale-hash.json",
+      "profile": "offline-single-file",
+      "error": "MODEL_HASH"
+    },
+    {
+      "file": "publish-missing-provenance.json",
+      "profile": "offline-single-file",
+      "error": "PUBLISH_METADATA"
+    },
+    {
+      "file": "publish-missing-geometry.json",
+      "profile": "offline-single-file",
+      "error": "PUBLISH_GEOMETRY"
+    },
+    {
+      "file": "text-two-sources.json",
+      "profile": "core",
+      "error": "SCHEMA"
+    },
+    {
+      "file": "valid-bar-chart.json",
+      "profile": "core",
+      "error": null
+    },
+    {
+      "file": "dataset-size-mismatch.json",
+      "profile": "core",
+      "error": "DATASET_SHAPE"
+    },
+    {
+      "file": "valid-table.json",
+      "profile": "core",
+      "error": null
+    },
+    {
+      "file": "valid-group.json",
+      "profile": "core",
+      "error": null
+    },
+    {
+      "file": "duplicate-rich-paragraph.json",
+      "profile": "core",
+      "error": "DUPLICATE_ID"
+    }
+  ]
+}
