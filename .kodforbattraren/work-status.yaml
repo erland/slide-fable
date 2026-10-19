@@ -1,13 +1,13 @@
 project: slide-fable
 source_version: 0.5.0
 latest_step: SF-UX-06
-status: implemented_verification_pending
+status: completed_ci_passed
 changes:
   - Added toggleable slide strip and properties pane, with collapsed speaker notes by default.
   - Reverted to Node >=22.16.0 and svg-pathdata 8.0.0.
   - Updated browser test to expand speaker notes before editing.
 verification:
-  ci_head_sha: bfee197cb3d29618b71125d3f0e823bd22ebfe83
+  ci_head_sha: 21a374b571425fb06608785c70e3190ab4993301
   github_actions_runs:
     - id: 39295208457
       conclusion: success
@@ -25,10 +25,10 @@ verification:
   sf_ux_05_drag_target: pass
   sf_ux_05_resize_and_multiselect: pass
   sf_ux_06_escape: pass
-  sf_ux_06_mobile_navigation: pending_ci
+  sf_ux_06_mobile_navigation: pass
   sf_ux_06_mobile_test_commit: f879964f0506d027cbe4ff7942daafda6a72a282
-blockers:
-  - SF-UX-06 mobile panel navigation and horizontal overflow test awaiting CI.
-  - Regenerate svg-pathdata 8 integrity checksum from npm registry when available; do not invent a checksum.
+follow_up:
+  - Verify and restore svg-pathdata 8 package-lock integrity using trusted registry metadata; npm ci already passes.
+  - Optional hands-on UX review before merge.
 next_step:
-  recommended: SF-UX-06-verification
+  recommended: PR-02-final-review
