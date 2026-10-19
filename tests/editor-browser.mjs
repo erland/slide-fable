@@ -53,7 +53,7 @@ try{
  await page.getByRole('button',{name:'Form',exact:true}).click();await page.getByLabel('Bredd',{exact:true}).fill('470');await page.getByLabel('Bredd',{exact:true}).press('Enter');assert.equal((await model()).slides[2].view.elements.at(-1).geometry.width,470);await page.getByRole('button',{name:'Ångra',exact:true}).click();assert.equal((await model()).slides[2].view.elements.at(-1).geometry.width,600);await page.getByRole('button',{name:'Gör om',exact:true}).click();pass('DEV005:geometry-and-undo');
  await page.getByRole('button',{name:'Text',exact:true}).click();
  const newTextId=(await model()).slides[2].view.elements.at(-1).id;
- await page.locator('[data-element-id="'+newTextId+'"]').dblclick();
+ await page.locator('.editor-canvas-pane .stage [data-element-id="'+newTextId+'"]').dblclick();
  const inline=page.locator('.canvas-inline-editor');
  await inline.getByRole('textbox',{name:'Redigera objektets text'}).fill('Redigerad direkt på canvas');
  await inline.getByRole('button',{name:'Klar'}).click();
