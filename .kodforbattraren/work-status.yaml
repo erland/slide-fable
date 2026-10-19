@@ -14,10 +14,10 @@ verification:
     - id: 39295217889
       conclusion: success
   node22_ci: pass
-  visual_manual_review: pending
+  visual_manual_review: desktop_and_tablet_screenshots_captured_interactions_pending
   package_lock_integrity: missing_for_svg_pathdata_8
 blockers:
-  - Manual visual verification of canvas-first layout on desktop and tablet is outstanding.
+  - Desktop (1440x900) and tablet (1024x768) screenshots captured from newly built dist; interaction checks (toggle panels and measure canvas space) remain outstanding.
   - Regenerate svg-pathdata 8 integrity checksum from npm registry when available; do not invent a checksum.
 next_step:
   recommended: SF-UX-01-visual-review
