@@ -31,3 +31,10 @@ follow_up:
   - Optional hands-on UX review before merge.
 next_step:
   recommended: PR-02-final-review
+
+ux_redesign:
+  current: SF-UX-07
+  state: implemented_verification_pending
+  focus: portrait_bottom_filmstrip_and_persistent_canvas
+  verification: pending_ci
+  next_after_success: SF-UX-08
