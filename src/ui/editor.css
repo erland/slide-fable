@@ -19,3 +19,26 @@
 
 /* SF-UX-04: rich-text editor anchored to its object on the slide. */
 .canvas-inline-editor{position:absolute;z-index:50;box-sizing:border-box;background:var(--panel);border:2px solid #387f89;box-shadow:0 3px 14px #0003;overflow:visible}.canvas-inline-editor .rich-editor{height:100%;overflow:auto}.canvas-inline-editor .rich-tools{display:none}.canvas-inline-editor .ProseMirror{min-height:100%;outline:none;padding:8px;box-sizing:border-box;font:inherit;color:inherit;text-align:inherit;line-height:1.3}.canvas-inline-editor .ProseMirror p{margin:0;line-height:inherit}.inline-text-done{position:absolute;right:0;top:-42px;z-index:51;background:var(--panel)!important}
+
+
+/* SF-UX-07: portrait and narrow layouts keep the canvas visible above a horizontal slide strip. */
+@media(max-width:900px){
+ .mobile-panels{padding:3px 12px;gap:4px}
+ .editor-workspace,.editor-workspace[data-slides-open=false],.editor-workspace[data-properties-open=false],.editor-workspace[data-slides-open=false][data-properties-open=false]{display:flex;flex-direction:column;grid-template-columns:none;min-height:0}
+ .editor-workspace .editor-canvas-pane,.editor-workspace[data-panel=slides] .editor-canvas-pane,.editor-workspace[data-panel=properties] .editor-canvas-pane{display:flex;order:1;min-width:0}
+ .editor-workspace .filmstrip,.editor-workspace[data-panel=canvas] .filmstrip,.editor-workspace[data-panel=properties] .filmstrip{display:block;order:2;border-right:0;border-top:1px solid var(--line);padding:8px 12px}
+ .editor-workspace[data-slides-open=false]>.filmstrip{display:none}
+ .filmstrip .panel-heading{margin-bottom:4px}
+ .filmstrip ol{display:flex;gap:10px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x proximity;padding-bottom:7px}
+ .filmstrip li{flex:0 0 148px;margin:0;scroll-snap-align:start}
+ .filmstrip .slide-card{width:100%;padding:5px!important}
+ .filmstrip .miniature{width:132px;height:74.25px}
+ .filmstrip .miniature>.slide-render{transform:scale(.0825)}
+ .filmstrip .button-row{margin:4px 0}
+ .editor-workspace .properties{display:none;order:3;border-left:0;border-top:1px solid var(--line);max-height:45vh}
+ .editor-workspace[data-panel=properties][data-properties-open=true]>.properties{display:block}
+ .canvas-scroll{height:min(56vh,620px);min-height:250px}
+}
+@media(min-width:901px) and (orientation:landscape){
+ .editor-workspace .filmstrip{order:0}
+}
