@@ -42,3 +42,13 @@
 @media(min-width:901px) and (orientation:landscape){
  .editor-workspace .filmstrip{order:0}
 }
+
+/* SF-UX-08: compact and horizontally scrollable ribbon tabs. */
+.ribbon-tabs{display:flex;gap:3px;overflow-x:auto;scrollbar-width:thin;flex-shrink:0;border-bottom:1px solid var(--line);padding:5px 10px 0}
+.ribbon-tabs button{white-space:nowrap;min-height:36px;border:0;border-radius:7px 7px 0 0;padding:6px 14px;background:transparent}
+.ribbon-tabs button[aria-selected=true]{background:#d9e9e3;color:#183641;border-bottom:2px solid #387f89}
+.ribbon-panel{border-bottom:1px solid var(--line);min-height:46px;flex-shrink:0}
+.ribbon-panel .insert-tools{border-bottom:0}
+.ribbon-actions{display:flex;gap:6px;align-items:center;overflow-x:auto;white-space:nowrap;padding:5px 12px;min-height:46px;box-sizing:border-box}
+.ribbon-actions button{min-height:34px;flex-shrink:0;font-size:12px}
+@media(max-width:900px){.ribbon-tabs{padding:4px 7px 0}.ribbon-tabs button{padding:6px 12px}.ribbon-panel{min-height:40px}.ribbon-actions{min-height:40px}}
