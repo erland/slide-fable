@@ -6,10 +6,10 @@ steps:
     status: completed
   - id: SF-UX-01-node-compatibility
     title: Samordna Node-krav och GitHub Actions
-    status: implemented_verification_blocked
+    status: completed
   - id: SF-UX-01-node22-dependency-rollback
     title: Backa svg-pathdata för Node 22
-    status: implemented_verification_blocked
+    status: completed
   - id: SF-UX-02
     title: Höjd- och breddbaserad zoom
     status: completed
@@ -26,4 +26,4 @@ steps:
     status: completed
   - id: SF-UX-06
     title: Responsivitet och tillgänglighet
-    status: in_progress
+    status: completed
