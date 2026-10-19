@@ -7,7 +7,7 @@ changes:
   - Reverted to Node >=22.16.0 and svg-pathdata 8.0.0.
   - Updated browser test to expand speaker notes before editing.
 verification:
-  ci_head_sha: 21a374b571425fb06608785c70e3190ab4993301
+  ci_head_sha: 6a596544e96426b1f32d69b591b8abe770cdd242
   github_actions_runs:
     - id: 39295208457
       conclusion: success
@@ -15,7 +15,7 @@ verification:
       conclusion: success
   node22_ci: pass
   visual_manual_review: desktop_and_tablet_screenshots_captured
-  package_lock_integrity: missing_for_svg_pathdata_8
+  package_lock_integrity: verified_npm_registry_sha512_added
   interaction_test_commit: 02dc8579476b4612f0ff831d512f5e59043a96c0
   interaction_tests: pass
   zoom_fit_dimensions: pass
@@ -28,7 +28,6 @@ verification:
   sf_ux_06_mobile_navigation: pass
   sf_ux_06_mobile_test_commit: f879964f0506d027cbe4ff7942daafda6a72a282
 follow_up:
-  - Verify and restore svg-pathdata 8 package-lock integrity using trusted registry metadata; npm ci already passes.
   - Optional hands-on UX review before merge.
 next_step:
   recommended: PR-02-final-review
