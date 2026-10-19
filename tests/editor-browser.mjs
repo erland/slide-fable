@@ -88,6 +88,21 @@ try{
  assert.equal(await toolbar.getByRole('button',{name:'Diagram',exact:true}).isVisible(),true);
  await toolbar.locator('summary',{hasText:'Fler objekt'}).click();
  pass('SF-UX-03:compact-insert-toolbar');
+ const ribbon=page.getByRole('tablist',{name:'Menyflikar'});
+ assert.equal(await ribbon.getByRole('tab',{name:'Infoga'}).getAttribute('aria-selected'),'true');
+ await ribbon.getByRole('tab',{name:'Start'}).click();
+ assert.equal(await page.getByRole('tabpanel',{name:'Start'}).getByRole('button',{name:'Ny bild'}).isVisible(),true);
+ assert.equal(await page.locator('.editor-canvas-pane').isVisible(),true);
+ await ribbon.getByRole('tab',{name:'Rita'}).click();
+ assert.equal(await page.getByRole('tabpanel',{name:'Rita'}).getByRole('button',{name:'Linje'}).isVisible(),true);
+ await ribbon.getByRole('tab',{name:'Design'}).click();
+ assert.equal(await page.getByRole('tabpanel',{name:'Design'}).getByRole('button',{name:'Öppna designegenskaper'}).isVisible(),true);
+ await ribbon.getByRole('tab',{name:'Visa'}).click();
+ assert.equal(await page.getByRole('tabpanel',{name:'Visa'}).getByRole('button',{name:'Presentera'}).isVisible(),true);
+ await ribbon.getByRole('tab',{name:'Infoga'}).click();
+ assert.equal(await toolbar.getByRole('button',{name:'Text',exact:true}).isVisible(),true);
+ pass('SF-UX-08:ribbon-tabs');
+
  await page.getByRole('button',{name:'Lägg till bild',exact:true}).click();await page.getByRole('button',{name:'Lägg till bild',exact:true}).click();assert.equal((await model()).slides.length,3);pass('DEV005:create-three-slides');
  await page.getByRole('button',{name:'Form',exact:true}).click();await page.getByLabel('Bredd',{exact:true}).fill('470');await page.getByLabel('Bredd',{exact:true}).press('Enter');assert.equal((await model()).slides[2].view.elements.at(-1).geometry.width,470);await page.getByRole('button',{name:'Ångra',exact:true}).click();assert.equal((await model()).slides[2].view.elements.at(-1).geometry.width,600);await page.getByRole('button',{name:'Gör om',exact:true}).click();pass('DEV005:geometry-and-undo');
  await page.getByRole('button',{name:'Text',exact:true}).click();
