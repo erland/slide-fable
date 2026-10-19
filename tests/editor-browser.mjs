@@ -51,6 +51,15 @@ try{
  pass('SF-UX-03:compact-insert-toolbar');
  await page.getByRole('button',{name:'Lägg till bild',exact:true}).click();await page.getByRole('button',{name:'Lägg till bild',exact:true}).click();assert.equal((await model()).slides.length,3);pass('DEV005:create-three-slides');
  await page.getByRole('button',{name:'Form',exact:true}).click();await page.getByLabel('Bredd',{exact:true}).fill('470');await page.getByLabel('Bredd',{exact:true}).press('Enter');assert.equal((await model()).slides[2].view.elements.at(-1).geometry.width,470);await page.getByRole('button',{name:'Ångra',exact:true}).click();assert.equal((await model()).slides[2].view.elements.at(-1).geometry.width,600);await page.getByRole('button',{name:'Gör om',exact:true}).click();pass('DEV005:geometry-and-undo');
+ await page.getByRole('button',{name:'Text',exact:true}).click();
+ const newTextId=(await model()).slides[2].view.elements.at(-1).id;
+ await page.locator('[data-element-id="'+newTextId+'"]').dblclick();
+ const inline=page.locator('.canvas-inline-editor');
+ await inline.getByRole('textbox',{name:'Redigera objektets text'}).fill('Redigerad direkt på canvas');
+ await inline.getByRole('button',{name:'Klar'}).click();
+ assert.ok(JSON.stringify(await model()).includes('Redigerad direkt på canvas'));
+ pass('SF-UX-04:inline-rich-text-edit');
+
  await page.getByRole('button',{name:'Text',exact:true}).click();const edit=page.getByRole('textbox',{name:'Redigera objektets text'});await edit.fill('Svensk berättelse ÅÄÖ');await page.getByRole('button',{name:'Fetstil',exact:true}).click();await edit.press('End');await edit.type(' med rik text');await page.getByRole('button',{name:'Bild',exact:true}).click();await page.getByRole('button',{name:'Visa anteckningar',exact:true}).click();await page.getByLabel('Talaranteckningar',{exact:true}).fill('HEMLIG ANTECKNING');await page.getByLabel('Talaranteckningar',{exact:true}).press('Tab');assert.ok(JSON.stringify(await model()).includes('Svensk berättelse'));pass('DEV008:rich-text-edit-and-save');
  await page.getByRole('status').filter({hasText:'Arbetskopia sparad'}).waitFor();const before=await model();await page.reload();await page.getByRole('button',{name:/Min presentation ·/}).click();assert.deepEqual(await model(),before);pass('DEV006:reload-explicit-recovery');
  const cas=await page.evaluate(async()=>{const p=await import('/src/core/persistence.ts'),doc=(await import('/src/core/editor.ts')).editorStore.getSnapshot().doc;let conflict=false;try{await p.saveDraft(doc,null,'other-tab');}catch(e){conflict=String(e).includes('CONFLICT');}return conflict;});assert.equal(cas,true);pass('DEV006:atomic-stale-tab-conflict');
