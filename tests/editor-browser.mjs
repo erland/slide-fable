@@ -45,6 +45,11 @@ try{
  assert.ok(fitMeasurements.sw<=fitMeasurements.vw+1,'Fit must respect viewport width');
  assert.ok(fitMeasurements.sh<=fitMeasurements.vh+1,'Fit must respect viewport height');
  pass('SF-UX-02:fit-both-dimensions');
+ const fitAt=async(w,h)=>{await page.setViewportSize({width:w,height:h});await page.waitForTimeout(180);return page.evaluate(()=>{const viewport=document.querySelector('.canvas-scroll'),space=document.querySelector('.stage-space');return {vw:viewport.clientWidth,vh:viewport.clientHeight,sw:space.getBoundingClientRect().width,sh:space.getBoundingClientRect().height};});};
+ for(const [w,h] of [[820,1180],[1180,820],[820,1180]]){const m=await fitAt(w,h);assert.ok(m.sw<=m.vw+2&&m.sh<=m.vh+2,'Canvas must refit on viewport rotation');}
+ await page.setViewportSize({width:1440,height:1000});
+ pass('SF-UX-10:rotation-refits-canvas');
+
 
  await page.setViewportSize({width:768,height:1024});
  await page.getByRole('button',{name:'Arbetsyta',exact:true}).click();
