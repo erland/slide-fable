@@ -113,11 +113,11 @@ try{
  assert.equal(await ribbon.getByRole('tab',{name:'Rita'}).getAttribute('aria-selected'),'true','Right arrow selects the next ribbon tab');
  assert.equal(await ribbon.getByRole('tab',{name:'Rita'}).evaluate(el=>el===document.activeElement),true,'Focus follows selected ribbon tab');
  await page.keyboard.press('End');
- assert.equal(await ribbon.getByRole('tab',{name:'Visa'}).getAttribute('aria-selected'),'true','End selects last visible tab');
+ assert.equal(await ribbon.getByRole('tab').last().getAttribute('aria-selected'),'true','End selects last visible tab');
  await page.keyboard.press('Home');
  assert.equal(await ribbon.getByRole('tab',{name:'Start'}).getAttribute('aria-selected'),'true','Home selects first tab');
  await page.keyboard.press('ArrowLeft');
- assert.equal(await ribbon.getByRole('tab',{name:'Visa'}).getAttribute('aria-selected'),'true','Left arrow wraps to last tab');
+ assert.equal(await ribbon.getByRole('tab').last().getAttribute('aria-selected'),'true','Left arrow wraps to last tab');
  await ribbon.getByRole('tab',{name:'Infoga'}).click();
  pass('SF-UX-11:ribbon-keyboard-navigation');
 
