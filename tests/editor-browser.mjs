@@ -13,6 +13,28 @@ async function model(){return page.evaluate(async()=>(await import('/src/core/ed
 async function api(fn,arg){return page.evaluate(async({source,arg})=>{const store=(await import('/src/core/editor.ts')).editorStore;return new Function('store','arg',source)(store,arg);},{source:fn,arg});}
 try{
  await page.goto('http://127.0.0.1:5178/');await page.getByRole('button',{name:'Lägg till bild',exact:true}).waitFor();
+ const pane=page.locator('.editor-canvas-pane');const paneWidth=()=>pane.evaluate(el=>el.getBoundingClientRect().width);
+ const baseWidth=await paneWidth();
+ await page.getByRole('button',{name:'Dölj bilder',exact:true}).click();
+ assert.equal(await page.locator('#slide-filmstrip').isVisible(),false);
+ assert.ok((await paneWidth())>baseWidth+100,'Canvas must grow when slides are hidden');
+ await page.getByRole('button',{name:'Dölj egenskaper',exact:true}).click();
+ assert.equal(await page.locator('.properties').isVisible(),false);
+ assert.ok((await paneWidth())>baseWidth+300,'Canvas must grow when both panels are hidden');
+ await page.getByRole('button',{name:'Visa bilder',exact:true}).click();
+ await page.getByRole('button',{name:'Visa egenskaper',exact:true}).click();
+ assert.equal(await page.locator('#slide-filmstrip').isVisible(),true);
+ assert.equal(await page.locator('.properties').isVisible(),true);
+ pass('SF-UX-01:desktop-panel-toggle-and-canvas-growth');
+ await page.setViewportSize({width:768,height:1024});
+ await page.getByRole('button',{name:'Arbetsyta',exact:true}).click();
+ assert.equal(await pane.isVisible(),true);
+ await page.getByRole('button',{name:'Bilder',exact:true}).click();
+ assert.equal(await page.locator('#slide-filmstrip').isVisible(),true);
+ await page.getByRole('button',{name:'Arbetsyta',exact:true}).click();
+ assert.equal(await pane.isVisible(),true);
+ await page.setViewportSize({width:1440,height:1000});
+ pass('SF-UX-01:tablet-panel-navigation');
  await page.getByRole('button',{name:'Lägg till bild',exact:true}).click();await page.getByRole('button',{name:'Lägg till bild',exact:true}).click();assert.equal((await model()).slides.length,3);pass('DEV005:create-three-slides');
  await page.getByRole('button',{name:'Form',exact:true}).click();await page.getByLabel('Bredd',{exact:true}).fill('470');await page.getByLabel('Bredd',{exact:true}).press('Enter');assert.equal((await model()).slides[2].view.elements.at(-1).geometry.width,470);await page.getByRole('button',{name:'Ångra',exact:true}).click();assert.equal((await model()).slides[2].view.elements.at(-1).geometry.width,600);await page.getByRole('button',{name:'Gör om',exact:true}).click();pass('DEV005:geometry-and-undo');
  await page.getByRole('button',{name:'Text',exact:true}).click();const edit=page.getByRole('textbox',{name:'Redigera objektets text'});await edit.fill('Svensk berättelse ÅÄÖ');await page.getByRole('button',{name:'Fetstil',exact:true}).click();await edit.press('End');await edit.type(' med rik text');await page.getByRole('button',{name:'Bild',exact:true}).click();await page.getByRole('button',{name:'Visa anteckningar',exact:true}).click();await page.getByLabel('Talaranteckningar',{exact:true}).fill('HEMLIG ANTECKNING');await page.getByLabel('Talaranteckningar',{exact:true}).press('Tab');assert.ok(JSON.stringify(await model()).includes('Svensk berättelse'));pass('DEV008:rich-text-edit-and-save');
