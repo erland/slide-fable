@@ -1,0 +1,33 @@
+project: slide-fable
+source_version: 0.5.0
+latest_step: SF-UX-06
+status: completed_ci_passed
+changes:
+  - Added toggleable slide strip and properties pane, with collapsed speaker notes by default.
+  - Reverted to Node >=22.16.0 and svg-pathdata 8.0.0.
+  - Updated browser test to expand speaker notes before editing.
+verification:
+  ci_head_sha: 6a596544e96426b1f32d69b591b8abe770cdd242
+  github_actions_runs:
+    - id: 39295208457
+      conclusion: success
+    - id: 39295217889
+      conclusion: success
+  node22_ci: pass
+  visual_manual_review: desktop_and_tablet_screenshots_captured
+  package_lock_integrity: verified_npm_registry_sha512_added
+  interaction_test_commit: 02dc8579476b4612f0ff831d512f5e59043a96c0
+  interaction_tests: pass
+  zoom_fit_dimensions: pass
+  compact_toolbar: pass
+  inline_text_editing: pass
+  sf_ux_04_ci_runs: [39304239204, 39304248030]
+  sf_ux_05_drag_target: pass
+  sf_ux_05_resize_and_multiselect: pass
+  sf_ux_06_escape: pass
+  sf_ux_06_mobile_navigation: pass
+  sf_ux_06_mobile_test_commit: f879964f0506d027cbe4ff7942daafda6a72a282
+follow_up:
+  - Optional hands-on UX review before merge.
+next_step:
+  recommended: PR-02-final-review
