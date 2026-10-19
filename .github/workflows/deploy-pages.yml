@@ -1,28 +1,27 @@
 name: Deploy Slide Fable to GitHub Pages
 
 on:
-  release:
-    types: [published]
+  push:
+    branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
   group: github-pages
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   build:
-    if: ${{ !github.event.release.prerelease }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
       pages: write
     steps:
-      - name: Checkout release tag
+      - name: Checkout main
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.release.tag_name }}
           persist-credentials: false
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -36,9 +35,9 @@ jobs:
         run: |
           npm run lint
           npm test
-      - name: Build release
+      - name: Build main
         env:
-          SF_BUILD_ID: ${{ github.event.release.tag_name }}
+          SF_BUILD_ID: ${{ github.sha }}
         run: npm run build
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
