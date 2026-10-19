@@ -23,7 +23,7 @@
 
 /* SF-UX-07: portrait and narrow layouts keep the canvas visible above a horizontal slide strip. */
 @media(max-width:900px){
- .mobile-panels{display:none}
+ .mobile-panels{padding:3px 12px;gap:4px}
  .editor-workspace,.editor-workspace[data-slides-open=false],.editor-workspace[data-properties-open=false],.editor-workspace[data-slides-open=false][data-properties-open=false]{display:flex;flex-direction:column;grid-template-columns:none;min-height:0}
  .editor-workspace .editor-canvas-pane,.editor-workspace[data-panel=slides] .editor-canvas-pane,.editor-workspace[data-panel=properties] .editor-canvas-pane{display:flex;order:1;min-width:0}
  .editor-workspace .filmstrip,.editor-workspace[data-panel=canvas] .filmstrip,.editor-workspace[data-panel=properties] .filmstrip{display:block;order:2;border-right:0;border-top:1px solid var(--line);padding:8px 12px}
