@@ -59,6 +59,12 @@ try{
  await inline.getByRole('button',{name:'Klar'}).click();
  assert.ok(JSON.stringify(await model()).includes('Redigerad direkt på canvas'));
  pass('SF-UX-04:inline-rich-text-edit');
+ await page.locator('.editor-canvas-pane .stage [data-element-id="'+newTextId+'"]').dblclick();
+ assert.equal(await page.getByRole('group',{name:'Redigera text på bilden'}).isVisible(),true);
+ await page.getByRole('group',{name:'Redigera text på bilden'}).getByRole('textbox',{name:'Redigera objektets text'}).press('Escape');
+ assert.equal(await page.locator('.canvas-inline-editor').count(),0);
+ pass('SF-UX-06:escape-closes-inline-edit');
+
  const dragEl=page.locator('.editor-canvas-pane .stage [data-element-id="'+newTextId+'"]');
  const startGeometry=(await model()).slides[2].view.elements.find(e=>e.id===newTextId).geometry;
  const dragBounds=await dragEl.boundingBox();assert.ok(dragBounds,'Text object must be visible');
