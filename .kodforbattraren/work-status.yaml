@@ -1,6 +1,6 @@
 project: slide-fable
 source_version: 0.5.0
-latest_step: SF-UX-02
+latest_step: SF-UX-03
 status: implemented_verification_pending
 changes:
   - Added toggleable slide strip and properties pane, with collapsed speaker notes by default.
@@ -18,9 +18,10 @@ verification:
   package_lock_integrity: missing_for_svg_pathdata_8
   interaction_test_commit: 02dc8579476b4612f0ff831d512f5e59043a96c0
   interaction_tests: pass
-  zoom_fit_dimensions: pending_ci
+  zoom_fit_dimensions: pass
+  compact_toolbar: pending_ci
 blockers:
-  - Automated desktop panel/canvas sizing and tablet panel navigation checks committed; awaiting CI verification.
+  - SF-UX-03 compact toolbar and advanced-object menu require passing browser CI.
   - Regenerate svg-pathdata 8 integrity checksum from npm registry when available; do not invent a checksum.
 next_step:
-  recommended: SF-UX-02-verification
+  recommended: SF-UX-03-verification
