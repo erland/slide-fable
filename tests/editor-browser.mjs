@@ -16,10 +16,10 @@ try{
  const starterTexts=page.locator('.editor-canvas-pane .stage .render-element.type-text');
  assert.ok(await starterTexts.count()>=2,'New presentation must have title and body text');
  for(const expectedSize of ['72px','36px']){
-  const textObject=starterTexts.filter({has:page.locator('*')}).filter({visible:true});
-  const matching=page.locator('.editor-canvas-pane .stage .render-element.type-text').filter({visible:true});
-  const index=expectedSize==='72px'?0:1;
-  const text=matching.nth(index);
+  const sizes=await starterTexts.evaluateAll(els=>els.map(el=>getComputedStyle(el).fontSize));
+  const index=sizes.indexOf(expectedSize);
+  assert.ok(index>=0,'Could not locate template text at '+expectedSize);
+  const text=starterTexts.nth(index);
   const before=await text.evaluate(el=>({size:getComputedStyle(el).fontSize,family:getComputedStyle(el).fontFamily}));
   assert.equal(before.size,expectedSize,'Template must expose expected typography');
   await text.dblclick();
