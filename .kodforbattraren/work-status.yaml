@@ -7,7 +7,7 @@ changes:
   - Reverted to Node >=22.16.0 and svg-pathdata 8.0.0.
   - Updated browser test to expand speaker notes before editing.
 verification:
-  ci_head_sha: 891d67550f4381600b527b236c5b5a49deec6617
+  ci_head_sha: bfee197cb3d29618b71125d3f0e823bd22ebfe83
   github_actions_runs:
     - id: 39295208457
       conclusion: success
@@ -24,9 +24,11 @@ verification:
   sf_ux_04_ci_runs: [39304239204, 39304248030]
   sf_ux_05_drag_target: pass
   sf_ux_05_resize_and_multiselect: pass
-  sf_ux_06_escape: pending_ci
+  sf_ux_06_escape: pass
+  sf_ux_06_mobile_navigation: pending_ci
+  sf_ux_06_mobile_test_commit: f879964f0506d027cbe4ff7942daafda6a72a282
 blockers:
-  - SF-UX-06 keyboard accessibility change requires CI and responsive review.
+  - SF-UX-06 mobile panel navigation and horizontal overflow test awaiting CI.
   - Regenerate svg-pathdata 8 integrity checksum from npm registry when available; do not invent a checksum.
 next_step:
   recommended: SF-UX-06-verification
