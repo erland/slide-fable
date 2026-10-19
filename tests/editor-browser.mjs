@@ -40,6 +40,21 @@ try{
  assert.equal(await pane.isVisible(),true);
  await page.setViewportSize({width:1440,height:1000});
  pass('SF-UX-01:tablet-panel-navigation');
+ await page.setViewportSize({width:390,height:844});
+ const mobileNav=page.getByRole('navigation',{name:'Arbetsytans paneler'});
+ await mobileNav.getByRole('button',{name:'Arbetsyta'}).click();
+ assert.equal(await pane.isVisible(),true);
+ const mobileLayout=await page.evaluate(()=>({width:document.documentElement.scrollWidth,innerWidth:window.innerWidth}));
+ assert.ok(mobileLayout.width<=mobileLayout.innerWidth+2,'Mobile layout should not overflow horizontally');
+ await mobileNav.getByRole('button',{name:'Bilder'}).click();
+ assert.equal(await page.locator('#slide-filmstrip').isVisible(),true);
+ await mobileNav.getByRole('button',{name:'Egenskaper'}).click();
+ assert.equal(await page.locator('#slide-properties').isVisible(),true);
+ await mobileNav.getByRole('button',{name:'Arbetsyta'}).click();
+ assert.equal(await pane.isVisible(),true);
+ await page.setViewportSize({width:1440,height:1000});
+ pass('SF-UX-06:mobile-panel-navigation-and-no-overflow');
+
  const toolbar=page.locator('.insert-tools');
  assert.equal(await toolbar.getByRole('button',{name:'Text',exact:true}).isVisible(),true);
  assert.equal(await toolbar.getByRole('button',{name:'Form',exact:true}).isVisible(),true);
