@@ -107,6 +107,7 @@ try{
  await ribbon.getByRole('tab',{name:'Infoga'}).click();
  assert.equal(await toolbar.getByRole('button',{name:'Text',exact:true}).isVisible(),true);
  pass('SF-UX-08:ribbon-tabs');
+ await page.evaluate(async()=> (await import('/src/core/editor.ts')).editorStore.select([]));
  await ribbon.getByRole('tab',{name:'Infoga'}).focus();
  await page.keyboard.press('ArrowRight');
  assert.equal(await ribbon.getByRole('tab',{name:'Rita'}).getAttribute('aria-selected'),'true','Right arrow selects the next ribbon tab');
