@@ -55,6 +55,15 @@ try{
  assert.equal(await pane.isVisible(),true);
  await page.setViewportSize({width:1440,height:1000});
  pass('SF-UX-01:tablet-panel-navigation');
+ await page.setViewportSize({width:768,height:1024});
+ const portraitLayout=await page.evaluate(()=>{const canvas=document.querySelector('.editor-canvas-pane')?.getBoundingClientRect(),slides=document.querySelector('#slide-filmstrip')?.getBoundingClientRect();return {canvasVisible:!!canvas&&canvas.height>0,slidesVisible:!!slides&&slides.height>0,below:!!canvas&&!!slides&&slides.top>=canvas.bottom-2};});
+ assert.ok(portraitLayout.canvasVisible&&portraitLayout.slidesVisible&&portraitLayout.below,'Portrait must show canvas above slide strip');
+ await page.setViewportSize({width:1180,height:820});
+ const landscapeLayout=await page.evaluate(()=>{const canvas=document.querySelector('.editor-canvas-pane')?.getBoundingClientRect(),slides=document.querySelector('#slide-filmstrip')?.getBoundingClientRect();return {beside:!!canvas&&!!slides&&slides.right<=canvas.left+2};});
+ assert.ok(landscapeLayout.beside,'Landscape must show slide strip beside canvas');
+ await page.setViewportSize({width:1440,height:1000});
+ pass('SF-UX-07:portrait-bottom-strip-landscape-sidebar');
+
  await page.setViewportSize({width:390,height:844});
  const mobileNav=page.getByRole('navigation',{name:'Arbetsytans paneler'});
  await mobileNav.getByRole('button',{name:'Arbetsyta'}).click();
