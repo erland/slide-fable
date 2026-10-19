@@ -1,0 +1,2390 @@
+schema_version: 1
+policy: Originalkrav införlivas; source_text behåller ursprunglig prioritet och senare
+  tillägg har företräde. Intervall hänvisar till hela angivna spannet.
+source_requirements:
+- id: F-301
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 75
+  source_text: '- **F-301:** Ändra semantisk diagrams nodtext och layout; text och
+    relationer överlever spara → HTML → återimport → PPTX.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: F-302
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 76
+  source_text: '- **F-302:** Formel bevarar ursprunglig källsträng genom HTML/PDF/PPTX-export
+    även om renderingen kräver raster/vektor.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: F-303
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 77
+  source_text: '- **F-303:** SVG med skript eller fjärrreferens avvisas; säker SVG
+    renderas offline.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: F-304
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 78
+  source_text: '- **F-304:** Freehand strokes behåller ordning, koordinater och tryckpunkter
+    genom roundtrip.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: F-305
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 79
+  source_text: '- **F-305:** 3D-modell visar poster när viewer är otillgänglig och
+    ger korrekt exportvarning.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: F-306
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 80
+  source_text: '- **F-306:** En deklarativ knapp navigerar mellan slides utan godtycklig
+    JS-exekvering.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: F-307
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 81
+  source_text: '- **F-307:** Okänt obligatoriskt objekt avvisas tydligt; känt frivilligt
+    objekt med fallback visas säkert.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: F-308
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 82
+  source_text: '- **F-308:** Exportlogg redovisar per objekt när native-redigerbarhet
+    inte kan uppnås.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-201
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 581
+  source_text: '### 16.2 Master, layout och platshållare – PPD-F-201…205 (M)'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-201
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 583
+  source_text: '- **PPD-F-201:** `masters[]` definierar varaktiga master-ID:n, generella
+    bakgrundsobjekt, sidhuvud/sidfot, logotyp, tema- och layoutreferenser; ärvning
+    ska vara deterministisk.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-202
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 584
+  source_text: '- **PPD-F-202:** `masters[].layouts[]` definierar namngivna layouter
+    (titel, innehåll, två kolumner, bild + text, tom) och deras platshållare. En platshållare
+    har `id`, `role`, `geometry`, `styleRef`, valfri `required` och eventuell `defaultContent`.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-203
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 585
+  source_text: '- **PPD-F-203:** En slide binder innehåll via `placeholderBindings[{placeholderId,contentRef|elementId}]`.
+    Overrides begränsas till explicit angivna egenskaper; saknade overrides ärvs.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-204
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 586
+  source_text: '- **PPD-F-204:** `layoutId` och `masterId` måste referera till existerande
+    och kompatibla objekt. Ingen tyst ombindning av roller som `title`, `body`, `image`,
+    `footer`.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-205
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 587
+  source_text: '- **PPD-F-205:** Byte av master/layout ska bevara semantiken, flytta
+    till tillgängliga platshållare enligt dokumenterad regel och rapportera obundna
+    element. Värden som skrivits över lokalt måste överleva byte och återställning
+    av layout.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-210
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 589
+  source_text: '### 16.3 Rik text – PPD-F-210…214 (M)'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-210
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 591
+  source_text: '- **PPD-F-210:** `text.paragraphs[]` innehåller `id`, `paragraphStyle`,
+    och `runs[]` med `text`, `marks` (`bold`, `italic`, `underline`, `strike`), `fontFamily`,
+    `size`, `color`, `link` och `language`; vanlig `plainText` får finnas som härledd/cachelagrad
+    form men är inte en andra sanningskälla.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-211
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 592
+  source_text: '- **PPD-F-211:** Stycken stöder listor med nivå, markör, startvärde,
+    indrag, tabbstopp, justering, rad- och styckeavstånd samt textvertikaljustering.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-212
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 593
+  source_text: '- **PPD-F-212:** Textbehållare skiljer mellan `overflow` (`clip`,
+    `shrink-to-fit`, `expand-height`, `warn`) och `autoFit` samt har definierad radbrytnings-
+    och språkstrategi. `warn` rekommenderas som redigeringsstandard; minsta tillåtna
+    typsnitt styrs av tema.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-213
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 594
+  source_text: '- **PPD-F-213:** Inbäddade länkar, formateringsruns och flernivålistor
+    måste överleva spara/öppna och behållas som redigerbara data vid PPTX-export där
+    möjligt.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-214
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 595
+  source_text: '- **PPD-F-214:** Text på flera språk, specialtecken, unicode, kopierade
+    HTML-fragment och radbrytningar ska serialiseras säkert utan exekverbar injektion.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-220
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 597
+  source_text: '### 16.4 Geometri, relationer och redigeringsrelevanta objektdata
+    – PPD-F-220…226 (M)'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-220
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 599
+  source_text: '- **PPD-F-220:** Varje visuellt objekt har `id`, `type`, `geometry`
+    (`x,y,width,height,rotation`), `zIndex`, `visible`, `locked`, `styleRef|style`,
+    `accessibility` och `exportPolicy`.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-221
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 600
+  source_text: '- **PPD-F-221:** `groups` innehåller ordnade barnreferenser och en
+    lokal koordinattransformation. En objektreferens får inte ingå i flera primära
+    grupper; cirklar förbjuds.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-222
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 601
+  source_text: '- **PPD-F-222:** Pilar/linjer ska stödja `startAnchor`, `endAnchor`,
+    bindning till andra objekts ID:n och ett definierat fallbackläge om målet tas
+    bort.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-223
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 602
+  source_text: '- **PPD-F-223:** Återanvändbara `components[]` innehåller struktur,
+    stilvariabler och `slots`; instanser refererar `componentId` och `overrides` för
+    synliga förändringar. **M:** fristående sparade komponenter och instanser; **B:**
+    global propagationsredigering av bibliotek över dokumentgränser.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-224
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 603
+  source_text: '- **PPD-F-224:** Objekt kan ha `altText`, `decorative`, `readingOrder`;
+    text och betydelse får inte bara ligga i en bitmap.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-225
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 604
+  source_text: '- **PPD-F-225:** `geometry` lagras i presentationsytans logiska enheter,
+    inte CSS-skärmpixlar; transformordning (föräldragrupp → objekt → effekt) är fixerad.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-226
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 605
+  source_text: '- **PPD-F-226:** Stödlinjer, markeringar, senaste urval, zoomnivå
+    och editorpanelers status är i grunden **editor-state**, inte delar av det publicerade
+    dokumentet. Dokumentfasta objektbegränsningar (`locked`, positioneringsconstraints)
+    lagras dock.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-230
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 607
+  source_text: '### 16.5 Bildresurser, diagram och tabeller – PPD-F-230…238'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-230
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 609
+  source_text: '- **PPD-F-230 (M):** Bildobjekt kan referera `assetId`, `crop` (normerat
+    rektangulärt urval), `fit` (`contain`, `cover`, `stretch`), `focalPoint`, mask/clip,
+    justeringar (brightness/contrast/saturation) och alt-text.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-231
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 610
+  source_text: '- **PPD-F-231 (M):** Byte av bild ska bevara beskärningsinställningar
+    när det går, annars kräva tydlig bekräftelse.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-232
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 611
+  source_text: '- **PPD-F-232 (M):** `tables[]` har rad-/kolumn-ID, cell-ID, `rowSpan/colSpan`,
+    typad celltext, kantlinjer, fyllning, mått och stöd för läsordning.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-233
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 612
+  source_text: '- **PPD-F-233 (M):** `charts[]` har `chartType` (`bar`, `line`, `pie`),
+    `dataset` med typade fält/värden, kategorier, serier, etiketter, skalor, färger
+    och legend. Diagrammet är redigerbart från data, inte enbart en bild.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-234
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 613
+  source_text: '- **PPD-F-234 (M):** Diagram har tillgängligt tabellalternativ och
+    deklarerad fallback för PDF/PPTX (native diagram om möjligt, annars bild med data
+    bevarad i PPD).'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-235
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 614
+  source_text: '- **PPD-F-235 (B):** Processer/tidslinjer/organisationsträd representeras
+    som semantiska noder och relationer och kan få flera utseenden utan att förlora
+    strukturen.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-236
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 615
+  source_text: '- **PPD-F-236 (B):** Diagramtyper såsom area, scatter, kombination,
+    staplad och sekundäraxlar.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-237
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 616
+  source_text: '- **PPD-F-237 (M):** Basnivån för ikoner och figurer omfattar typade
+    SVG-/geometriobjekt, inklusive markörfärger.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-238
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 617
+  source_text: '- **PPD-F-238 (M):** Datadiagram får inte få tyst ändrade skalor eller
+    sorter vid export.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-240
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 619
+  source_text: '### 16.6 Presentation och metadata – PPD-F-240…245'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-240
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 621
+  source_text: '- **PPD-F-240 (M):** `presentation` kan innehålla talaranteckningar
+    per slide, valfri förväntad taltid, standardövergång och inkrementella visningssteg
+    med stabila ID:n.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-241
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 622
+  source_text: '- **PPD-F-241 (M):** Varje slide får `sectionId`, tillgänglig titel
+    och valfri `hidden` för presentationsordning.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-242
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 623
+  source_text: '- **PPD-F-242 (M):** Övergångar/animationer ska ha deklarerad statisk
+    fallback för PDF och PPTX.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-243
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 624
+  source_text: '- **PPD-F-243 (B):** Hyperlänkar till specifika slides, förgreningar
+    och interaktiva navigeringsmål.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-244
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 625
+  source_text: '- **PPD-F-244 (B):** Kommentarer/granskningsstatus refererar stabila
+    slide-/objekt-ID:n och har `author`, `createdAt`, `status`, `thread`; får publiceras
+    eller utelämnas enligt explicit exportval.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-245
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 626
+  source_text: '- **PPD-F-245 (M):** Presentationen ska alltid kunna läsas utan animationer
+    eller JavaScript-drivna berättarsteg via fallbacks.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-250
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 628
+  source_text: '### 16.7 Bevarande, exportkontrakt och redigerbarhetsklass – PPD-F-250…257
+    (M)'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-250
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 630
+  source_text: '- **PPD-F-250:** `exportPolicy` anger `editable-preferred`, `visual-preferred`
+    eller `flatten-allowed` per objekt, med möjlig användaröverstyrning vid export.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-251
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 631
+  source_text: '- **PPD-F-251:** Varje export skapar en rapport per slide/objekt:
+    `native`, `hybrid`, `rasterized`, `omitted`, `unsupported` samt orsak och kvarvarande
+    semantik.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-252
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 632
+  source_text: '- **PPD-F-252:** PPTX-export ska prioritera redigerbar text, former,
+    tabeller och bilder. Komplexa effekter får rasteriseras som **separata effektlager**
+    med redigerbara innehållsobjekt ovanpå.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-253
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 633
+  source_text: '- **PPD-F-253:** PDF-export ska behålla text/vägar som vektor där
+    möjligt; exporterade sidor måste ha rätt sidmått, sidordning och läsbarhet.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-254
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 634
+  source_text: '- **PPD-F-254:** Exportprofiler deklareras i `build` eller exportmanifest
+    men ändrar aldrig originalmodellens semantik.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-255
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 635
+  source_text: '- **PPD-F-255:** Publicerad HTML innehåller inte oskyddade lokala
+    sökvägar eller nätverksberoenden i standardprofilen `offline-single-file`.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-256
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 636
+  source_text: '- **PPD-F-256:** Ingen dataförlust tillåts tyst vid import/export;
+    `roundTripReport` ska visa ignorerade, förenklade eller migrerade fält.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-257
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 637
+  source_text: '- **PPD-F-257:** `build.sourceModelHash` kopplas till den kanoniska
+    modellen så att inkonsekvent cache/rendering upptäcks.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-201
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 668
+  source_text: '| PPD-F-201–205 | PPD-S-201–205 | Ändra master/layout och kontrollera
+    ärvning/overrides |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-201
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 668
+  source_text: '| PPD-F-201–205 | PPD-S-201–205 | Ändra master/layout och kontrollera
+    ärvning/overrides |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-210
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 669
+  source_text: '| PPD-F-210–214 | PPD-S-210–214 | Rich-text round-trip + PPTX-öppning
+    |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-210
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 669
+  source_text: '| PPD-F-210–214 | PPD-S-210–214 | Rich-text round-trip + PPTX-öppning
+    |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-220
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 670
+  source_text: '| PPD-F-220–226 | PPD-S-220–227 | Grupp, justering, layer/lock och
+    sparning |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-220
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 670
+  source_text: '| PPD-F-220–226 | PPD-S-220–227 | Grupp, justering, layer/lock och
+    sparning |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-230
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 671
+  source_text: '| PPD-F-230–238 | PPD-S-230–239 | Beskärning, tabell/diagram och export
+    |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-230
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 671
+  source_text: '| PPD-F-230–238 | PPD-S-230–239 | Beskärning, tabell/diagram och export
+    |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-240
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 672
+  source_text: '| PPD-F-240–245 | PPD-S-240–244 | Presenterarläge och statisk fallback
+    |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-240
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 672
+  source_text: '| PPD-F-240–245 | PPD-S-240–244 | Presenterarläge och statisk fallback
+    |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-250
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 673
+  source_text: '| PPD-F-250–257 | PPD-S-250–260 | Exportjämförelser, varningsrapport,
+    integritet |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-250
+  source: reference/presentationsformat_forslag_v0_3.md
+  line: 673
+  source_text: '| PPD-F-250–257 | PPD-S-250–260 | Exportjämförelser, varningsrapport,
+    integritet |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: S-301
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 11
+  source_text: '| S-301 Semantiska diagram | MVP | Infoga process/hierarki/tidslinje,
+    redigera noder och kanter, byt layout utan förlust av innehåll |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: S-302
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 12
+  source_text: '| S-302 Ekvation | MVP | Skriv LaTeX/MathML, förhandsgranska, ange
+    alternativtext, redigera källan senare |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: S-303
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 13
+  source_text: '| S-303 Vektorbana | MVP | Infoga säker SVG eller rita bana; skala
+    och färgsätt utan rasterisering |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: S-304
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 14
+  source_text: '| S-304 Frihandsritning | Nästa | Pennverktyg, färg, tjocklek, radera
+    stroke, tryckbevarande import |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: S-305
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 15
+  source_text: '| S-305 Interaktion | Nästa | Tilldela enkel åtgärd till form/bild/text,
+    testa i presentationsläge |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: S-306
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 16
+  source_text: '| S-306 Avancerad text | Nästa | Text längs bana och dekorativ warping,
+    med fortsatt redigerbar textkälla |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: S-307
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 17
+  source_text: '| S-307 Mediekontroll | Nästa | Infoga ljud/video, välj poster, uppspelning,
+    captions, muting/loop |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: S-308
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 18
+  source_text: '| S-308 Bildgalleri | Nästa | Återanvändbar komponent med layout och
+    presentationsnavigering |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: S-309
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 19
+  source_text: '| S-309 3D-modell | Senare | Placera GLB/glTF, välj kameravinkel och
+    poster, hantera säkerhetsbegränsningar |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: S-310
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 20
+  source_text: '| S-310 Inbäddade dokument | Senare | Bifoga icke exekverat dokument
+    med poster och länk/nedladdning |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: S-311
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 21
+  source_text: '| S-311 Kodblock | Nästa | Syntaxmarkering och korrekt escaping, ingen
+    exekvering |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: S-312
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 22
+  source_text: '| S-312 Kartobjekt | Senare | GeoJSON med attribution och statisk
+    exportfallback |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: S-313
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 23
+  source_text: '| S-313 Diagramtyper | Nästa | Utöka datavisning utan att ändra grundläggande
+    datasetsemantik |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: S-314
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 24
+  source_text: '| S-314 Exportinsyn | MVP | Förhandsvisa och ladda ned objektrapport
+    för HTML/PDF/PPTX och val av fallback |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: AT-301
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 37
+  source_text: '| AT-301 | Ett tvåstegsprocessdiagram byter layout och återöppnas;
+    noder, relationer och id bevaras |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: AT-302
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 38
+  source_text: '| AT-302 | En LaTeX-formel ändras och exporteras; renderad bild och
+    källan är konsistenta |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: AT-303
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 39
+  source_text: '| AT-303 | Säker SVG infogas och exporteras; farlig SVG avvisas med
+    konkret felmeddelande |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: AT-304
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 40
+  source_text: '| AT-304 | En deklarativ interaktiv knapp navigerar korrekt och exporteras
+    med fallbackvarning i PDF |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: AT-305
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 41
+  source_text: '| AT-305 | En 3D-modell utan viewer använder poster; ingen tom yta
+    i PDF/PPTX |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: AT-306
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 42
+  source_text: '| AT-306 | En PPTX innehåller redigerbara diagramformer och text där
+    policy säger native; annat redovisas |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: AT-307
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 43
+  source_text: '| AT-307 | Enfil-HTML fungerar offline inklusive typsnitt, diagram
+    och formelrendering |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: AT-308
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 44
+  source_text: '| AT-308 | Import/export av v0.2-dokument via migration ändrar inte
+    befintlig semantik eller bildordning |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: AT-309
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 45
+  source_text: '| AT-309 | Inbäddad kod/extern URL exekveras aldrig utan tillåten
+    explicit handling |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: AT-310
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 46
+  source_text: '| AT-310 | Obehandlat okänt objekt med fallback visas men markeras
+    som delvis redigerbart |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: UF-01
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 102
+  source_text: '| UF-01 | Öppna befintlig PPD-HTML | Struktur, bilder, texter, effekter,
+    ordning och anteckningar återskapas | M |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: UF-02
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 103
+  source_text: '| UF-02 | Skapa ny presentation | Välj format, mall/tema och lägg
+    till bilder | M |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: UF-03
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 104
+  source_text: '| UF-03 | Redigera slide | Välj, flytta, ändra och ordna objekt med
+    direkt visuell återkoppling | M |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: UF-04
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 105
+  source_text: '| UF-04 | Förhandsgranska | Presentera i helskärm med tangentbord
+    och touch | M |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: UF-05
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 106
+  source_text: '| UF-05 | Spara projekt | Ladda ned ny självförsörjande HTML som går
+    att återöppna | M |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: UF-06
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 107
+  source_text: '| UF-06 | Exportera PDF | Samtliga bilder blir läsbara sidor i rätt
+    proportioner | M |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: UF-07
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 108
+  source_text: '| UF-07 | Exportera PowerPoint | Bilder blir PPTX-bilder med redigerbara
+    standardobjekt där möjligt | M |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: UF-08
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 109
+  source_text: '| UF-08 | Byta tema | Innehåll och referenser bevaras, design uppdateras
+    | B |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: UF-09
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 110
+  source_text: '| UF-09 | Arbeta med diagramdata | Ändra dataset och uppdatera visualisering
+    | B |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: UF-10
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 111
+  source_text: '| UF-10 | Samarbeta | Dela och samredigera projekt med andra | F |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-001
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 116
+  source_text: '- **KR-001 [M]:** Ny presentation från blankt dokument eller minst
+    tre inbyggda mallar (titel, innehåll, process).'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-002
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 117
+  source_text: '- **KR-002 [M]:** Importera lokal `.html` med PPD-markör och validera
+    den kanoniska modellen före redigering.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-003
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 118
+  source_text: '- **KR-003 [M]:** Vänlig felrapport för felaktigt format, saknade
+    resurser, versionskonflikter och trasiga referenser; ingen tyst databortfall.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-004
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 119
+  source_text: '- **KR-004 [M]:** Visa dokumenttitel, revisionsnummer, ändringsstatus
+    och senaste sparade tid *i aktuell session*.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-005
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 120
+  source_text: '- **KR-005 [B]:** Stöd valfri projektkatalog och projektpaket för
+    utvecklingsflöden; HTML-enfilsexport är fortfarande obligatorisk.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-010
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 125
+  source_text: '- **KR-010 [M]:** Visa miniatyrer, lägg till, duplicera, ta bort och
+    ändra ordning på bilder.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-011
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 126
+  source_text: '- **KR-011 [M]:** Markera ett eller flera objekt, flytta genom drag,
+    ändra storlek, rotera, duplicera och ta bort; synliga markeringshandtag.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-012
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 127
+  source_text: '- **KR-012 [M]:** Ordna lager: framåt, bakåt, överst, underst; visa/dölj
+    och lås/lås upp objekt.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-013
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 128
+  source_text: '- **KR-013 [M]:** Editera rubriker, vanlig text, listor och textformat
+    utan att semantiska referenser (`contentRef`) bryts.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-014
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 129
+  source_text: '- **KR-014 [M]:** Visa stödlinjer, rutnät, fästning mot kanter/objekt
+    och justeringskommandon.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-015
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 130
+  source_text: '- **KR-015 [M]:** Fyllning, linje, rundade hörn, opacitet, gradient,
+    skugga och bildbeskärning ska gå att konfigurera på relevanta objekt.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-016
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 131
+  source_text: '- **KR-016 [M]:** Stöd zoom, panorering, fit-to-screen, ångra/gör
+    om och standardkortkommandon.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-017
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 132
+  source_text: '- **KR-017 [M]:** Sidans storlek/proportion, säker marginal och vald
+    bakgrund ska kunna ändras.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-018
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 133
+  source_text: '- **KR-018 [M]:** Återge element av samma typ konsekvent i redigerare,
+    presentationsläge och HTML-export.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-019
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 134
+  source_text: '- **KR-019 [B]:** Gruppera/avgruppera objekt och hantera nästlade
+    grupper.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-020
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 135
+  source_text: '- **KR-020 [B]:** Slide- och temamallar med ärvda stilar samt valbar
+    lokal override.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-021
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 136
+  source_text: '- **KR-021 [B]:** Objektträd med namngivning, sökning, tillgänglighetsordning
+    och gruppering.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-030
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 159
+  source_text: '- **KR-030 [M]:** Temapalett, typografisk skala, bakgrunder och återanvändbara
+    stilinställningar.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-031
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 160
+  source_text: '- **KR-031 [M]:** Effektredigering med förhandsvisning: opacity, gradient,
+    blur, backdrop-filter, shadow, border, overlay.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-032
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 161
+  source_text: '- **KR-032 [M]:** Stöd både helt redigerbara objekt och hybridkompositioner
+    (rasteriserat effektlager, redigerbara texter).'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-033
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 162
+  source_text: '- **KR-033 [M]:** Visa indikator när en viss effekt inte väntas följa
+    med som redigerbart objekt till PPTX.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-034
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 163
+  source_text: '- **KR-034 [B]:** Gemensamma masterlayouter, designvariabler och återanvändbara
+    komponenter.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-040
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 166
+  source_text: '- **KR-040 [M]:** Bildtitel, syfte, huvudbudskap, sektion och anteckningar
+    kan granskas/redigeras i separat semantikpanel.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-041
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 167
+  source_text: '- **KR-041 [M]:** Objekt har stabila ID:n; textobjekt har relation
+    till semantiskt innehåll där sådan relation finns.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-042
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 168
+  source_text: '- **KR-042 [M]:** Alternativtext för meningsbärande bilder och dekorativ-markering
+    för icke-informativ grafik.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-043
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 169
+  source_text: '- **KR-043 [M]:** Läsordning och tangentbordsnavigation för presentationen;
+    kontrastvarning på text mot bakgrund.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-044
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 170
+  source_text: '- **KR-044 [B]:** Export av presentationsöversikt i maskinläsbar text
+    och utökad tillgänglighetsgranskning.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-050
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 173
+  source_text: '- **KR-050 [M]:** Presentation i helskärm eller fönster; navigering
+    framåt/bakåt med piltangenter, klick och touch.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-051
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 174
+  source_text: '- **KR-051 [M]:** Förbli offline efter att den fristående HTML-filen
+    öppnats; inga nödvändiga nätverksresurser.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-052
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 175
+  source_text: '- **KR-052 [M]:** Respektera bildens referenskoordinater och proportioner,
+    med letterbox hellre än beskärning av innehåll.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-053
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 176
+  source_text: '- **KR-053 [M]:** Stöd enklare inträdesanimation och statiskt reservläge
+    om reducerad rörelse är aktiverad.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-054
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 177
+  source_text: '- **KR-054 [M]:** Dölj redigeringskontroller när man presenterar.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-055
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 178
+  source_text: '- **KR-055 [B]:** Presentatörsvy med aktuella/nästa bild, anteckningar,
+    timer, bildräknare och översikt.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-056
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 179
+  source_text: '- **KR-056 [B]:** Stegvis reveal/fragment, övergångstyper och per-objekt
+    animationstidslinje.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-057
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 180
+  source_text: '- **KR-057 [B]:** Direktlänk till bild där webbadress används, utan
+    att skada offlinepresentationen.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-060
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 185
+  source_text: '- **KR-060 [M]:** Spara som enda `.html` med `format: "ppd"`, `schemaVersion`,
+    `document`, `theme`, `slides`, `assets`, `presentation`, `provenance`, `build`
+    enligt formatspecifikationen.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-061
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 186
+  source_text: '- **KR-061 [M]:** Samtliga för visning nödvändiga skript, stilar,
+    fonter och bilder måste vara inbäddade lokalt (t.ex. data-URI eller binära paket
+    representerade i HTML).'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-062
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 187
+  source_text: '- **KR-062 [M]:** En sparad PPD-HTML ska både kunna presenteras direkt
+    och återimporteras utan nätverksanslutning.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-063
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 188
+  source_text: '- **KR-063 [M]:** Spara ändringar i den kanoniska modellen först och
+    regenerera härledd vy; undvik två osynkroniserade sanningskällor.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-064
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 189
+  source_text: '- **KR-064 [M]:** Uppdatera revision och ändringsmetadata; skilj `schemaVersion`
+    från dokumentrevision och buildversion.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-065
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 190
+  source_text: '- **KR-065 [M]:** Verifiera referenser, tillgångar och schema före
+    sparande. Erbjud tydliga fel och åtgärdsförslag.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-066
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 191
+  source_text: '- **KR-066 [M]:** Varna om osparade ändringar och erbjud nedladdning;
+    gör inte anspråk på att kunna skriva över en lokal fil utan rätt användarbehörighet.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-067
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 192
+  source_text: '- **KR-067 [B]:** Lokal autosparning till IndexedDB/liknande med tydlig
+    status; export av ny HTML kvarstår som portabelt sparande.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-068
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 193
+  source_text: '- **KR-068 [B]:** Lättviktig versionshistorik och formatmigration
+    med säkerhetskopia.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-070
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 196
+  source_text: '- **KR-070 [M]:** Läsaren ska deklarera stödd schemaversion och obligatoriska
+    funktioner (`featureRequirements`).'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-071
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 197
+  source_text: '- **KR-071 [M]:** En nyare fil med okända obligatoriska funktioner
+    får inte skrivas om destruktivt; öppna i begränsat läsläge eller stoppa med tydligt
+    besked.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-072
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 198
+  source_text: '- **KR-072 [M]:** Bevara okända, icke-kritiska namnrymdade `extensions`
+    vid normal öppna/spara om säkert möjligt; rapportera annars förlust före export.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-073
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 199
+  source_text: '- **KR-073 [M]:** Otillåtna skript/HTML från modell, extern resursåtkomst
+    och osäkra SVG-element ska saneras eller blockeras.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-080
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 210
+  source_text: '**KR-080 [M]:** Exporten får inte tyst utelämna objekt. Varje typ
+    som inte stöds ska få definierad fallback eller blockeras med begripligt fel.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-081
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 213
+  source_text: '- **KR-081 [M]:** `.html` exporteras med full PPD-modell, renderad
+    vy och resurser, utan obligatoriska CDN-länkar.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-082
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 214
+  source_text: '- **KR-082 [M]:** HTML ska fungera efter `file://`-öppning i moderna
+    webbläsare; kontrollera speciellt Safari och Chromium.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-083
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 215
+  source_text: '- **KR-083 [M]:** HTML-import → redigering → HTML-export → återimport
+    ska behålla innehåll, ID:n, lager och referenser.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-084
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 216
+  source_text: '- **KR-084 [M]:** Enbart användarinitierad nedladdning av en ny HTML-fil
+    krävs. Inbyggt redigeringsläge i den exporterade filen är valbart i MVP; modellen
+    ska ändå följa med.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-090
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 219
+  source_text: '- **KR-090 [M]:** Exportera till PDF med en sida per presentationsbild
+    och korrekta proportioner (16:9 som standard).'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-091
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 220
+  source_text: '- **KR-091 [M]:** Behåll text som sökbar/markerbar text och vektorer
+    där möjligt; tillåt raster för effekter/bakgrunder.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-092
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 221
+  source_text: '- **KR-092 [M]:** Bilder får inte beskäras felaktigt och text får
+    inte gå utanför angivna gränser utan varning.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-093
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 222
+  source_text: '- **KR-093 [M]:** Hyperlänkar och dokumentmetadata ska inkluderas
+    där tekniken stödjer det.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-094
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 223
+  source_text: '- **KR-094 [M]:** Exporten ska använda dokumenterad renderingsmiljö
+    (rekommenderat låst Chromium-version) för reproducerbarhet; offlinefunktion ska
+    inte kräva en server för att *visa* HTML.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-095
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 224
+  source_text: '- **KR-095 [B]:** Sidurval, utskrift med anteckningar, handout-layouter
+    och valbar tillgänglighetsprofil.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-100
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 227
+  source_text: '- **KR-100 [M]:** Skapa en giltig öppningsbar `.pptx` i samma bildordning
+    och med samma sidproportioner.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-101
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 228
+  source_text: '- **KR-101 [M]:** Textobjekt, grundformer, pilar, linjer, och bilder
+    exporteras som **redigerbara native PowerPoint-objekt** där objektet stöds av
+    MVP-mappningen.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-102
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 229
+  source_text: '- **KR-102 [M]:** Lagerordning, placering, storlek, färg, opacitet,
+    text och basala länkar ska bevaras inom rimliga toleranser.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-103
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 230
+  source_text: '- **KR-103 [M]:** Glas-, blur- och ljuseffekter får bli **separata
+    rasteriserade stödytor** utan att bakomliggande texter plattas till.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-104
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 231
+  source_text: '- **KR-104 [M]:** Objekt som rasteriseras ska redovisas per bild/objekt
+    i exportrapporten; rapporten ska beskriva effekt på redigerbarhet.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-105
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 232
+  source_text: '- **KR-105 [M]:** Diagram och tabeller ska ha en publicerad kompatibilitetsmatris.
+    Enkel tabell exporteras som native tabell; diagram får i MVP rasteriseras med
+    varning och förbli semantiskt tillgängliga i PPD-originalet.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-106
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 233
+  source_text: '- **KR-106 [M]:** Exporten ska kunna öppnas i aktuell PowerPoint för
+    Mac och Windows; funktionstest ska inkludera faktisk ändring av text och form
+    efter export.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-107
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 234
+  source_text: '- **KR-107 [M]:** PPD-HTML förblir redigerbart original. Återimport
+    av ändrad `.pptx` ingår **inte** i MVP, och ändringar där synkroniseras inte automatiskt
+    tillbaka.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-108
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 235
+  source_text: '- **KR-108 [B]:** Exportera vanliga stapel-, linje- och cirkeldiagram
+    som native PowerPoint-diagram när datamodell stöds.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: KR-109
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 236
+  source_text: '- **KR-109 [B]:** Exportera enkla övergångar, anteckningar och grupper
+    i PowerPoint-format.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: NFR-01
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 264
+  source_text: '| NFR-01 | Offline | Exporterad PPD-HTML visar alla bilder med nätverket
+    avstängt |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: NFR-02
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 265
+  source_text: '| NFR-02 | Portabilitet | En enda HTML-fil ska vara tillräcklig för
+    visning och återimport |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: NFR-03
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 266
+  source_text: '| NFR-03 | Prestanda | Vanlig 20-bilders presentation ska kunna navigeras
+    responsivt på modern laptop; mät och fastställ budget i pilot |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: NFR-04
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 267
+  source_text: '| NFR-04 | Format | Utförligt schema + strukturell validering + versions-
+    och feature negotiation |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: NFR-05
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 268
+  source_text: '| NFR-05 | Säkerhet | Sanerad input, ingen exekvering av dokumentinbäddad
+    användarkod, resurspolicy, CSP i möjligaste mån |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: NFR-06
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 269
+  source_text: '| NFR-06 | Tillgänglighet | Tangentbordsstyrning, tydliga fokuslägen,
+    alt-textstöd, reduced motion, kontrastgranskning |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: NFR-07
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 270
+  source_text: '| NFR-07 | Kompatibilitet | Senaste stabila Chrome/Edge/Firefox/Safari;
+    export-PDF via definierad Chromium |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: NFR-08
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 271
+  source_text: '| NFR-08 | Robusthet | Avbruten export eller ogiltig fil får inte
+    skada den aktuella arbetskopian |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: NFR-09
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 272
+  source_text: '| NFR-09 | Tester | Deterministiska enhets-/integrations-/e2e-tester
+    och visuell regression |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: NFR-10
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 273
+  source_text: '| NFR-10 | Datahantering | Lokal behandling som standard; ingen serveruppladdning
+    utan uttryckligt användarval |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: AT-01
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 324
+  source_text: '**AT-01 Import:** Ett giltigt PPD-dokument med 5 bilder och inbäddade
+    resurser importeras offline. Bildordning, titel, objekt-ID och semantik är intakta.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: AT-02
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 326
+  source_text: '**AT-02 Objekt:** Skapa text, bild, linje, pil, form och tabell. Flytta,
+    rotera, ändra färg/opacitet och lager. Sparad förändring återkommer efter omladdning.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: AT-03
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 328
+  source_text: '**AT-03 Premiumdesign:** Referensslide med fotobakgrund, mörk gradient,
+    frostad glaspanel och text återges korrekt i både Safari och Chromium. Ingen överlappning/klippning
+    vid 16:9.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: AT-04
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 330
+  source_text: '**AT-04 Roundtrip:** HTML-export → ny import → samma semantiska innehåll,
+    referenser och visuell ordning; inga förlorade nödvändiga resurser.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: AT-05
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 332
+  source_text: '**AT-05 Offline:** Fristående HTML öppnas och spelas upp med helt
+    avstängd nätverksanslutning.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: AT-06
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 334
+  source_text: '**AT-06 PDF:** Exportera 5 bilder → 5 sidor med rätt proportioner;
+    text är sökbar där möjligt, bildbeskärning korrekt, ingen extratom sida.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: AT-07
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 336
+  source_text: '**AT-07 PPTX:** Exportera samma 5 bilder → presentationen öppnas i
+    PowerPoint. Testaren ändrar rubrik, pil och formfärg på en bild och sparar; bakgrund
+    och avsedda visuella effekter finns kvar.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: AT-08
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 338
+  source_text: '**AT-08 Hybrid:** Glas/blur rasteriseras vid behov utan att huvudrubriker
+    plattas till. Exportrapport namnger berörda objekt.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: AT-09
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 340
+  source_text: '**AT-09 Fel:** Korrupt modell, saknade bildresurser och osäker inbäddad
+    kod ger kontrollerade varningar/fel utan krasch eller dataförlust.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: AT-10
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 342
+  source_text: '**AT-10 Versionsstöd:** Dokument med okänd obligatorisk funktion öppnas
+    inte i full redigeringsläge utan explicit och tydlig kompatibilitetsinformation.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: AT-11
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 344
+  source_text: '**AT-11 Flerbläddring:** Minst en end-to-end-testrunda i Safari och
+    Chromium; faktisk PDF-/PPTX-granskning, inte bara filgenerering.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: AT-12
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 346
+  source_text: '**AT-12 Tillgänglighet:** Presentationen kan navigeras med tangentbord,
+    har synligt fokus, respekterar reduced motion och visar alt-texter för relevanta
+    bilder.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: AT-01
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 349
+  source_text: MVP är **godkänd först när** samtliga M-krav och AT-01–AT-12 är verifierade
+    i den riktiga implementationen, nödvändiga beroenden är licensmässigt klarlagda,
+    formatet dokumenterats och ingen kritisk databortfallssituation är öppen.
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: AT-12
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 349
+  source_text: MVP är **godkänd först när** samtliga M-krav och AT-01–AT-12 är verifierade
+    i den riktiga implementationen, nödvändiga beroenden är licensmässigt klarlagda,
+    formatet dokumenterats och ingen kritisk databortfallssituation är öppen.
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-201
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 396
+  source_text: '- **PPD-S-201 (M):** Skapa, döp, duplicera, välja och justera presentationsmaster;
+    minst titelbild, innehållsbild, två kolumner, bild + text, tom.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-202
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 397
+  source_text: '- **PPD-S-202 (M):** Redaktionella platshållare för titel, brödtext,
+    bild, sidnummer och sidfot; innehåll kan bytas utan att objektets avsedda layout
+    förstörs.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-203
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 398
+  source_text: '- **PPD-S-203 (M):** Ändring av master uppdaterar alla anslutna bilder
+    och bevarar individuella innehållsbindningar och lokala överstyrningar.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-204
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 399
+  source_text: '- **PPD-S-204 (M):** Användaren kan återställa en slide till layouten
+    eller bryta kopplingen; verktyget varnar om objekt blir obundna.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-205
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 400
+  source_text: '- **PPD-S-205 (B):** Hantering av externa återanvändbara temabibliotek
+    och komponentbibliotek över flera dokument.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-210
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 404
+  source_text: '- **PPD-S-210 (M):** Redigera text direkt på sliden och i egenskapspanel;
+    blandad fet/kursiv/understruken/färg/storlek, hyperlinks och svenska tecken fungerar.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-211
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 405
+  source_text: '- **PPD-S-211 (M):** Styckeformat med punktlistor, flernivålistor,
+    numrering, radavstånd, indrag, tabbar och horisontell/vertikal justering.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-212
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 406
+  source_text: '- **PPD-S-212 (M):** Explicit åtgärd för overflow: visa varning, öka
+    textruta eller passa text enligt användarens val; ingen tyst minskning under temats
+    lägsta typstorlek.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-213
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 407
+  source_text: '- **PPD-S-213 (M):** Klipp ut/kopiera/klistra in objekt och formaterad
+    text inom och mellan öppna PPD-dokument, med stabila nya ID:n för kopior och bibehållna
+    referenser.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-214
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 408
+  source_text: '- **PPD-S-214 (M):** Sök och ersätt i hela presentationen; möjlighet
+    att välja matchningar och undvika att ändra dolda masterelement av misstag.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-220
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 412
+  source_text: '- **PPD-S-220 (M):** Flerval och grupp/avgruppera; flytta, duplicera,
+    rotera, proportionell skalning och ta bort med mus, touch och tangentbord.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-221
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 413
+  source_text: '- **PPD-S-221 (M):** Justera mot vänster/höger/mitten/topp/botten,
+    fördela jämnt och snappa mot stödlinjer, rutnät och objektkanter; möjlighet att
+    slå av snapping.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-222
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 414
+  source_text: '- **PPD-S-222 (M):** Layerpanel med z-ordning, visa/dölj, lås/lås
+    upp, grupptillhörighet, tydlig aktuell markering.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-223
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 415
+  source_text: '- **PPD-S-223 (M):** Piltangentsjustering, numeriskt läge/storlek/rotation,
+    förhållandelås och reset-transform.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-224
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 416
+  source_text: '- **PPD-S-224 (M):** Formateringspensel eller kopiera/klistra in stil
+    mellan objekt av kompatibla typer.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-225
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 417
+  source_text: '- **PPD-S-225 (M):** Smarta linjer/ankare följer kopplade objekt när
+    de flyttas, utan att skapa brutna referenser.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-226
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 418
+  source_text: '- **PPD-S-226 (M):** Användaren kan skapa återanvändbar komponent
+    inom dokumentet med slots och lokala overrides.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-227
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 419
+  source_text: '- **PPD-S-227 (B):** Biblioteksuppdateringar av delade komponenter
+    och mer avancerade layoutconstraints.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-230
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 423
+  source_text: '- **PPD-S-230 (M):** Ladda in bild, ersätt bild utan layoutändring,
+    beskära, zooma inom mask, välja contain/cover och ange fokuspunkt.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-231
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 424
+  source_text: '- **PPD-S-231 (M):** Grundläggande bildjustering brightness/contrast/saturation
+    och masker till vanliga geometriska former.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-232
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 425
+  source_text: '- **PPD-S-232 (M):** Skapa tabell; infoga/ta bort rader och kolumner,
+    slå ihop celler, ändra ramar/fyllning/justering och celltext.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-233
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 426
+  source_text: '- **PPD-S-233 (M):** Skapa stapel-, linje- och cirkeldiagram från
+    en datatabell som förblir redigerbar efter spara/öppna.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-234
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 427
+  source_text: '- **PPD-S-234 (M):** Diagramstilar (axlar, etiketter, legend, serier,
+    färger) och tillgänglig datatabell.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-235
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 428
+  source_text: '- **PPD-S-235 (M):** Infoga ikon, pil och enkla processsteg som separata
+    redigerbara objekt.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-236
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 429
+  source_text: '- **PPD-S-236 (B):** Tidslinjer, processkartor, organisationsscheman
+    med semantiska relationer och alternativa layouter.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-237
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 430
+  source_text: '- **PPD-S-237 (B):** Avancerade diagramtyper/diagramkompositioner.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-238
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 431
+  source_text: '- **PPD-S-238 (M):** Öppen PNG-/JPG-export av enstaka bild eller alla
+    bilder i valt pixelmått.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-239
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 432
+  source_text: '- **PPD-S-239 (M):** Exportval för bilder/diagram ska redovisa när
+    objekt blir rasteriserade.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-240
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 436
+  source_text: '- **PPD-S-240 (M):** Minatyrpanel stöder duplicera, dölja, flytta,
+    ta bort, namn/sektion, flera markerade slides och drag-and-drop-ordning.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-241
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 437
+  source_text: '- **PPD-S-241 (M):** Presentatörsvy med aktuell/nästa bild, talaranteckningar,
+    timer och möjlighet att snabbt hoppa till slide.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-242
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 438
+  source_text: '- **PPD-S-242 (M):** Fullskärm, tangentbord, touch, länkade steg,
+    pausa och svart skärm; presentationsläget ska kunna användas offline.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-243
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 439
+  source_text: '- **PPD-S-243 (M):** Enkel övergång och stegvist uppbyggda objekt
+    med kontrollerad statisk export till PDF/PPTX.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-244
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 440
+  source_text: '- **PPD-S-244 (B):** Pekverktyg/laser, ritanteckningar, tidsinställning
+    och valbara interaktiva grenar.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-250
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 444
+  source_text: '- **PPD-S-250 (M):** Öppna PPD-HTML offline via filväljare; validera
+    modell, resurser, formatversion och skapa läsbar felrapport vid fel.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-251
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 445
+  source_text: '- **PPD-S-251 (M):** Spara som en ny självförsörjande HTML-fil som
+    kan öppnas offline och återimporteras utan förlust av information för stödda fält.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-252
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 446
+  source_text: '- **PPD-S-252 (M):** Flera ångra/gör om-steg inklusive gruppoperationer,
+    masterändring, text och diagramskiften; en konsekvent användaroperation = en undo-enhet.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-253
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 447
+  source_text: '- **PPD-S-253 (M):** Automatisk återställningspunkt under redigering
+    (t.ex. IndexedDB), möjlighet att återuppta och explicit radera lokal återställningsdata;
+    får inte vara beroende av konto.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-254
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 448
+  source_text: '- **PPD-S-254 (M):** Varning vid osparade ändringar och tydlig skillnad
+    mellan arbetskopia och exporterad fil.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-255
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 449
+  source_text: '- **PPD-S-255 (M):** Export till PDF med korrekt sidformat, bevarad
+    sökbar text där möjligt och möjlighet att välja slide-intervall.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-256
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 450
+  source_text: '- **PPD-S-256 (M):** PPTX-export med valen `editable-first`, `visual-first`,
+    `flattened` och förhandsrapport över rasterisering/utelämningar. Faktiska Office-objekt
+    ska användas för text, bilder, former och tabeller där möjligt.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-257
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 451
+  source_text: '- **PPD-S-257 (M):** Robust export även utan användarens nätuppkoppling;
+    om headless-server krävs ska det framgå och offline-alternativ erbjudas med tydlig
+    begränsning. Standardprofil ska kunna byggas med lokalt körd Chromium.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-258
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 452
+  source_text: '- **PPD-S-258 (M):** Exporterad PPTX öppnas utan reparationsdialog
+    i PowerPoint; text/grundobjekt kan redigeras, inga betydande klippningar; exportrapport
+    med objekttäckning.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-259
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 453
+  source_text: '- **PPD-S-259 (M):** En genomgående diagnostikpanel visar fel, varningar
+    och begränsningar per slide/objekt och exportformat.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-260
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 454
+  source_text: '- **PPD-S-260 (B):** Importera grundläggande PPTX (text, former, bilder,
+    slides, tabeller) med förlustrapport, inte bara platt bild.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-270
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 458
+  source_text: '- **PPD-S-270 (B):** Kommentarer per slide/objekt, markerade trådar
+    och enkel granskningsstatus; exportval för att ta med eller utelämna kommentarer.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-271
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 459
+  source_text: '- **PPD-S-271 (F):** Realtidssamredigering, behörigheter, delade bibliotek
+    och molnsynk.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-272
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 460
+  source_text: '- **PPD-S-272 (F):** AI-assisterad utkastsgenerering, språkgranskning
+    och designförslag; användaren ska godkänna materiella ändringar.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-273
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 461
+  source_text: '- **PPD-S-273 (F):** Videoexport, inspelad berättarröst, avancerad
+    publikinteraktion.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: AT-201
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 480
+  source_text: '| AT-201 | Master och platshållare | Ändra gemensam logotyp/rubrikstil
+    på master → minst tre slides uppdateras; lokala rubriktexter kvarstår |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: AT-202
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 481
+  source_text: '| AT-202 | Layoutbyte | Byt titel→två kolumner→titel; inga bundna
+    innehållsblock förloras och eventuella obundna objekt rapporteras |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: AT-203
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 482
+  source_text: '| AT-203 | Formaterad text | Två stilar inom samma stycke, två listnivåer
+    och länk överlever HTML-save/reopen och är redigerbara i PPTX när stödda |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: AT-204
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 483
+  source_text: '| AT-204 | Geometri och grupper | Flytta grupperat objekt, lås ett
+    barn, duplicera och ångra; inga dubbla ID:n eller ändrad z-ordning |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: AT-205
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 484
+  source_text: '| AT-205 | Smart placering | Placera fem kort, distribuera jämnt och
+    slå på/av snapping; geometri sparas och är stabil vid återöppning |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: AT-206
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 485
+  source_text: '| AT-206 | Bildbehandling | Beskär foto till form, byt till ny bild;
+    layout och fokus bevaras eller varning visas |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: AT-207
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 486
+  source_text: '| AT-207 | Tabell | Slå ihop celler, flytta kolumn, ändra formatering;
+    innehållet överlever HTML/PPTX/PDF |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: AT-208
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 487
+  source_text: '| AT-208 | Diagram | Uppdatera tal i stapel/linje/cirkel; rendered
+    slide, sparad JSON och export avspeglar samma data |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: AT-209
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 488
+  source_text: '| AT-209 | Talaranteckningar | Två skärmar: publikvy visar inte anteckningar;
+    presentatörsvy visar aktuell/nästa bild, timer och anteckningar |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: AT-210
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 489
+  source_text: '| AT-210 | Undo och crash recovery | Ändra text+master+diagram, simulera
+    omstart; lokal återställning fungerar och användaren väljer om den används |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: AT-211
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 490
+  source_text: '| AT-211 | Offline PPD | Spara ensam HTML, koppla bort nätverk och
+    öppna om; navigering, bilder, typsnitt och allt stödd data fungerar |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: AT-212
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 491
+  source_text: '| AT-212 | PDF | 16:9 slides, svensk text och icke-standardtecken
+    ger inga tomsidor/klippningar; text sökbar där möjligt |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: AT-213
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 492
+  source_text: '| AT-213 | PPTX editable-first | Text, former, tabell är separata
+    redigerbara objekt; avancerad blur rasteriseras och redovisas |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: AT-214
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 493
+  source_text: '| AT-214 | PPTX visual-first | Visuell jämförelse mot HTML inom dokumenterad
+    tolerans, redigerbar huvudtext och tydlig exportdiagnostik |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: AT-215
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 494
+  source_text: '| AT-215 | Exportvarningar | Medvetet osupporterad effekt medför specificerad
+    varning; ingen tyst utelämning |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: AT-216
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 495
+  source_text: '| AT-216 | Migration och säkerhet | PPD 0.1 uppgraderas utan informationsförlust;
+    injicerad HTML/JS i text exekveras inte |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: AT-217
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 496
+  source_text: '| AT-217 | Klippbord, sök och flera slides | Objektkopiering ger nya
+    ID:n, sök/ersätt uppdaterar avsedda träffar, slides kan dupliceras/sektioneras
+    |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: AT-218
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 497
+  source_text: '| AT-218 | PNG-export | Vald slide och hela presentationen exporteras
+    i vald upplösning utan felaktig sidbeskärning |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: AT-201
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 499
+  source_text: '**DoD för release:** Samtliga M-krav och AT-201–218 ska ha ett automatiserat
+    test där det är praktiskt möjligt, annars dokumenterat manuellt prov; inga kritiska
+    blockerare. PDF/PPTX ska verifieras i en riktig läsare, inte bara genom att filen
+    genererats. Referensdokumenten ska omfatta minst en ljus, en mörk, en fotorealistisk
+    och en diagramtung presentation.'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-201
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 505
+  source_text: '| Master/layout | PPD-F-201–205 | PPD-S-201–205 | MVP, inte senare
+    etapp |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-201
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 505
+  source_text: '| Master/layout | PPD-F-201–205 | PPD-S-201–205 | MVP, inte senare
+    etapp |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-210
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 506
+  source_text: '| Rich text | PPD-F-210–214 | PPD-S-210–214 | MVP |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-210
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 506
+  source_text: '| Rich text | PPD-F-210–214 | PPD-S-210–214 | MVP |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-220
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 507
+  source_text: '| Geometri, ankare, gruppering | PPD-F-220–226 | PPD-S-220–227 | MVP
+    med komponentbibliotek B |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-220
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 507
+  source_text: '| Geometri, ankare, gruppering | PPD-F-220–226 | PPD-S-220–227 | MVP
+    med komponentbibliotek B |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-230
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 508
+  source_text: '| Bild, tabell, diagram | PPD-F-230–238 | PPD-S-230–239 | Enkla diagram
+    i MVP |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-230
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 508
+  source_text: '| Bild, tabell, diagram | PPD-F-230–238 | PPD-S-230–239 | Enkla diagram
+    i MVP |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-240
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 509
+  source_text: '| Presentation | PPD-F-240–245 | PPD-S-240–244 | Presenterarläge i
+    MVP |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-240
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 509
+  source_text: '| Presentation | PPD-F-240–245 | PPD-S-240–244 | Presenterarläge i
+    MVP |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-250
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 510
+  source_text: '| Export/round trip | PPD-F-250–257 | PPD-S-250–260 | HTML/PDF/PPTX/PNG
+    MVP, PPTX-import B |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-250
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 510
+  source_text: '| Export/round trip | PPD-F-250–257 | PPD-S-250–260 | HTML/PDF/PPTX/PNG
+    MVP, PPTX-import B |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-F-244
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 511
+  source_text: '| Revision, granskning | PPD-F-244, 16.8 | PPD-S-252–254, 270 | Undo/recovery
+    MVP, kommentarer B |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+- id: PPD-S-252
+  source: reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md
+  line: 511
+  source_text: '| Revision, granskning | PPD-F-244, 16.8 | PPD-S-252–254, 270 | Undo/recovery
+    MVP, kommentarer B |'
+  status: not_verified
+  coverage: governing_reference
+  implementation_assessment: docs/release-review.md
+added_requirements:
+- id: SF-001
+  source: docs/functional-specification.md
+  status: not_implemented
+- id: SF-002
+  source: docs/functional-specification.md
+  status: not_implemented
+- id: SF-003
+  source: docs/functional-specification.md
+  status: not_implemented
+- id: SF-004
+  source: docs/functional-specification.md
+  status: not_implemented
+- id: SF-005
+  source: docs/functional-specification.md
+  status: not_implemented
+- id: SF-006
+  source: docs/functional-specification.md
+  status: not_implemented
+- id: SF-007
+  source: docs/functional-specification.md
+  status: not_implemented
+- id: SF-008
+  source: docs/functional-specification.md
+  status: not_implemented
+- id: SF-009
+  source: docs/functional-specification.md
+  status: not_implemented
+- id: SF-010
+  source: docs/functional-specification.md
+  status: not_implemented
+- id: SF-011
+  source: docs/functional-specification.md
+  status: not_implemented
+- id: SF-012
+  source: docs/functional-specification.md
+  status: not_implemented
+coverage_groups:
+- source_group: KR-001–073, PPD-S-201–254
+  steps:
+  - DEV-004
+  - DEV-005
+  - DEV-006
+  - DEV-007
+  - DEV-008
+  - DEV-009
+  - DEV-010
+  - DEV-012
+- source_group: S-301–303, F-301–303, AT-301–303
+  steps:
+  - DEV-011
+  - DEV-014
+- source_group: S-314, KR-080–108, PPD-S-255–259, PPD-F-250–257
+  steps:
+  - DEV-002
+  - DEV-007
+  - DEV-013
+  - DEV-014
+- source_group: AT-01–12, AT-201–218, normative MVP and applicable safe-fallback tests
+  steps:
+  - DEV-015
+- source_group: SF-001–012
+  steps:
+  - DEV-003
+  - DEV-005
+  - DEV-006
+  - DEV-007
+  - DEV-012
+  - DEV-015
+format_decisions:
+- gap: GAP-01
+  decision: docs/dev001-decisions.md
+  contract: docs/ppd-contract.md
+  step: DEV-001
+  verification: tests/test_ppd_contract.py
+- gap: GAP-02
+  decision: docs/dev001-decisions.md
+  contract: docs/ppd-contract.md
+  step: DEV-001
+  verification: tests/test_ppd_contract.py
+- gap: GAP-03
+  decision: docs/dev001-decisions.md
+  contract: docs/ppd-contract.md
+  step: DEV-001
+  verification: tests/test_ppd_contract.py
+- gap: GAP-04
+  decision: docs/dev001-decisions.md
+  contract: docs/ppd-contract.md
+  step: DEV-001
+  verification: tests/test_ppd_contract.py
+- gap: GAP-05
+  decision: docs/dev001-decisions.md
+  contract: docs/ppd-contract.md
+  step: DEV-001
+  verification: tests/test_ppd_contract.py
+- gap: GAP-06
+  decision: docs/dev001-decisions.md
+  contract: docs/ppd-contract.md
+  step: DEV-001
+  verification: tests/test_ppd_contract.py
+- gap: GAP-07
+  decision: docs/dev001-decisions.md
+  contract: docs/ppd-contract.md
+  step: DEV-001
+  verification: tests/test_ppd_contract.py
+- gap: GAP-08
+  decision: docs/dev001-decisions.md
+  contract: docs/ppd-contract.md
+  step: DEV-001
+  verification: tests/test_ppd_contract.py
+- gap: GAP-09
+  decision: docs/dev001-decisions.md
+  contract: docs/ppd-contract.md
+  step: DEV-001
+  verification: tests/test_ppd_contract.py
+- gap: GAP-10
+  decision: docs/dev001-decisions.md
+  contract: docs/ppd-contract.md
+  step: DEV-001
+  verification: tests/test_ppd_contract.py
+- gap: GAP-11
+  decision: docs/dev001-decisions.md
+  contract: docs/ppd-contract.md
+  step: DEV-001
+  verification: tests/test_ppd_contract.py
+- gap: GAP-12
+  decision: docs/dev001-decisions.md
+  contract: docs/ppd-contract.md
+  step: DEV-001
+  verification: tests/test_ppd_contract.py
+technical_evidence:
+  step: DEV-002
+  source: spikes/dev002
+  tests:
+  - scripts/verify_dev002.py
+  - scripts/verify_dev002_files.py
+  decision: docs/dev002-technical-decisions.md
+  scope: technical feasibility; no product acceptance
+pwa_shell_evidence:
+  step: DEV-003
+  source: src/pwa
+  ux: src/ui
+  tests:
+  - tests/pwa.mjs
+  - tests/update-safety.test.mjs
+  requirements:
+  - SF-001
+  - SF-003
+  - SF-004
+  - SF-006
+  - SF-007
+  scope: shell only; no document import or persistence

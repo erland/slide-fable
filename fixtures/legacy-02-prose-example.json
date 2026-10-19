@@ -1,0 +1,84 @@
+{
+  "format": "ppd",
+  "schemaVersion": "0.2.0",
+  "document": {
+    "id": "doc-1",
+    "title": "Strategi",
+    "defaultMasterId": "master-1",
+    "canvas": {
+      "width": 1600,
+      "height": 900
+    }
+  },
+  "theme": {
+    "colors": {
+      "ink": "#102231"
+    }
+  },
+  "masters": [
+    {
+      "id": "master-1",
+      "layouts": [
+        {
+          "id": "layout-title",
+          "placeholders": [
+            {
+              "id": "ph-title",
+              "role": "title",
+              "geometry": {
+                "x": 100,
+                "y": 90,
+                "width": 1200,
+                "height": 180
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "components": [],
+  "slides": [
+    {
+      "id": "slide-1",
+      "masterId": "master-1",
+      "layoutId": "layout-title",
+      "content": {
+        "blocks": [
+          {
+            "id": "headline",
+            "type": "heading",
+            "text": {
+              "paragraphs": [
+                {
+                  "id": "p1",
+                  "runs": [
+                    {
+                      "text": "Digital utveckling",
+                      "marks": [
+                        "bold"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "placeholderBindings": [
+        {
+          "placeholderId": "ph-title",
+          "contentRef": "headline"
+        }
+      ],
+      "view": {
+        "elements": []
+      }
+    }
+  ],
+  "assets": {},
+  "presentation": {},
+  "provenance": {},
+  "build": {}
+}

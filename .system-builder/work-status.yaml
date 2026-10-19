@@ -1,0 +1,167 @@
+schema_version: 1
+phase: release_review
+planning: complete
+implementation: in_progress
+selected_step: null
+in_progress: null
+next:
+  recommended: DEV-004
+  title: Komplettera historisk migration och stäng kvarvarande acceptansgrindar
+blocking_issues:
+- id: R-01
+  description: Full historisk 0.1/0.2-migration saknar representativa ursprungliga
+    filer och kontrakt.
+- id: R-02
+  description: Fulla redigerings-, objekt-, effekt- och exportkrav återstår enligt
+    docs/release-review.md.
+- id: R-03
+  description: Safari/iPad/iPhone, WebKit, Office Mac/Windows och full referenssvit
+    saknar acceptans.
+risks_before_implementation:
+- Full open-gate list in docs/release-review.md; no READY transition is authorized
+  by green automation alone.
+validation:
+  last_result: AUTOMATED_PASS_RELEASE_NOT_READY
+  scope: DEV-004–015 implementation and final review; full plan acceptance remains
+    open
+  evidence: .system-builder/final-verification.json
+project_hygiene:
+  last_result: passed
+steps:
+- id: DEV-001
+  title: PPD-kontrakt och fixturer
+  dependencies: []
+  status: completed
+- id: DEV-002
+  title: Tekniska riskspikar
+  dependencies:
+  - DEV-001
+  status: completed
+- id: DEV-003
+  title: Källprojekt och responsivt PWA-skal
+  dependencies:
+  - DEV-002
+  status: completed
+- id: DEV-004
+  title: Domänkärna och säker filimport
+  dependencies:
+  - DEV-003
+  status: blocked
+  implementation_status: delivered_partial
+  verification_status: automated_subset_passed_full_acceptance_open
+  evidence: .system-builder/final-verification.json
+  assessment: docs/release-review.md
+- id: DEV-005
+  title: Första redigeringskedjan
+  dependencies:
+  - DEV-004
+  status: blocked
+  implementation_status: delivered_partial
+  verification_status: automated_subset_passed_full_acceptance_open
+  evidence: .system-builder/final-verification.json
+  assessment: docs/release-review.md
+- id: DEV-006
+  title: Arbetskopior och återställning
+  dependencies:
+  - DEV-005
+  status: blocked
+  implementation_status: delivered_partial
+  verification_status: automated_subset_passed_full_acceptance_open
+  evidence: .system-builder/final-verification.json
+  assessment: docs/release-review.md
+- id: DEV-007
+  title: Fristående HTML och vertikalt delmål
+  dependencies:
+  - DEV-006
+  status: blocked
+  implementation_status: delivered_partial
+  verification_status: automated_subset_passed_full_acceptance_open
+  evidence: .system-builder/final-verification.json
+  assessment: docs/release-review.md
+- id: DEV-008
+  title: Rik text och precisionsredigering
+  dependencies:
+  - DEV-007
+  status: blocked
+  implementation_status: delivered_partial
+  verification_status: automated_subset_passed_full_acceptance_open
+  evidence: .system-builder/final-verification.json
+  assessment: docs/release-review.md
+- id: DEV-009
+  title: Master, teman och komponenter
+  dependencies:
+  - DEV-008
+  status: blocked
+  implementation_status: delivered_partial
+  verification_status: automated_subset_passed_full_acceptance_open
+  evidence: .system-builder/final-verification.json
+  assessment: docs/release-review.md
+- id: DEV-010
+  title: Bilder, tabeller och datadiagram
+  dependencies:
+  - DEV-009
+  status: blocked
+  implementation_status: delivered_partial
+  verification_status: automated_subset_passed_full_acceptance_open
+  evidence: .system-builder/final-verification.json
+  assessment: docs/release-review.md
+- id: DEV-011
+  title: Semantiska diagram, formler och vektor
+  dependencies:
+  - DEV-010
+  status: blocked
+  implementation_status: delivered_partial
+  verification_status: automated_subset_passed_full_acceptance_open
+  evidence: .system-builder/final-verification.json
+  assessment: docs/release-review.md
+- id: DEV-012
+  title: Presentatör och tillgänglighet
+  dependencies:
+  - DEV-011
+  status: blocked
+  implementation_status: delivered_partial
+  verification_status: automated_subset_passed_full_acceptance_open
+  evidence: .system-builder/final-verification.json
+  assessment: docs/release-review.md
+- id: DEV-013
+  title: PDF och bildexport
+  dependencies:
+  - DEV-012
+  status: blocked
+  implementation_status: delivered_partial
+  verification_status: automated_subset_passed_full_acceptance_open
+  evidence: .system-builder/final-verification.json
+  assessment: docs/release-review.md
+- id: DEV-014
+  title: PPTX och exportinsyn
+  dependencies:
+  - DEV-013
+  status: blocked
+  implementation_status: delivered_partial
+  verification_status: automated_subset_passed_full_acceptance_open
+  evidence: .system-builder/final-verification.json
+  assessment: docs/release-review.md
+- id: DEV-015
+  title: Samlad acceptans och releaseberedskap
+  dependencies:
+  - DEV-014
+  status: blocked
+  implementation_status: delivered_partial
+  verification_status: automated_subset_passed_full_acceptance_open
+  evidence: .system-builder/final-verification.json
+  assessment: docs/release-review.md
+completed_steps:
+- DEV-001
+- DEV-002
+- DEV-003
+deferred_verification:
+- check: Actual Safari/iPad hardware and WebKit automation
+  reason: Missing system dependencies; hardware unavailable
+  required_before: release
+- check: PowerPoint Mac/Windows open and edit
+  reason: Office environment unavailable
+  required_before: DEV-014/015 release readiness
+execution_authorization: User authorized consecutive implementation through end of
+  plan, 2026-10-19
+sequence_reviewed_through: DEV-015
+release_readiness: NOT_READY

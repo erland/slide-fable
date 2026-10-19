@@ -1,0 +1,227 @@
+{
+  "result": "PASS",
+  "scope": "PDF and OOXML structure; no Office application test",
+  "checks": [
+    {
+      "name": "desktop:pdf-page-count",
+      "result": "PASS"
+    },
+    {
+      "name": "desktop:pdf-aspect",
+      "result": "PASS"
+    },
+    {
+      "name": "desktop:searchable-swedish",
+      "result": "PASS"
+    },
+    {
+      "name": "desktop:no-blank-pdf-pages",
+      "result": "PASS"
+    },
+    {
+      "name": "desktop:pptx-zip",
+      "result": "PASS"
+    },
+    {
+      "name": "desktop:native-text",
+      "result": "PASS"
+    },
+    {
+      "name": "desktop:native-shape",
+      "result": "PASS"
+    },
+    {
+      "name": "desktop:native-table",
+      "result": "PASS"
+    },
+    {
+      "name": "desktop:effect-raster-and-separate-text",
+      "result": "PASS"
+    },
+    {
+      "name": "desktop:editable-glass-title",
+      "result": "PASS"
+    },
+    {
+      "name": "tablet:pdf-page-count",
+      "result": "PASS"
+    },
+    {
+      "name": "tablet:pdf-aspect",
+      "result": "PASS"
+    },
+    {
+      "name": "tablet:searchable-swedish",
+      "result": "PASS"
+    },
+    {
+      "name": "tablet:no-blank-pdf-pages",
+      "result": "PASS"
+    },
+    {
+      "name": "tablet:pptx-zip",
+      "result": "PASS"
+    },
+    {
+      "name": "tablet:native-text",
+      "result": "PASS"
+    },
+    {
+      "name": "tablet:native-shape",
+      "result": "PASS"
+    },
+    {
+      "name": "tablet:native-table",
+      "result": "PASS"
+    },
+    {
+      "name": "tablet:effect-raster-and-separate-text",
+      "result": "PASS"
+    },
+    {
+      "name": "tablet:editable-glass-title",
+      "result": "PASS"
+    },
+    {
+      "name": "phone:pdf-page-count",
+      "result": "PASS"
+    },
+    {
+      "name": "phone:pdf-aspect",
+      "result": "PASS"
+    },
+    {
+      "name": "phone:searchable-swedish",
+      "result": "PASS"
+    },
+    {
+      "name": "phone:no-blank-pdf-pages",
+      "result": "PASS"
+    },
+    {
+      "name": "phone:pptx-zip",
+      "result": "PASS"
+    },
+    {
+      "name": "phone:native-text",
+      "result": "PASS"
+    },
+    {
+      "name": "phone:native-shape",
+      "result": "PASS"
+    },
+    {
+      "name": "phone:native-table",
+      "result": "PASS"
+    },
+    {
+      "name": "phone:effect-raster-and-separate-text",
+      "result": "PASS"
+    },
+    {
+      "name": "phone:editable-glass-title",
+      "result": "PASS"
+    },
+    {
+      "name": "sample-model-contract",
+      "result": "PASS"
+    },
+    {
+      "name": "pdf:report:title",
+      "result": "PASS"
+    },
+    {
+      "name": "pdf:report:lead",
+      "result": "PASS"
+    },
+    {
+      "name": "pdf:report:wrap",
+      "result": "PASS"
+    },
+    {
+      "name": "pdf:report:title2",
+      "result": "PASS"
+    },
+    {
+      "name": "pdf:report:shape1",
+      "result": "PASS"
+    },
+    {
+      "name": "pdf:report:shape-label",
+      "result": "PASS"
+    },
+    {
+      "name": "pdf:report:table1",
+      "result": "PASS"
+    },
+    {
+      "name": "pdf:report:hint",
+      "result": "PASS"
+    },
+    {
+      "name": "pdf:report:glass",
+      "result": "PASS"
+    },
+    {
+      "name": "pdf:report:glass-title",
+      "result": "PASS"
+    },
+    {
+      "name": "pdf:report:glass-body",
+      "result": "PASS"
+    },
+    {
+      "name": "pptx:report:title",
+      "result": "PASS"
+    },
+    {
+      "name": "pptx:report:lead",
+      "result": "PASS"
+    },
+    {
+      "name": "pptx:report:wrap",
+      "result": "PASS"
+    },
+    {
+      "name": "pptx:report:title2",
+      "result": "PASS"
+    },
+    {
+      "name": "pptx:report:shape1",
+      "result": "PASS"
+    },
+    {
+      "name": "pptx:report:shape-label",
+      "result": "PASS"
+    },
+    {
+      "name": "pptx:report:table1",
+      "result": "PASS"
+    },
+    {
+      "name": "pptx:report:hint",
+      "result": "PASS"
+    },
+    {
+      "name": "pptx:report:glass",
+      "result": "PASS"
+    },
+    {
+      "name": "pptx:report:glass-title",
+      "result": "PASS"
+    },
+    {
+      "name": "pptx:report:glass-body",
+      "result": "PASS"
+    },
+    {
+      "name": "glass-fallback-explicit",
+      "result": "PASS"
+    },
+    {
+      "name": "browser-probes-passed",
+      "result": "PASS"
+    }
+  ],
+  "check_count": 55
+}

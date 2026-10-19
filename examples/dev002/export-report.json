@@ -1,0 +1,156 @@
+[
+  {
+    "format": "pdf",
+    "slideId": "s1",
+    "elementId": "title",
+    "status": "native",
+    "reason": "Measured line fragments; searchable embedded font"
+  },
+  {
+    "format": "pdf",
+    "slideId": "s1",
+    "elementId": "lead",
+    "status": "native",
+    "reason": "Measured line fragments; searchable embedded font"
+  },
+  {
+    "format": "pdf",
+    "slideId": "s1",
+    "elementId": "wrap",
+    "status": "native",
+    "reason": "Measured line fragments; searchable embedded font"
+  },
+  {
+    "format": "pdf",
+    "slideId": "s2",
+    "elementId": "shape1",
+    "status": "native",
+    "reason": ""
+  },
+  {
+    "format": "pdf",
+    "slideId": "s2",
+    "elementId": "table1",
+    "status": "native",
+    "reason": "Text and cell vectors"
+  },
+  {
+    "format": "pdf",
+    "slideId": "s2",
+    "elementId": "title2",
+    "status": "native",
+    "reason": "Measured line fragments; searchable embedded font"
+  },
+  {
+    "format": "pdf",
+    "slideId": "s2",
+    "elementId": "shape-label",
+    "status": "native",
+    "reason": "Measured line fragments; searchable embedded font"
+  },
+  {
+    "format": "pdf",
+    "slideId": "s2",
+    "elementId": "hint",
+    "status": "native",
+    "reason": "Measured line fragments; searchable embedded font"
+  },
+  {
+    "format": "pdf",
+    "slideId": "s3",
+    "elementId": "glass",
+    "status": "rasterized",
+    "reason": "Spike effect approximation; not general backdrop parity"
+  },
+  {
+    "format": "pdf",
+    "slideId": "s3",
+    "elementId": "glass-title",
+    "status": "native",
+    "reason": "Measured line fragments; searchable embedded font"
+  },
+  {
+    "format": "pdf",
+    "slideId": "s3",
+    "elementId": "glass-body",
+    "status": "native",
+    "reason": "Measured line fragments; searchable embedded font"
+  },
+  {
+    "format": "pptx",
+    "slideId": "s1",
+    "elementId": "title",
+    "status": "native",
+    "reason": "Measured lines as separate textboxes; font substitution possible in Office"
+  },
+  {
+    "format": "pptx",
+    "slideId": "s1",
+    "elementId": "lead",
+    "status": "native",
+    "reason": "Measured lines as separate textboxes; font substitution possible in Office"
+  },
+  {
+    "format": "pptx",
+    "slideId": "s1",
+    "elementId": "wrap",
+    "status": "native",
+    "reason": "Measured lines as separate textboxes; font substitution possible in Office"
+  },
+  {
+    "format": "pptx",
+    "slideId": "s2",
+    "elementId": "shape1",
+    "status": "native",
+    "reason": ""
+  },
+  {
+    "format": "pptx",
+    "slideId": "s2",
+    "elementId": "table1",
+    "status": "native",
+    "reason": "Native OOXML table"
+  },
+  {
+    "format": "pptx",
+    "slideId": "s2",
+    "elementId": "title2",
+    "status": "native",
+    "reason": "Measured lines as separate textboxes; font substitution possible in Office"
+  },
+  {
+    "format": "pptx",
+    "slideId": "s2",
+    "elementId": "shape-label",
+    "status": "native",
+    "reason": "Measured lines as separate textboxes; font substitution possible in Office"
+  },
+  {
+    "format": "pptx",
+    "slideId": "s2",
+    "elementId": "hint",
+    "status": "native",
+    "reason": "Measured lines as separate textboxes; font substitution possible in Office"
+  },
+  {
+    "format": "pptx",
+    "slideId": "s3",
+    "elementId": "glass",
+    "status": "rasterized",
+    "reason": "Spike effect approximation; text separately editable"
+  },
+  {
+    "format": "pptx",
+    "slideId": "s3",
+    "elementId": "glass-title",
+    "status": "native",
+    "reason": "Measured lines as separate textboxes; font substitution possible in Office"
+  },
+  {
+    "format": "pptx",
+    "slideId": "s3",
+    "elementId": "glass-body",
+    "status": "native",
+    "reason": "Measured lines as separate textboxes; font substitution possible in Office"
+  }
+]

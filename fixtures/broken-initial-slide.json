@@ -1,0 +1,124 @@
+{
+  "format": "ppd",
+  "schemaVersion": "0.3.1",
+  "document": {
+    "id": "doc-1",
+    "title": "Slide Fable – svenska tecken åäö",
+    "canvas": {
+      "width": 1600,
+      "height": 900,
+      "unit": "logical"
+    },
+    "revision": 1,
+    "defaultMasterId": "m1",
+    "defaultLayoutId": "l1",
+    "featureRequirements": [
+      "ppd.core"
+    ]
+  },
+  "theme": {
+    "id": "theme-1"
+  },
+  "masters": [
+    {
+      "id": "m1",
+      "name": "Grundmaster",
+      "layouts": [
+        {
+          "id": "l1",
+          "name": "Titel",
+          "placeholders": [
+            {
+              "id": "ph1",
+              "role": "title",
+              "geometry": {
+                "x": 80,
+                "y": 80,
+                "width": 1200,
+                "height": 120
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "components": [],
+  "slides": [
+    {
+      "id": "s1",
+      "content": {
+        "blocks": [
+          {
+            "id": "title",
+            "kind": "text",
+            "text": {
+              "paragraphs": [
+                {
+                  "id": "p1",
+                  "runs": [
+                    {
+                      "text": "Hej ",
+                      "marks": {
+                        "bold": true
+                      }
+                    },
+                    {
+                      "text": "världen!"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "view": {
+        "elements": [
+          {
+            "id": "text-1",
+            "type": "text",
+            "name": "Rubrik",
+            "contentRef": "title#text",
+            "geometry": {
+              "x": 80,
+              "y": 80,
+              "width": 1200,
+              "height": 120
+            }
+          }
+        ],
+        "accessibilityOrder": [
+          "text-1"
+        ]
+      },
+      "placeholderBindings": [
+        {
+          "placeholderId": "ph1",
+          "contentRef": "title"
+        }
+      ],
+      "delivery": {
+        "speakerNotes": "Bara för talaren",
+        "fragments": [
+          {
+            "elementId": "text-1",
+            "order": 1
+          }
+        ]
+      }
+    }
+  ],
+  "assets": {},
+  "presentation": {
+    "initialSlideId": "missing"
+  },
+  "provenance": {
+    "privacyProfile": "full"
+  },
+  "extensions": {
+    "org.slidefable": {
+      "note": "Bevara mig utan tolkning"
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "reference/README.md": "5ac28840a0260ebe1a44ca194c1748f6558189bf393eed45b6adc35832678713",
+  "reference/example.ppd.json": "84794f057a7fa79fa537c6e7e586e909ec5447c6648a55da0011b81058b2f52b",
+  "reference/ppd.schema.json": "64f04f661a045656fd010527aa44ed894dc7285a50da8ac33cfc7387faf9f582",
+  "reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md": "1cb9d2e5fd9b7aba9933b7d428eaf56c94643a8737b34bf6d14650b6e06361e1",
+  "reference/presentationsformat_forslag_v0_3.md": "35aa822059b75de81dc7ca3f2bd71f8e3b0fee0d793b936265a6c4f41eed8c5d",
+  "reference/validate_example.py": "050f1ad9b9fb122443b2862aa9ac591ebdb8c8d7b9d411f42874c27ad1055b0d"
+}

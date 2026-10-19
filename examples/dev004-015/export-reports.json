@@ -1,0 +1,176 @@
+{
+  "pdf": {
+    "format": "pdf",
+    "profile": "editable-first",
+    "sourceHash": "4b9d916be2ff64118e4093d94e7ab8932d0471c0bac66627e36be86bb58a1bca",
+    "objects": [
+      {
+        "slideId": "slide-2c290049-1a05-49ac-986e-94d090e4fa42",
+        "elementId": "text-bb71bc3c-0ba7-442c-9e86-0195aa063ff0",
+        "status": "native",
+        "reason": "Separat redigerbart objekt"
+      },
+      {
+        "slideId": "slide-2c290049-1a05-49ac-986e-94d090e4fa42",
+        "elementId": "text-1f0d1063-a7bc-4698-ab8e-bb40bc978f0c",
+        "status": "native",
+        "reason": "Separat redigerbart objekt"
+      },
+      {
+        "slideId": "slide-2c290049-1a05-49ac-986e-94d090e4fa42",
+        "elementId": "table-60805d19-4f7d-42ba-b68d-264b2c371f3f",
+        "status": "native",
+        "reason": "Separat redigerbart objekt"
+      },
+      {
+        "slideId": "slide-2c290049-1a05-49ac-986e-94d090e4fa42",
+        "elementId": "chart-2da2f747-bc72-41cf-b9b9-17b25d97e149",
+        "status": "rasterized",
+        "reason": "Visuell fallback; källinformation i PPD/källbilaga"
+      },
+      {
+        "slideId": "slide-2c290049-1a05-49ac-986e-94d090e4fa42",
+        "elementId": "semanticDiagram-fff7e9e9-940c-4081-b876-1fcc03420099",
+        "status": "rasterized",
+        "reason": "Visuell fallback; källinformation i PPD/källbilaga"
+      },
+      {
+        "slideId": "slide-2c290049-1a05-49ac-986e-94d090e4fa42",
+        "elementId": "equation-8e667b1a-0160-415d-b277-efbce12bdbbb",
+        "status": "rasterized",
+        "reason": "Visuell fallback; källinformation i PPD/källbilaga"
+      },
+      {
+        "slideId": "slide-2c290049-1a05-49ac-986e-94d090e4fa42",
+        "elementId": "vectorPath-1a83d468-9b7c-436d-9662-9d280f9383b2",
+        "status": "rasterized",
+        "reason": "Visuell fallback; källinformation i PPD/källbilaga"
+      },
+      {
+        "slideId": "slide-0efe4c13-965a-4b4a-bae6-3e8d80b8e82a",
+        "elementId": "text-becd8f82-b19d-4486-8d22-16d2f43053bc",
+        "status": "native",
+        "reason": "Separat redigerbart objekt"
+      },
+      {
+        "slideId": "slide-0efe4c13-965a-4b4a-bae6-3e8d80b8e82a",
+        "elementId": "text-1b16665a-a16d-42bf-a01d-7ba12bfb9449",
+        "status": "native",
+        "reason": "Separat redigerbart objekt"
+      },
+      {
+        "slideId": "slide-d57692a1-c546-497f-b0dd-7214da744878",
+        "elementId": "text-b2dff615-ade0-41a2-b949-72d26644d92c",
+        "status": "native",
+        "reason": "Separat redigerbart objekt"
+      },
+      {
+        "slideId": "slide-d57692a1-c546-497f-b0dd-7214da744878",
+        "elementId": "text-d4f2935f-7d27-45cc-ba17-51e0a25dba4f",
+        "status": "native",
+        "reason": "Separat redigerbart objekt"
+      },
+      {
+        "slideId": "slide-d57692a1-c546-497f-b0dd-7214da744878",
+        "elementId": "shape-0689719f-dd48-4a5d-a94c-7a9f3869670c",
+        "status": "native",
+        "reason": "Separat redigerbart objekt"
+      },
+      {
+        "slideId": "slide-d57692a1-c546-497f-b0dd-7214da744878",
+        "elementId": "text-b30b5716-6508-4851-a14a-90fdb6caa210",
+        "status": "native",
+        "reason": "Separat redigerbart objekt"
+      }
+    ],
+    "warnings": []
+  },
+  "pptx": {
+    "format": "pptx",
+    "profile": "editable-first",
+    "sourceHash": "4b9d916be2ff64118e4093d94e7ab8932d0471c0bac66627e36be86bb58a1bca",
+    "objects": [
+      {
+        "slideId": "slide-2c290049-1a05-49ac-986e-94d090e4fa42",
+        "elementId": "text-bb71bc3c-0ba7-442c-9e86-0195aa063ff0",
+        "status": "native",
+        "reason": "Separat redigerbart objekt"
+      },
+      {
+        "slideId": "slide-2c290049-1a05-49ac-986e-94d090e4fa42",
+        "elementId": "text-1f0d1063-a7bc-4698-ab8e-bb40bc978f0c",
+        "status": "native",
+        "reason": "Separat redigerbart objekt"
+      },
+      {
+        "slideId": "slide-2c290049-1a05-49ac-986e-94d090e4fa42",
+        "elementId": "table-60805d19-4f7d-42ba-b68d-264b2c371f3f",
+        "status": "native",
+        "reason": "Separat redigerbart objekt"
+      },
+      {
+        "slideId": "slide-2c290049-1a05-49ac-986e-94d090e4fa42",
+        "elementId": "chart-2da2f747-bc72-41cf-b9b9-17b25d97e149",
+        "status": "native",
+        "reason": "Separat redigerbart objekt"
+      },
+      {
+        "slideId": "slide-2c290049-1a05-49ac-986e-94d090e4fa42",
+        "elementId": "semanticDiagram-fff7e9e9-940c-4081-b876-1fcc03420099",
+        "status": "native",
+        "reason": "Separat redigerbart objekt"
+      },
+      {
+        "slideId": "slide-2c290049-1a05-49ac-986e-94d090e4fa42",
+        "elementId": "equation-8e667b1a-0160-415d-b277-efbce12bdbbb",
+        "status": "rasterized",
+        "reason": "Komponerad visuell fallback; källan medföljer PPD/källmetadata."
+      },
+      {
+        "slideId": "slide-2c290049-1a05-49ac-986e-94d090e4fa42",
+        "elementId": "vectorPath-1a83d468-9b7c-436d-9662-9d280f9383b2",
+        "status": "rasterized",
+        "reason": "Komponerad visuell fallback; källan medföljer PPD/källmetadata."
+      },
+      {
+        "slideId": "slide-0efe4c13-965a-4b4a-bae6-3e8d80b8e82a",
+        "elementId": "text-becd8f82-b19d-4486-8d22-16d2f43053bc",
+        "status": "native",
+        "reason": "Separat redigerbart objekt"
+      },
+      {
+        "slideId": "slide-0efe4c13-965a-4b4a-bae6-3e8d80b8e82a",
+        "elementId": "text-1b16665a-a16d-42bf-a01d-7ba12bfb9449",
+        "status": "native",
+        "reason": "Separat redigerbart objekt"
+      },
+      {
+        "slideId": "slide-d57692a1-c546-497f-b0dd-7214da744878",
+        "elementId": "text-b2dff615-ade0-41a2-b949-72d26644d92c",
+        "status": "native",
+        "reason": "Separat redigerbart objekt"
+      },
+      {
+        "slideId": "slide-d57692a1-c546-497f-b0dd-7214da744878",
+        "elementId": "text-d4f2935f-7d27-45cc-ba17-51e0a25dba4f",
+        "status": "native",
+        "reason": "Separat redigerbart objekt"
+      },
+      {
+        "slideId": "slide-d57692a1-c546-497f-b0dd-7214da744878",
+        "elementId": "shape-0689719f-dd48-4a5d-a94c-7a9f3869670c",
+        "status": "native",
+        "reason": "Separat redigerbart objekt"
+      },
+      {
+        "slideId": "slide-d57692a1-c546-497f-b0dd-7214da744878",
+        "elementId": "text-b30b5716-6508-4851-a14a-90fdb6caa210",
+        "status": "native",
+        "reason": "Separat redigerbart objekt"
+      }
+    ],
+    "warnings": [
+      "Typsnitt bäddas inte in i PPTX. Mottagarens PowerPoint kan ersätta dem."
+    ]
+  }
+}

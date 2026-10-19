@@ -1,0 +1,17 @@
+schema_version: 1
+id: slide-fable
+name: Slide Fable
+version: 0.5.0
+mode: CREATE
+delivery: zip
+complexity: large
+language: sv-SE
+source_format: Slide Fable PPD 0.3.1 (source proposal 0.3.0)
+state_path: .system-builder/work-status.yaml
+implemented: false
+contract_reference_implemented: true
+technical_spike_available: true
+pwa_shell_implemented: true
+product_acceptance: not_complete
+editor_implementation_available: true
+release_readiness: NOT_READY

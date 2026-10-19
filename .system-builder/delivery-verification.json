@@ -1,0 +1,14 @@
+{
+  "result": "PASS",
+  "checks": [
+    "CRC and safe archive paths",
+    "all payload SHA-256 match",
+    "extracted project lint",
+    "extracted project 12 unit tests",
+    "extracted project typecheck/build",
+    "fresh build byte matches delivered preview"
+  ],
+  "dependency_note": "Existing exact locked node_modules reused via temporary symlink; dependencies are not included in ZIP",
+  "payload_files": 198,
+  "release_readiness": "NOT_READY"
+}
