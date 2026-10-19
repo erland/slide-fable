@@ -13,6 +13,21 @@ async function model(){return page.evaluate(async()=>(await import('/src/core/ed
 async function api(fn,arg){return page.evaluate(async({source,arg})=>{const store=(await import('/src/core/editor.ts')).editorStore;return new Function('store','arg',source)(store,arg);},{source:fn,arg});}
 try{
  await page.goto('http://127.0.0.1:5178/');await page.getByRole('button',{name:'Lägg till bild',exact:true}).waitFor();
+ const starterTexts=page.locator('.editor-canvas-pane .stage .render-element.type-text');
+ assert.ok(await starterTexts.count()>=2,'New presentation must have title and body text');
+ for(const expectedSize of ['72px','36px']){
+  const sizes=await starterTexts.evaluateAll(els=>els.map(el=>getComputedStyle(el).fontSize));
+  const index=sizes.indexOf(expectedSize);
+  assert.ok(index>=0,'Could not locate template text at '+expectedSize);
+  const text=starterTexts.nth(index);
+  const before=await text.evaluate(el=>({size:getComputedStyle(el).fontSize,family:getComputedStyle(el).fontFamily}));
+  assert.equal(before.size,expectedSize,'Template must expose expected typography');
+  await text.dblclick();
+  const during=await page.locator('.canvas-inline-editor .ProseMirror').evaluate(el=>({size:getComputedStyle(el).fontSize,family:getComputedStyle(el).fontFamily}));
+  assert.deepEqual(during,before,'Inline editor must use effective template typography');
+  await page.getByRole('button',{name:'Klar',exact:true}).click();
+ }
+ pass('SF-UX-04:initial-title-and-body-preserve-font-size');
  const pane=page.locator('.editor-canvas-pane');const paneWidth=()=>pane.evaluate(el=>el.getBoundingClientRect().width);
  const baseWidth=await paneWidth();
  await page.getByRole('button',{name:'Dölj bilder',exact:true}).click();
