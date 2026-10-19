@@ -59,6 +59,15 @@ try{
  await inline.getByRole('button',{name:'Klar'}).click();
  assert.ok(JSON.stringify(await model()).includes('Redigerad direkt på canvas'));
  pass('SF-UX-04:inline-rich-text-edit');
+ const dragEl=page.locator('.editor-canvas-pane .stage [data-element-id="'+newTextId+'"]');
+ const startGeometry=(await model()).slides[2].view.elements.find(e=>e.id===newTextId).geometry;
+ const dragBounds=await dragEl.boundingBox();assert.ok(dragBounds,'Text object must be visible');
+ await page.mouse.move(dragBounds.x+dragBounds.width/2,dragBounds.y+dragBounds.height/2);
+ await page.mouse.down();await page.mouse.move(dragBounds.x+dragBounds.width/2+35,dragBounds.y+dragBounds.height/2+25,{steps:5});await page.mouse.up();
+ const movedGeometry=(await model()).slides[2].view.elements.find(e=>e.id===newTextId).geometry;
+ assert.ok(movedGeometry.x!==startGeometry.x||movedGeometry.y!==startGeometry.y,'Drag must update element geometry');
+ pass('SF-UX-05:drag-selected-object');
+
 
  await page.getByRole('button',{name:'Text',exact:true}).click();const edit=page.getByRole('textbox',{name:'Redigera objektets text'});await edit.fill('Svensk berättelse ÅÄÖ');await page.getByRole('button',{name:'Fetstil',exact:true}).click();await edit.press('End');await edit.type(' med rik text');await page.getByRole('button',{name:'Bild',exact:true}).click();await page.getByRole('button',{name:'Visa anteckningar',exact:true}).click();await page.getByLabel('Talaranteckningar',{exact:true}).fill('HEMLIG ANTECKNING');await page.getByLabel('Talaranteckningar',{exact:true}).press('Tab');assert.ok(JSON.stringify(await model()).includes('Svensk berättelse'));pass('DEV008:rich-text-edit-and-save');
  await page.getByRole('status').filter({hasText:'Arbetskopia sparad'}).waitFor();const before=await model();await page.reload();await page.getByRole('button',{name:/Min presentation ·/}).click();assert.deepEqual(await model(),before);pass('DEV006:reload-explicit-recovery');
