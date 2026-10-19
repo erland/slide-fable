@@ -23,7 +23,7 @@ steps:
     status: completed
   - id: SF-UX-05
     title: Objektmanipulation
-    status: in_progress
+    status: completed
   - id: SF-UX-06
     title: Responsivitet och tillgänglighet
-    status: pending
+    status: in_progress
