@@ -26,6 +26,11 @@ try{
  assert.equal(await page.locator('#slide-filmstrip').isVisible(),true);
  assert.equal(await page.locator('.properties').isVisible(),true);
  pass('SF-UX-01:desktop-panel-toggle-and-canvas-growth');
+ const fitMeasurements=await page.evaluate(()=>{const viewport=document.querySelector('.canvas-scroll'),space=document.querySelector('.stage-space');if(!viewport||!space)throw Error('Canvas elements missing');return {vw:viewport.clientWidth,vh:viewport.clientHeight,sw:space.getBoundingClientRect().width,sh:space.getBoundingClientRect().height};});
+ assert.ok(fitMeasurements.sw<=fitMeasurements.vw+1,'Fit must respect viewport width');
+ assert.ok(fitMeasurements.sh<=fitMeasurements.vh+1,'Fit must respect viewport height');
+ pass('SF-UX-02:fit-both-dimensions');
+
  await page.setViewportSize({width:768,height:1024});
  await page.getByRole('button',{name:'Arbetsyta',exact:true}).click();
  assert.equal(await pane.isVisible(),true);
