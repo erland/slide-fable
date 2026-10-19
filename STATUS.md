@@ -7,3 +7,5 @@
 **Kvar:** Manuell visuell granskning av canvas och paneler på desktop och surfplatta. `package-lock.json` saknar `integrity` för `svg-pathdata@8.0.0`; npm CI-installationen har passerat, men kontrollsumman ska hämtas från npm-registret och inte konstrueras manuellt.
 
 **Nästa steg:** SF-UX-01-visual-review. Fortsätt därefter till SF-UX-02 (zoom som tar hänsyn till både höjd och bredd).
+
+**SF-UX-02:** Automatisk anpassning tar nu hänsyn till både tillgänglig bredd och höjd. Webbläsartest tillagt; verifiering av ny commit inväntas.
