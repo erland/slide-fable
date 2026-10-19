@@ -52,3 +52,6 @@
 .ribbon-actions{display:flex;gap:6px;align-items:center;overflow-x:auto;white-space:nowrap;padding:5px 12px;min-height:46px;box-sizing:border-box}
 .ribbon-actions button{min-height:34px;flex-shrink:0;font-size:12px}
 @media(max-width:900px){.ribbon-tabs{padding:4px 7px 0}.ribbon-tabs button{padding:6px 12px}.ribbon-panel{min-height:40px}.ribbon-actions{min-height:40px}}
+
+/* SF-UX-09: contextual commands stay compact; secondary commands open on demand. */
+.ribbon-dropdown{position:relative;flex-shrink:0}.ribbon-dropdown>summary{cursor:pointer;list-style:none;min-height:34px;display:flex;align-items:center;padding:5px 10px;border:1px solid var(--line);border-radius:6px;background:var(--panel);font-size:12px}.ribbon-dropdown>summary::-webkit-details-marker{display:none}.ribbon-dropdown-items{position:absolute;top:calc(100% + 4px);right:0;display:flex;flex-direction:column;gap:4px;min-width:160px;padding:8px;background:var(--panel);border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 20px #0002;z-index:40}.ribbon-dropdown-items button{text-align:left}
