@@ -67,6 +67,20 @@ try{
  const movedGeometry=(await model()).slides[2].view.elements.find(e=>e.id===newTextId).geometry;
  assert.ok(movedGeometry.x!==startGeometry.x||movedGeometry.y!==startGeometry.y,'Drag must update element geometry');
  pass('SF-UX-05:drag-selected-object');
+ const resizeHandle=page.getByRole('button',{name:'Ändra objektstorlek'});
+ const beforeResize=(await model()).slides[2].view.elements.find(e=>e.id===newTextId).geometry;
+ const handleBounds=await resizeHandle.boundingBox();assert.ok(handleBounds,'Resize handle must be visible');
+ await page.mouse.move(handleBounds.x+handleBounds.width/2,handleBounds.y+handleBounds.height/2);
+ await page.mouse.down();await page.mouse.move(handleBounds.x+handleBounds.width/2+48,handleBounds.y+handleBounds.height/2+32,{steps:5});await page.mouse.up();
+ const afterResize=(await model()).slides[2].view.elements.find(e=>e.id===newTextId).geometry;
+ assert.ok(afterResize.width>beforeResize.width&&afterResize.height>beforeResize.height,'Resize must increase width and height');
+ pass('SF-UX-05:resize-handle-updates-geometry');
+ const firstId=(await model()).slides[2].view.elements[0].id;
+ await page.locator('.editor-canvas-pane .stage [data-element-id="'+newTextId+'"]').click();
+ await page.locator('.editor-canvas-pane .stage [data-element-id="'+firstId+'"]').click({modifiers:['Shift']});
+ assert.equal(await page.locator('.editor-canvas-pane .stage [data-selected="true"]').count(),2,'Shift-click must retain both selected elements');
+ pass('SF-UX-05:shift-multiselect');
+
 
 
  await page.getByRole('button',{name:'Text',exact:true}).click();const edit=page.getByRole('textbox',{name:'Redigera objektets text'});await edit.fill('Svensk berättelse ÅÄÖ');await page.getByRole('button',{name:'Fetstil',exact:true}).click();await edit.press('End');await edit.type(' med rik text');await page.getByRole('button',{name:'Bild',exact:true}).click();await page.getByRole('button',{name:'Visa anteckningar',exact:true}).click();await page.getByLabel('Talaranteckningar',{exact:true}).fill('HEMLIG ANTECKNING');await page.getByLabel('Talaranteckningar',{exact:true}).press('Tab');assert.ok(JSON.stringify(await model()).includes('Svensk berättelse'));pass('DEV008:rich-text-edit-and-save');
