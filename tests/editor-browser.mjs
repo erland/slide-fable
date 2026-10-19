@@ -102,6 +102,7 @@ try{
  await ribbon.getByRole('tab',{name:'Infoga'}).click();
  assert.equal(await toolbar.getByRole('button',{name:'Text',exact:true}).isVisible(),true);
  pass('SF-UX-08:ribbon-tabs');
+ await page.evaluate(async()=> (await import('/src/core/editor.ts')).editorStore.select([]));
  assert.equal(await ribbon.getByRole('tab',{name:'Objekt'}).count(),0,'Contextual tab must be absent without selection');
  await page.locator('.editor-canvas-pane .stage .render-element.type-text').first().click();
  assert.equal(await ribbon.getByRole('tab',{name:'Objekt'}).count(),1,'Selecting an object must show contextual tab');
