@@ -16,14 +16,14 @@ steps:
     depends_on: [SF-UX-01]
   - id: SF-UX-03
     title: Kompaktare verktygsrad
-    status: implemented_verification_pending
+    status: completed
     depends_on: [SF-UX-02]
   - id: SF-UX-04
     title: Direktredigering av text
-    status: pending
+    status: completed
   - id: SF-UX-05
     title: Objektmanipulation
-    status: pending
+    status: in_progress
   - id: SF-UX-06
     title: Responsivitet och tillgänglighet
     status: pending
