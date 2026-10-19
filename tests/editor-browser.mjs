@@ -70,6 +70,11 @@ try{
  const newTextId=(await model()).slides[2].view.elements.at(-1).id;
  await page.locator('.editor-canvas-pane .stage [data-element-id="'+newTextId+'"]').dblclick();
  const inline=page.locator('.canvas-inline-editor');
+ const originalText=page.locator('.editor-canvas-pane .stage [data-element-id="'+newTextId+'"]');
+ const typographyBefore=await originalText.evaluate(el=>({size:getComputedStyle(el).fontSize,font:getComputedStyle(el).fontFamily}));
+ const typographyDuring=await inline.locator('.ProseMirror').evaluate(el=>({size:getComputedStyle(el).fontSize,font:getComputedStyle(el).fontFamily}));
+ assert.equal(typographyDuring.size,typographyBefore.size,'Inline editor must preserve text font size');
+ assert.equal(typographyDuring.font,typographyBefore.font,'Inline editor must preserve font family');
  await inline.getByRole('textbox',{name:'Redigera objektets text'}).fill('Redigerad direkt på canvas');
  await inline.getByRole('button',{name:'Klar'}).click();
  assert.ok(JSON.stringify(await model()).includes('Redigerad direkt på canvas'));
