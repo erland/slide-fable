@@ -40,6 +40,15 @@ try{
  assert.equal(await pane.isVisible(),true);
  await page.setViewportSize({width:1440,height:1000});
  pass('SF-UX-01:tablet-panel-navigation');
+ const toolbar=page.locator('.insert-tools');
+ assert.equal(await toolbar.getByRole('button',{name:'Text',exact:true}).isVisible(),true);
+ assert.equal(await toolbar.getByRole('button',{name:'Form',exact:true}).isVisible(),true);
+ assert.equal(await toolbar.getByRole('button',{name:'Bildfil',exact:true}).isVisible(),true);
+ assert.equal(await toolbar.getByRole('button',{name:'Diagram',exact:true}).isVisible(),false);
+ await toolbar.locator('summary',{hasText:'Fler objekt'}).click();
+ assert.equal(await toolbar.getByRole('button',{name:'Diagram',exact:true}).isVisible(),true);
+ await toolbar.locator('summary',{hasText:'Fler objekt'}).click();
+ pass('SF-UX-03:compact-insert-toolbar');
  await page.getByRole('button',{name:'Lägg till bild',exact:true}).click();await page.getByRole('button',{name:'Lägg till bild',exact:true}).click();assert.equal((await model()).slides.length,3);pass('DEV005:create-three-slides');
  await page.getByRole('button',{name:'Form',exact:true}).click();await page.getByLabel('Bredd',{exact:true}).fill('470');await page.getByLabel('Bredd',{exact:true}).press('Enter');assert.equal((await model()).slides[2].view.elements.at(-1).geometry.width,470);await page.getByRole('button',{name:'Ångra',exact:true}).click();assert.equal((await model()).slides[2].view.elements.at(-1).geometry.width,600);await page.getByRole('button',{name:'Gör om',exact:true}).click();pass('DEV005:geometry-and-undo');
  await page.getByRole('button',{name:'Text',exact:true}).click();const edit=page.getByRole('textbox',{name:'Redigera objektets text'});await edit.fill('Svensk berättelse ÅÄÖ');await page.getByRole('button',{name:'Fetstil',exact:true}).click();await edit.press('End');await edit.type(' med rik text');await page.getByRole('button',{name:'Bild',exact:true}).click();await page.getByRole('button',{name:'Visa anteckningar',exact:true}).click();await page.getByLabel('Talaranteckningar',{exact:true}).fill('HEMLIG ANTECKNING');await page.getByLabel('Talaranteckningar',{exact:true}).press('Tab');assert.ok(JSON.stringify(await model()).includes('Svensk berättelse'));pass('DEV008:rich-text-edit-and-save');
