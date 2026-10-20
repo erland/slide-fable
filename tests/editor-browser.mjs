@@ -362,6 +362,31 @@ try{
  await page.evaluate(async id=>{const store=(await import('/src/core/editor.ts')).editorStore;store.updateElement(id,{geometry:{x:70,y:50,width:400,height:180,rotation:0,unit:'logical'}});},textShapeId);
  assert.equal(await shapeNode.locator('.shape-text').innerText(),'Beslut fattat','Shape text follows geometry changes');
  pass('SF-SH-10:editable-shape-text');
+ // SF-SH-12: bound endpoints track named shape ports, including during pointer moves.
+ const connection=await page.evaluate(async()=>{
+  const store=(await import('/src/core/editor.ts')).editorStore;
+  const first=store.add('shape','rect');store.updateElement(first,{geometry:{x:120,y:120,width:150,height:90,rotation:0,unit:'logical'}});
+  const second=store.add('shape','rect');store.updateElement(second,{geometry:{x:520,y:120,width:150,height:90,rotation:0,unit:'logical'}});
+  const line=store.add('arrow');store.updateElement(line,{startAnchor:{elementId:first,port:'right'},endAnchor:{elementId:second,port:'left'}});
+  return {first,second,line};
+ });
+ const connectionNode=page.locator('.stage [data-element-id="'+connection.line+'"] svg line');
+ const lineStart=()=>connectionNode.getAttribute('x1');
+ const originalX=await lineStart();
+ const firstNode=page.locator('.stage [data-element-id="'+connection.first+'"]');
+ const firstBox=await firstNode.boundingBox();assert.ok(firstBox);
+ await page.mouse.move(firstBox.x+30,firstBox.y+30);
+ await page.mouse.down();
+ await page.mouse.move(firstBox.x+70,firstBox.y+60,{steps:5});
+ assert.notEqual(await lineStart(),originalX,'Connected line follows shape during drag, before mouseup');
+ await page.mouse.up();
+ assert.notEqual(await lineStart(),originalX,'Connected line remains attached after drop');
+ const afterConnect=(await model()).slides.flatMap(s=>s.view.elements).find(e=>e.id===connection.line);
+ assert.equal(afterConnect.startAnchor.elementId,connection.first);
+ assert.equal(afterConnect.startAnchor.port,'right');
+ assert.equal(afterConnect.endAnchor.port,'left');
+ pass('SF-SH-12:attached-line-follows-shape-live');
+
 
 
 
