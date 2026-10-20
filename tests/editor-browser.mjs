@@ -294,6 +294,20 @@ try{
  assert.notEqual(arrow.extensions.slideFableLinePoints.start.y,arrow.extensions.slideFableLinePoints.end.y,'Arrow must become diagonal');
  assert.equal(await page.locator('.stage [data-element-id="'+endpointId+'"] svg polygon').count(),1,'Arrowhead still rendered');
  pass('SF-SH-03:movable-line-endpoint-and-arrowhead');
+ // Background clicks should clear selection, including the slide surface itself.
+ const selection=()=>page.evaluate(async()=>[...(await import('/src/core/editor.ts')).editorStore.getSnapshot().selected]);
+ assert.deepEqual(await selection(),[endpointId],'Arrow selected before canvas deselection');
+ await page.locator('.stage .slide-render').click({position:{x:8,y:8}});
+ assert.deepEqual(await selection(),[],'Clicking blank slide background clears selection');
+ assert.equal(await page.locator('.line-endpoint-handle').count(),0,'Deselect hides endpoint handles');
+ await page.evaluate(async id=>(await import('/src/core/editor.ts')).editorStore.select([id]),endpointId);
+ await page.locator('.canvas-scroll').click({position:{x:3,y:3}});
+ assert.deepEqual(await selection(),[],'Clicking surrounding canvas clears selection');
+ await page.evaluate(async id=>(await import('/src/core/editor.ts')).editorStore.select([id]),endpointId);
+ await page.locator('.line-endpoint-handle').first().click();
+ assert.deepEqual(await selection(),[endpointId],'Clicking an endpoint handle must preserve selection');
+ pass('SF-SH-08:canvas-background-deselect');
+
  for(const [name,width,height] of [['desktop',1440,1000],['tablet',768,1024],['phone',390,844]]){
   await page.setViewportSize({width,height});
   await page.getByRole('tab',{name:'Visa'}).click();
