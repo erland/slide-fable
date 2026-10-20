@@ -108,7 +108,7 @@
 
 /* SF-UX-23: compact phone header without hiding file/edit commands. */
 @media(max-width:520px){
- .editor-header{gap:6px;padding:7px 10px;align-items:center}
+ .editor-header{gap:4px;padding:5px 10px;align-items:center}
  .editor-header .brand{font-size:17px;flex:1 1 auto}
  .editor-header .brand img{width:26px;height:26px}
  .editor-header .document-title{order:2;flex-basis:100%;line-height:1.2;margin:0;font-size:11px}
