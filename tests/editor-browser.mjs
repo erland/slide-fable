@@ -418,7 +418,7 @@ try{
  assert.ok(acceptanceXml.includes('Beslut'),'Shape text should survive editable PowerPoint export');
  assert.ok(acceptanceXml.includes('0066CC'),'Connection stroke color should survive PowerPoint export');
  assert.ok(acceptanceXml.includes('dash'),'Connection dash pattern should survive PowerPoint export');
- assert.equal(accepted.report.objects.filter(o=>o.status==='native').length,3,'Forms and line remain native editable PPTX objects');
+ assert.equal(accepted.report.objects.filter(o=>[connection.first,connection.second,connection.line].includes(o.elementId)&&o.status==='native').length,3,'Forms and line remain native editable PPTX objects');
  await writeFile(path.join(output,'sf-sh-13-acceptance.pptx'),new Uint8Array(accepted.pptx));
  await page.screenshot({path:path.join(output,'sf-sh-13-shapes-and-connectors.png'),fullPage:true});
  pass('SF-SH-13:combined-shape-text-connector-symbol-pattern-and-editable-PPTX');
