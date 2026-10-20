@@ -2,7 +2,7 @@ import {useEffect,useRef,useState,useSyncExternalStore,type PointerEvent} from '
 import {editorStore as store} from '../core/editor';
 import {resizeRect,resizeDirections,lineBounds,moveEndpoint,type ResizeDirection} from '../core/geometry';
 import {markerGeometry,markerSvgPoints,endMarkers} from '../core/endMarkers';
-import {resolveLinePoints,nearestPort,portPoint,ports} from '../core/connectors';
+import {resolveLinePoints,nearestPort} from '../core/connectors';
 import {box,copy,createDocument,effective,layoutOf,masterOf,plain,textOf,uid,type D} from '../core/model';
 import {bytesHash,importDocument,validateFull} from '../core/contract';
 import {deleteDraft,listDrafts,saveDraft,type Draft} from '../core/persistence';
@@ -126,7 +126,7 @@ export function App(){
   if(!event.isPrimary||event.button!==0||state.readOnly||safety.locked||safety.busy)return;
   const source=slide.view.elements.find((e:D)=>e.id===id);
   if(!source||source.locked)return;
-  const b=effective(doc,slide,source).geometry,stored=source.extensions?.slideFableLinePoints;
+  const b=effective(doc,slide,source).geometry;
   const existing=resolveLinePoints(source,slide.view.elements.filter((item:D)=>item.id!==id).map((item:D)=>({id:item.id,geometry:effective(doc,slide,item).geometry})));
   const start=existing.start,end=existing.end;
   const x=event.clientX,y=event.clientY,target=event.currentTarget as HTMLElement;
