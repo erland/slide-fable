@@ -130,3 +130,11 @@ ux_mobile_toolbar:
   previous_step_sf_ux_22: merged_and_ci_green
   coverage: [mobile_header_height, document_menu_reachability]
   verification: pending_ci
+
+shape_editing:
+  current: SF-SH-01
+  state: implemented_verification_pending
+  kind: functional_foundation
+  verification: pending_ci
+  next_after_success: SF-SH-02
+  constraints: preserve_wire_format_and_existing_resize_behavior
