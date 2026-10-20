@@ -86,3 +86,10 @@ ux_command_catalog_expansion:
   commands_added: [newSlide, line, arrow, shape]
   verification: pending_ci
   next_after_success: consolidate_command_metadata_and_tab_placement
+
+ux_declarative_tabs:
+  current: SF-UX-18
+  state: implemented_verification_pending
+  previous_step_sf_ux_17: pass_ci_runs_39351920574_39351887595
+  verification: pending_ci
+  next_after_success: consolidate_specialized_ribbon_groups
