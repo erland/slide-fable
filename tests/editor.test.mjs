@@ -17,3 +17,20 @@ test('stale CAS completion never acknowledges newer edits',()=>{
  assert.equal(s.markPersisted(stale),false);assert.equal(s.getSnapshot().dirty,true);assert.equal(updateSafety.prepare(),false);
  assert.equal(s.markPersisted(s.getSnapshot().doc),true);assert.equal(s.getSnapshot().dirty,false);
 });
+
+
+test('moveSlide ignores unknown IDs and boundaries without modifying revision, history or update guard',()=>{
+ const s=new EditorStore();updateSafety.setDirty(false);s.addSlide('blank');s.markPersisted(s.getSnapshot().doc);
+ const before=s.getSnapshot();const original=JSON.stringify(before.doc);const first=before.doc.slides[0].id;
+ s.moveSlide('slide-does-not-exist',1);s.moveSlide(first,-1);s.moveSlide(first,0);s.moveSlide(first,Number.NaN);
+ assert.equal(s.getSnapshot().doc,before.doc);assert.equal(JSON.stringify(s.getSnapshot().doc),original);
+ assert.equal(s.getSnapshot().dirty,false);assert.equal(updateSafety.getSnapshot().dirty,false);
+ assert.equal(s.getSnapshot().undo,before.undo);
+});
+test('moveSlide reorders valid slides and supports undo without losing references',()=>{
+ const s=new EditorStore();s.addSlide('blank');const first=s.getSnapshot().doc.slides[0].id;
+ const second=s.getSnapshot().doc.slides[1].id;const rev=s.getSnapshot().doc.document.revision;
+ s.moveSlide(first,1);assert.deepEqual(s.getSnapshot().doc.slides.map(x=>x.id),[second,first]);
+ assert.equal(s.getSnapshot().doc.document.revision,rev+1);validateCore(s.getSnapshot().doc);
+ s.undo();assert.deepEqual(s.getSnapshot().doc.slides.map(x=>x.id),[first,second]);validateCore(s.getSnapshot().doc);
+});
