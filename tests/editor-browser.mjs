@@ -36,8 +36,8 @@ try{
  pass('SF-UX-14:unified-navigation-hierarchy');
  const pane=page.locator('.editor-canvas-pane');const paneWidth=()=>pane.evaluate(el=>el.getBoundingClientRect().width);
  const baseWidth=await paneWidth();
- assert.equal(await page.locator('.workspace-controls-disclosure').evaluate(el=>el.hasAttribute('open')),false,'Secondary panel controls must be collapsed initially');
  await page.getByRole('tab',{name:'Visa'}).click();
+ assert.equal(await page.locator('.workspace-controls-disclosure').evaluate(el=>el.hasAttribute('open')),false,'Secondary panel controls must be collapsed initially');
  await page.locator('.workspace-controls-disclosure > summary').click();
  await page.getByRole('button',{name:'Dölj bilder',exact:true}).click();
  assert.equal(await page.locator('#slide-filmstrip').isVisible(),false);
