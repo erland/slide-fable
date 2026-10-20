@@ -139,3 +139,6 @@
 
 /* SF-SH-05: compact, responsive formatting controls in Rita. */
 .draw-formatting{display:flex;flex-wrap:wrap;align-items:end;gap:8px;padding:5px 0}.draw-formatting label{display:flex;flex-direction:column;gap:3px;margin:0;font-size:11px;min-width:90px}.draw-formatting input[type=color]{width:54px;min-width:54px}.draw-formatting input[type=number]{width:90px;min-width:75px;padding:6px}
+
+/* Lines and arrows are selected through their endpoint handles, not a bounding rectangle. */
+.stage .render-element[data-selected=true]:is(.type-line,.type-arrow,.type-connector){outline:none;box-shadow:none}
