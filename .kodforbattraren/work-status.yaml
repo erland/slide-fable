@@ -116,3 +116,10 @@ ux_responsive_review:
   coverage: [desktop_compact, tablet_compact, phone_compact]
   evidence: [desktop-compact-ribbon.png, tablet-compact-ribbon.png, phone-compact-ribbon.png]
   verification: pending_ci
+
+ux_responsive_canvas:
+  current: SF-UX-22
+  state: implemented_verification_pending
+  approach: definite_flex_height_prevents_fit_feedback_loop
+  coverage: [tablet_slide_size, mobile_slide_size]
+  verification: pending_ci
