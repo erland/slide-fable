@@ -57,3 +57,10 @@ ux_secondary_controls:
   changes: [collapsed_workspace_panel_controls, updated_browser_tests]
   verification: pending_ci
   next_after_success: visual_review_on_tablet_portrait
+
+ux_unified_navigation:
+  current: SF-UX-14
+  state: implemented_verification_pending
+  previous_step_sf_ux_13: pass_ci_runs_39348514657_39348495596
+  verification: pending_ci
+  next_after_success: command_catalog_and_collapsible_ribbon

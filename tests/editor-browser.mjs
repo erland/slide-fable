@@ -28,21 +28,30 @@ try{
   await page.getByRole('button',{name:'Klar',exact:true}).click();
  }
  pass('SF-UX-04:initial-title-and-body-preserve-font-size');
+ assert.equal(await page.locator('.editor-header > .editor-menu-disclosure').count(),1,'Document menu belongs in header');
+ assert.equal(await page.locator('main ~ .workspace-controls-disclosure').count(),0,'Panel controls should not use an extra toolbar row');
+ await page.getByRole('tab',{name:'Visa'}).click();
+ assert.equal(await page.getByRole('tabpanel',{name:'Visa'}).locator('.workspace-controls-disclosure').count(),1,'Panel settings belong to Visa');
+ await page.getByRole('tab',{name:'Infoga'}).click();
+ pass('SF-UX-14:unified-navigation-hierarchy');
  const pane=page.locator('.editor-canvas-pane');const paneWidth=()=>pane.evaluate(el=>el.getBoundingClientRect().width);
  const baseWidth=await paneWidth();
+ await page.getByRole('tab',{name:'Visa'}).click();
  assert.equal(await page.locator('.workspace-controls-disclosure').evaluate(el=>el.hasAttribute('open')),false,'Secondary panel controls must be collapsed initially');
  await page.locator('.workspace-controls-disclosure > summary').click();
- await page.getByRole('button',{name:'Dölj bilder',exact:true}).click();
+ await page.getByRole('group',{name:'Visa eller dölj paneler'}).getByRole('button',{name:'Dölj bilder',exact:true}).click();
  assert.equal(await page.locator('#slide-filmstrip').isVisible(),false);
  assert.ok((await paneWidth())>baseWidth+100,'Canvas must grow when slides are hidden');
- await page.getByRole('button',{name:'Dölj egenskaper',exact:true}).click();
+ await page.getByRole('group',{name:'Visa eller dölj paneler'}).getByRole('button',{name:'Dölj egenskaper',exact:true}).click();
  assert.equal(await page.locator('.properties').isVisible(),false);
  assert.ok((await paneWidth())>baseWidth+300,'Canvas must grow when both panels are hidden');
- await page.getByRole('button',{name:'Visa bilder',exact:true}).click();
- await page.getByRole('button',{name:'Visa egenskaper',exact:true}).click();
+ await page.getByRole('group',{name:'Visa eller dölj paneler'}).getByRole('button',{name:'Visa bilder',exact:true}).click();
+ await page.getByRole('group',{name:'Visa eller dölj paneler'}).getByRole('button',{name:'Visa egenskaper',exact:true}).click();
  assert.equal(await page.locator('#slide-filmstrip').isVisible(),true);
  assert.equal(await page.locator('.properties').isVisible(),true);
+ await page.getByRole('tab',{name:'Visa'}).click();
  await page.locator('.workspace-controls-disclosure > summary').click();
+ await page.getByRole('tab',{name:'Infoga'}).click();
  pass('SF-UX-01:desktop-panel-toggle-and-canvas-growth');
  const fitMeasurements=await page.evaluate(()=>{const viewport=document.querySelector('.canvas-scroll'),space=document.querySelector('.stage-space');if(!viewport||!space)throw Error('Canvas elements missing');return {vw:viewport.clientWidth,vh:viewport.clientHeight,sw:space.getBoundingClientRect().width,sh:space.getBoundingClientRect().height};});
  assert.ok(fitMeasurements.sw<=fitMeasurements.vw+1,'Fit must respect viewport width');
@@ -193,7 +202,7 @@ try{
 
 
 
- await page.getByRole('button',{name:'Text',exact:true}).click();const edit=page.getByRole('textbox',{name:'Redigera objektets text'});await edit.fill('Svensk berättelse ÅÄÖ');await page.getByRole('button',{name:'Fetstil',exact:true}).click();await edit.press('End');await edit.type(' med rik text');await page.getByRole('button',{name:'Bild',exact:true}).click();await page.locator('.workspace-controls-disclosure > summary').click();await page.getByRole('button',{name:'Visa anteckningar',exact:true}).click();await page.getByLabel('Talaranteckningar',{exact:true}).fill('HEMLIG ANTECKNING');await page.getByLabel('Talaranteckningar',{exact:true}).press('Tab');assert.ok(JSON.stringify(await model()).includes('Svensk berättelse'));pass('DEV008:rich-text-edit-and-save');
+ await page.getByRole('button',{name:'Text',exact:true}).click();const edit=page.getByRole('textbox',{name:'Redigera objektets text'});await edit.fill('Svensk berättelse ÅÄÖ');await page.getByRole('button',{name:'Fetstil',exact:true}).click();await edit.press('End');await edit.type(' med rik text');await page.getByRole('button',{name:'Bild',exact:true}).click();await page.getByRole('tab',{name:'Visa'}).click();await page.locator('.workspace-controls-disclosure > summary').click();await page.getByRole('group',{name:'Visa eller dölj paneler'}).getByRole('button',{name:'Visa anteckningar',exact:true}).click();await page.getByRole('tab',{name:'Infoga'}).click();await page.getByLabel('Talaranteckningar',{exact:true}).fill('HEMLIG ANTECKNING');await page.getByLabel('Talaranteckningar',{exact:true}).press('Tab');assert.ok(JSON.stringify(await model()).includes('Svensk berättelse'));pass('DEV008:rich-text-edit-and-save');
  await page.getByRole('status').filter({hasText:'Arbetskopia sparad'}).waitFor();const before=await model();await page.reload();await page.getByRole('button',{name:/Min presentation ·/}).click();assert.deepEqual(await model(),before);pass('DEV006:reload-explicit-recovery');
  const cas=await page.evaluate(async()=>{const p=await import('/src/core/persistence.ts'),doc=(await import('/src/core/editor.ts')).editorStore.getSnapshot().doc;let conflict=false;try{await p.saveDraft(doc,null,'other-tab');}catch(e){conflict=String(e).includes('CONFLICT');}return conflict;});assert.equal(cas,true);pass('DEV006:atomic-stale-tab-conflict');
  const quota=await page.evaluate(async()=>{const proto=IDBObjectStore.prototype,old=proto.put;proto.put=function(){throw new DOMException('test quota','QuotaExceededError');};try{const p=await import('/src/core/persistence.ts'),d=(await import('/src/core/model.ts')).createDocument();await p.saveDraft(d,null,'test');return false;}catch(e){return String(e).includes('Quota');}finally{proto.put=old;}});assert.equal(quota,true);pass('DEV006:quota-error-does-not-report-success');
