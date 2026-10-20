@@ -66,5 +66,10 @@ steps:
 
   - id: SF-UX-15
     title: Kompakt och expanderbart menyband
-    status: implemented_verification_pending
+    status: completed
     depends_on: [SF-UX-14]
+
+  - id: SF-UX-16
+    title: Gemensamma återanvändbara kommandon
+    status: implemented_verification_pending
+    depends_on: [SF-UX-15]

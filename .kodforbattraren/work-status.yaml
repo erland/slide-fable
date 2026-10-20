@@ -71,3 +71,10 @@ ux_ribbon_compact:
   previous_step_sf_ux_14: pass_ci_runs_39350653215_39350648848
   verification: pending_ci
   next_after_success: command_catalog_refactor
+
+ux_command_catalog:
+  current: SF-UX-16
+  state: implemented_verification_pending
+  previous_step_sf_ux_15: pass_ci_runs_39351170637_39351146774
+  shared_commands: [undo, redo, copy, paste, properties, present]
+  verification: pending_ci
