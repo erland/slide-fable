@@ -135,6 +135,15 @@ try{
  await ribbon.getByRole('tab',{name:'Visa'}).click();
  assert.equal(await page.getByRole('tabpanel',{name:'Visa'}).getByRole('button',{name:'Presentera'}).isVisible(),true);
  assert.equal(await page.getByRole('tabpanel',{name:'Visa'}).getByRole('button',{name:'Presentera',exact:true}).count(),1,'Visa has one declarative presentation command');
+ const visaPanel=page.getByRole('tabpanel',{name:'Visa'});
+ assert.equal(await visaPanel.getByRole('button',{name:'Dölj bilder',exact:true}).count(),0,'Slide visibility commands must not be duplicated directly in Visa');
+ assert.equal(await visaPanel.getByRole('button',{name:'Dölj anteckningar',exact:true}).count(),0,'Notes visibility commands must not be duplicated directly in Visa');
+ await visaPanel.locator('.workspace-controls-disclosure > summary').click();
+ assert.equal(await visaPanel.getByRole('group',{name:'Visa eller dölj paneler'}).getByRole('button',{name:'Dölj bilder',exact:true}).count(),1);
+ assert.equal(await visaPanel.getByRole('group',{name:'Visa eller dölj paneler'}).getByRole('button',{name:'Visa anteckningar',exact:true}).count(),1);
+ await visaPanel.locator('.workspace-controls-disclosure > summary').click();
+ pass('SF-UX-20:single-panel-command-location');
+
  await ribbon.getByRole('tab',{name:'Infoga'}).click();
  assert.equal(await toolbar.getByRole('button',{name:'Text',exact:true}).isVisible(),true);
  pass('SF-UX-08:ribbon-tabs');
