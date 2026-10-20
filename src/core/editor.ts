@@ -23,7 +23,7 @@ export class EditorStore{
  insert(element:D){this.transaction((_d,s)=>s.view.elements.push(element));this.select([element.id]);}
  add(type:string,shapeType='rect'){const g=box(180+this.slide.view.elements.length*12,220,600,240),base:D={id:uid(type),type,geometry:g,style:{}};
  if(type==='text'){base.text=rich('Ny text');base.style={fontSize:40,color:'#183641'};}
- if(type==='shape'){base.shapeType=shapeType==='round'?'rect':shapeType;base.style={fill:{color:'#d5e5df'},stroke:{color:'#183641'},strokeWidth:2,cornerRadius:shapeType==='round'?30:12};}
+ if(type==='shape'){base.shapeType=shapeType==='round'?'rect':shapeType;base.style={fill:{color:'#d5e5df'},stroke:{color:'#183641'},strokeWidth:2,cornerRadius:shapeType==='round'?30:12,fontSize:32,color:'#183641',align:'center',verticalAlign:'middle',padding:14};base.text=rich('');}
  if(type==='line'||type==='arrow'){base.geometry=box(200,300,600,10);base.style={stroke:{color:'#cf694c'},strokeWidth:5};}
  if(type==='table'){base.cells=[[{id:uid('cell'),text:'Rubrik A',header:true},{id:uid('cell'),text:'Rubrik B',header:true}],[{id:uid('cell'),text:'Värde A'},{id:uid('cell'),text:'Värde B'}]];base.geometry=box(150,300,1100,300);}
  if(type==='chart'){base.chartType='bar';base.dataset={categories:['A','B','C'],series:[{id:uid('series'),name:'Serie 1',values:[4,8,6]}]};base.geometry=box(180,260,1100,500);}
