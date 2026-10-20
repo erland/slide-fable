@@ -109,7 +109,7 @@ try{
 
  const toolbar=page.locator('.insert-tools');
  assert.equal(await toolbar.getByRole('button',{name:'Text',exact:true}).isVisible(),true);
- assert.equal(await toolbar.getByRole('button',{name:'Form',exact:true}).isVisible(),true);
+ assert.equal(await toolbar.locator('.shape-picker > summary').isVisible(),true);
  assert.equal(await toolbar.getByRole('button',{name:'Bildfil',exact:true}).isVisible(),true);
  assert.equal(await toolbar.getByRole('button',{name:'Diagram',exact:true}).isVisible(),false);
  await toolbar.locator('summary',{hasText:'Fler objekt'}).click();
@@ -187,7 +187,20 @@ try{
 
 
  await page.getByRole('button',{name:'Lägg till bild',exact:true}).click();await page.getByRole('button',{name:'Lägg till bild',exact:true}).click();assert.equal((await model()).slides.length,3);pass('DEV005:create-three-slides');
- await page.getByRole('button',{name:'Form',exact:true}).click();await page.getByLabel('Bredd',{exact:true}).fill('470');await page.getByLabel('Bredd',{exact:true}).press('Enter');assert.equal((await model()).slides[2].view.elements.at(-1).geometry.width,470);await page.getByRole('button',{name:'Ångra',exact:true}).click();assert.equal((await model()).slides[2].view.elements.at(-1).geometry.width,600);await page.getByRole('button',{name:'Gör om',exact:true}).click();pass('DEV005:geometry-and-undo');
+ await toolbar.locator('.shape-picker > summary').click();await toolbar.locator('.shape-picker-items button',{hasText:'Rektangel'}).first().click();await page.getByLabel('Bredd',{exact:true}).fill('470');await page.getByLabel('Bredd',{exact:true}).press('Enter');assert.equal((await model()).slides[2].view.elements.at(-1).geometry.width,470);await page.getByRole('button',{name:'Ångra',exact:true}).click();assert.equal((await model()).slides[2].view.elements.at(-1).geometry.width,600);await page.getByRole('button',{name:'Gör om',exact:true}).click();pass('DEV005:geometry-and-undo');
+ await toolbar.locator('.shape-picker > summary').click();
+ await toolbar.locator('.shape-picker-items button',{hasText:'Triangel'}).click();
+ assert.equal((await model()).slides[2].view.elements.at(-1).shapeType,'triangle');
+ await toolbar.locator('.shape-picker > summary').click();
+ await toolbar.locator('.shape-picker-items button',{hasText:'Rundad rektangel'}).click();
+ const rounded=(await model()).slides[2].view.elements.at(-1);
+ assert.equal(rounded.shapeType,'rect');
+ assert.equal(rounded.style.cornerRadius,30);
+ await toolbar.locator('.shape-picker > summary').click();
+ await toolbar.locator('.shape-picker-items button',{hasText:'Ellips'}).click();
+ assert.equal((await model()).slides[2].view.elements.at(-1).shapeType,'ellipse');
+ pass('SF-SH-04:visual-shape-picker');
+
  await page.getByRole('button',{name:'Text',exact:true}).click();
  const newTextId=(await model()).slides[2].view.elements.at(-1).id;
  await page.locator('.editor-canvas-pane .stage [data-element-id="'+newTextId+'"]').dblclick();
