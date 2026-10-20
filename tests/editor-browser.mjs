@@ -262,7 +262,15 @@ try{
   await page.screenshot({path:path.join(output,name+'-compact-ribbon.png'),fullPage:true});
   await page.getByRole('tab',{name:'Infoga'}).click();
   assert.equal(await page.locator('#slide-ribbon-panel').isVisible(),true,name+': selecting a tab must restore tools');
-  pass('SF-UX-21:compact-ribbon-'+name);
+  
+  if(name!=='desktop'){
+   const fit=await page.evaluate(()=>{const viewport=document.querySelector('.canvas-scroll')?.getBoundingClientRect(),slide=document.querySelector('.stage-space')?.getBoundingClientRect();return {viewportWidth:viewport?.width??0,viewportHeight:viewport?.height??0,slideWidth:slide?.width??0,slideHeight:slide?.height??0};});
+   assert.ok(fit.slideWidth>=fit.viewportWidth*0.42,name+': fitted slide should occupy meaningful canvas width: '+JSON.stringify(fit));
+   assert.ok(fit.slideHeight>=130,name+': fitted slide should be usable in portrait: '+JSON.stringify(fit));
+   assert.ok(fit.slideWidth<=fit.viewportWidth+2,name+': slide width should fit the viewport');
+   pass('SF-UX-22:usable-portrait-slide-'+name);
+  }
+ pass('SF-UX-21:compact-ribbon-'+name);
  }
  await page.setViewportSize({width:1440,height:1000});
  for(const [name,width,height] of [['desktop',1440,1000],['tablet',768,1024],['phone',390,844]]){await page.setViewportSize({width,height});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);if(width<=800){await page.getByRole('button',{name:'Egenskaper',exact:true}).click();await page.getByRole('button',{name:'Objekt',exact:true}).waitFor();await page.getByRole('button',{name:'Arbetsyta',exact:true}).click();}await page.screenshot({path:path.join(output,name+'.png'),fullPage:true});pass('responsive:'+name);}
