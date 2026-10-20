@@ -84,7 +84,7 @@ export function App(){
   const preview=(dx:number,dy:number,alt=false)=>{
    const q=(n:number)=>snap&&!alt?Math.round(n/10)*10:n;
    const geometries=slide.view.elements.map((e:D)=>{const changed=initial.find(t=>t.id===e.id);if(!changed)return {id:e.id,geometry:effective(doc,slide,e).geometry};const b=changed.geometry;return {id:e.id,geometry:resize?{...b,...resizeRect(b,resize,q(dx),q(dy))}:{...b,x:q(b.x+dx),y:q(b.y+dy)}};});
-   initial.forEach((item,i)=>{const node=nodes[i];if(!node)return;const next=geometries.find(g=>g.id===item.id)!.geometry;Object.assign(node.style,{left:next.x+'px',top:next.y+'px',width:next.width+'px',height:next.height+'px'});});
+   initial.forEach((item,i)=>{const node=nodes[i];if(!node)return;const next=geometries.find((g:{id:string;geometry:D})=>g.id===item.id)!.geometry;Object.assign(node.style,{left:next.x+'px',top:next.y+'px',width:next.width+'px',height:next.height+'px'});});
    for(const record of connected){
     if(!record.line)continue;
     const endpoints=resolveLinePoints(record.element,geometries),b=record.element.geometry;
@@ -92,7 +92,7 @@ export function App(){
     for(const [key,value] of Object.entries(coords))record.line.setAttribute(key,String(value));
     const kinds=endMarkers(record.element);
     for(const which of ['start','end'] as const){
-     const node=record.markers.find(m=>m.getAttribute('data-marker-end')===which);
+     const node=record.markers.find((m:SVGElement)=>m.getAttribute('data-marker-end')===which);
      const g=markerGeometry(kinds[which],which==='start'?{x:coords.x1,y:coords.y1}:{x:coords.x2,y:coords.y2},which==='start'?{x:coords.x2,y:coords.y2}:{x:coords.x1,y:coords.y1});
      if(!node||!g)continue;
      if('points'in g)node.setAttribute('points',markerSvgPoints(g.points));
