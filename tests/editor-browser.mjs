@@ -18,6 +18,7 @@ try{
  const fixtureReports=await page.evaluate(async fixture=>{
   const {createDocument,box}=await import('/src/core/model.ts');
   const {preflight}=await import('/src/export/office.ts');
+  const {preflight:planned}=await import('/src/export/plan.ts');
   const doc=createDocument(),slide=doc.slides[0];slide.view.elements=[];
   for(const item of fixture.objects){
    const e={id:item.id,type:item.type,geometry:box(0,0,200,100),style:{}};
@@ -28,8 +29,9 @@ try{
    if(item.effects)e.effects=item.effects;
    slide.view.elements.push(e);
   }
-  return {pptx:preflight(doc,'pptx'),pdf:preflight(doc,'pdf'),flattened:preflight(doc,'pptx','flattened')};
+  return {pptx:preflight(doc,'pptx'),pdf:preflight(doc,'pdf'),flattened:preflight(doc,'pptx','flattened'),samePlan:JSON.stringify(planned(doc,'pptx'))===JSON.stringify(preflight(doc,'pptx'))&&JSON.stringify(planned(doc,'pdf'))===JSON.stringify(preflight(doc,'pdf'))};
  },exportFixture);
+ assert.equal(fixtureReports.samePlan,true,'IP-009 planner must preserve previous format reports');
  for(const format of ['pptx','pdf']){
   const report=fixtureReports[format],byId=new Map(report.objects.map(o=>[o.elementId,o]));
   for(const item of exportFixture.objects){
