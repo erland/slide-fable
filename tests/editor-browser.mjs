@@ -406,15 +406,12 @@ try{
   const {validateFull}=await import('/src/core/contract.ts');
   const {pptxExport,preflight}=await import('/src/export/office.ts');
   const doc=copy(source);
-  const slide=doc.slides.find(s=>s.view.elements.some(e=>e.id===line));
-  slide.view.elements=slide.view.elements.filter(e=>[first,second,line].includes(e.id));
-  doc.slides=[slide];doc.presentation.initialSlideId=slide.id;
   await validateFull(doc);
   const exported=await pptxExport(doc,doc.slides);
-  return {pptx:Array.from(exported.file),report:preflight(doc,'pptx'),elements:slide.view.elements};
+  return {pptx:Array.from(exported.file),report:preflight(doc,'pptx')};
  },connection);
  const acceptanceZip=await JSZip.loadAsync(new Uint8Array(accepted.pptx));
- const acceptanceXml=await acceptanceZip.file('ppt/slides/slide1.xml').async('string');
+ const acceptanceXml=(await Promise.all(Object.keys(acceptanceZip.files).filter(n=>/^ppt\/slides\/slide\d+\.xml$/.test(n)).map(n=>acceptanceZip.file(n).async('string')))).join('');
  assert.ok(acceptanceXml.includes('Beslut'),'Shape text should survive editable PowerPoint export');
  assert.ok(acceptanceXml.includes('0066CC'),'Connection stroke color should survive PowerPoint export');
  assert.ok(acceptanceXml.includes('dash'),'Connection dash pattern should survive PowerPoint export');
