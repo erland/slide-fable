@@ -34,3 +34,19 @@ AT-01–12, AT-201–218 och relevanta AT-301–310/F-301–308 ska mappas till 
 senare objekts fulla editortest väntar till dess etapp, men säker fallback och ingen
 tyst dataförlust gäller från första läsare. Manuella prov ska ha faktisk evidens;
 ej körda prov är pending, aldrig PASS. Miljöbegränsningar dokumenteras separat.
+
+## Maskinläsbara releasegrindar (IP-003)
+
+`docs/release-gates.json` är en versionerad matris för **bevistyp**, **omfattning** och
+**aktuell atteststatus**. `scripts/release_gates.py` validerar matrisen och
+`scripts/verify_release_candidate.py` inkluderar härledda `release_gates` i sitt
+JSON-resultat. Automatiska PASS hämtas endast från utförda namngivna kontroller;
+profilfilen får inte innehålla förhandsattesterade PASS. Manuella prov kräver
+separata daterade bevis innan de kan godkännas i en framtida releaseprocess.
+Blockerade prov får inte klassificeras som PASS utan att förutsättningarna ändrats.
+
+Grindarna RG-001–004 gäller begränsade automatiska Chrome/Chromium-prov;
+RG-005–008 och RG-010 gäller manuella plattforms- och acceptansprov;
+RG-009 kräver faktiska historiska källfiler och kontrakt. Även när alla
+maskinprov är gröna förblir `release_readiness` = `NOT_READY` enligt
+`docs/release-review.md` till dess övriga MVP-krav har verifierats.

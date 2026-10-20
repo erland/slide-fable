@@ -101,3 +101,13 @@ versioner, scopes, offlineöppning, offline-PDF, uppdatering och flera flikar.
 Historiska dev001–003-belägg bevaras med sina dåvarande revisionshashar.
 Inga browser-skärmbilder ingår i leveransen. PDF-kontroll använder Poppler/pypdf;
 det är inte ett PowerPoint-prov eller ett prov på fysisk läsplatta.
+
+## Spårbar releaseprofil (IP-003)
+
+Den maskinläsbara matrisen finns i `docs/release-gates.json` och verifieras
+av `scripts/release_gates.py`. Den är **inte** en ersättning för
+AT-acceptansmatrisen ovan. `RG-001`–`RG-004` kan få automatiskt PASS endast
+från faktisk CI-körning; `RG-005`–`RG-008` och `RG-010` är manuella
+accepterans-/plattformskontroller utan attest; `RG-009` är blockerad av saknat
+historiskt originalunderlag. Green CI/Chromium bevisar inte Safari på fysisk
+Apple-enhet, Office-redigerbarhet eller en fullständig MVP-release.
