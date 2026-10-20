@@ -78,3 +78,14 @@
 .workspace-controls-disclosure>summary{cursor:pointer;list-style:none;display:inline-flex;align-items:center;min-height:32px;padding:4px 10px;border:1px solid var(--line);border-radius:6px;background:var(--panel);font-size:12px}
 .workspace-controls-disclosure>summary::-webkit-details-marker{display:none}
 .workspace-controls-disclosure .workspace-layout-controls{border-bottom:0;padding:5px 0}
+
+/* SF-UX-14: one navigation hierarchy. Document menu lives in the title bar,
+   panel controls live inside Visa; neither takes a dedicated row. */
+.editor-header .editor-menu-disclosure{border:0;padding:0;position:relative;flex:0 0 auto}
+.editor-header .editor-menu-disclosure>summary{white-space:nowrap;min-height:34px}
+.editor-header .editor-menu-disclosure[open] .editor-menu{position:absolute;right:0;top:calc(100% + 6px);z-index:100;display:flex;flex-direction:column;align-items:stretch;gap:3px;min-width:190px;max-height:70dvh;overflow:auto;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--panel);box-shadow:0 8px 20px #0003}
+.editor-header .editor-menu-disclosure .editor-menu>button{text-align:left;white-space:nowrap}
+.ribbon-actions .workspace-controls-disclosure{border:0;padding:0;flex:0 0 auto}
+.ribbon-actions .workspace-controls-disclosure>summary{white-space:nowrap;min-height:34px}
+.ribbon-actions .workspace-controls-disclosure[open] .workspace-layout-controls{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+@media(max-width:900px){.editor-header .editor-menu-disclosure>summary{max-width:100px;overflow:hidden;text-overflow:ellipsis}.ribbon-actions .workspace-controls-disclosure .workspace-layout-controls{max-width:min(70vw,340px)}}
