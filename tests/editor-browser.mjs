@@ -294,6 +294,26 @@ try{
  assert.notEqual(arrow.extensions.slideFableLinePoints.start.y,arrow.extensions.slideFableLinePoints.end.y,'Arrow must become diagonal');
  assert.equal(await page.locator('.stage [data-element-id="'+endpointId+'"] svg polygon').count(),1,'Arrowhead still rendered');
  pass('SF-SH-03:movable-line-endpoint-and-arrowhead');
+ // SF-SH-11: independent editable endpoint symbols; old arrows retain filled tips.
+ await page.getByRole('tab',{name:'Rita'}).click();
+ const markerPanel=page.getByRole('tabpanel',{name:'Rita'});
+ assert.equal(await markerPanel.getByLabel('Rita startsymbol').inputValue(),'none');
+ assert.equal(await markerPanel.getByLabel('Rita slutsymbol').inputValue(),'filledArrow');
+ await markerPanel.getByLabel('Rita startsymbol').selectOption('circle');
+ await markerPanel.getByLabel('Rita slutsymbol').selectOption('openArrow');
+ const customMarkers=(await model()).slides.flatMap(s=>s.view.elements).find(e=>e.id===endpointId);
+ assert.deepEqual(customMarkers.extensions.slideFableEndMarkers,{start:'circle',end:'openArrow'});
+ assert.equal(await page.locator('.stage [data-element-id="'+endpointId+'"] svg circle.line-end-marker').count(),1);
+ assert.equal(await page.locator('.stage [data-element-id="'+endpointId+'"] svg polyline.line-end-marker').count(),1);
+ await markerPanel.getByLabel('Rita slutsymbol').selectOption('diamond');
+ assert.equal(await page.locator('.stage [data-element-id="'+endpointId+'"] svg polygon.line-end-marker').count(),1);
+ const lineId=await page.evaluate(async()=>{const store=(await import('/src/core/editor.ts')).editorStore;return store.add('line');});
+ assert.equal(await markerPanel.getByLabel('Rita slutsymbol').inputValue(),'none','Line defaults to no endpoint markers');
+ await markerPanel.getByLabel('Rita startsymbol').selectOption('bar');
+ assert.equal(await page.locator('.stage [data-element-id="'+lineId+'"] svg polyline.line-end-marker').count(),1);
+ pass('SF-SH-11:independent-endpoint-markers');
+ await page.evaluate(async id=>(await import('/src/core/editor.ts')).editorStore.select([id]),endpointId);
+
  // Background clicks should clear selection, including the slide surface itself.
  const selection=()=>page.evaluate(async()=>[...(await import('/src/core/editor.ts')).editorStore.getSnapshot().selected]);
  assert.deepEqual(await selection(),[endpointId],'Arrow selected before canvas deselection');
