@@ -66,7 +66,62 @@ export function App(){
  async function saveHtml(){const end=updateSafety.beginOperation();try{const source=store.getSnapshot();const html=await standaloneHtml(source.doc,true);download(html,source.doc.document.title+'.html','text/html');store.markExported(Number(source.doc.document.revision??0));setMessage('HTML-filen är skapad. Webbläsaren hanterar nedladdningen.');}catch(e){setMessage(String(e));}finally{end();}}
  async function openFile(f:File){const end=updateSafety.beginOperation();try{const text=await f.text(),result=await importDocument(text);store.load(result.doc,result.readOnly,text,result.warnings);setConflict(false);setMessage(result.warnings.join(' · ')||'Presentation öppnad.');}catch(e){setMessage('Filen kunde inte öppnas: '+String(e));}finally{end();}}
  async function addImage(f:File){const end=updateSafety.beginOperation();try{if(!['image/png','image/jpeg','image/webp','image/svg+xml'].includes(f.type)||f.size>10*1024*1024)throw Error('Välj PNG, JPEG, WebP eller säker SVG, högst 10 MB.');const bytes=new Uint8Array(await f.arrayBuffer());const uri=await new Promise<string>((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result));reader.onerror=reject;reader.readAsDataURL(f);});const id=uid('asset'),eid=uid('image'),next=copy(doc);next.assets[id]={storage:'embedded',mimeType:f.type,uri,sha256:await bytesHash(bytes)};const elements=next.slides.find((s:D)=>s.id===slide.id).view.elements;const replacing=replaceImage.current&&element?.type==='image'?elements.find((e:D)=>e.id===element.id):undefined;if(replacing)replacing.assetRef=id;else elements.push({id:eid,type:'image',geometry:box(200,200,800,500),assetRef:id,fit:'cover',accessibility:{altText:f.name}});await validateFull(next);const probe=new Image();probe.src=uri;await probe.decode();if(probe.naturalWidth*probe.naturalHeight>40000000)throw Error('Bilden överskrider 40 megapixlar.');store.transaction(d=>{d.assets=next.assets;d.slides=next.slides;});store.select([replacing?.id??eid]);replaceImage.current=false;}catch(e){setMessage(String(e));}finally{end();}}
- function startDrag(id:string,event:PointerEvent,resize:ResizeDirection|false=false){if(!event.isPrimary||event.button!==0||state.readOnly||safety.locked||safety.busy)return;const e=slide.view.elements.find((e:D)=>e.id===id);if(!e||e.locked)return;const chosen=event.shiftKey?[...new Set([...state.selected,id])]:state.selected.includes(id)?state.selected:[id];store.select(chosen);const initial=chosen.map(cid=>({id:cid,geometry:copy(effective(doc,slide,slide.view.elements.find((x:D)=>x.id===cid)).geometry)})),x=event.clientX,y=event.clientY,target=event.currentTarget as HTMLElement;target.setPointerCapture(event.pointerId);const nodes=initial.map(e=>viewport.current?.querySelector<HTMLElement>(`.stage [data-element-id="${CSS.escape(e.id)}"]`));const move=(ev:globalThis.PointerEvent)=>{const dx=(ev.clientX-x)/scale,dy=(ev.clientY-y)/scale;initial.forEach((e,i)=>{const n=nodes[i];if(!n)return;const b=e.geometry;if(resize){const next=resizeRect(b,resize,dx,dy);n.style.left=next.x+'px';n.style.top=next.y+'px';n.style.width=next.width+'px';n.style.height=next.height+'px';}else{n.style.left=(b.x+dx)+'px';n.style.top=(b.y+dy)+'px';}});};const end=(ev:globalThis.PointerEvent)=>{target.removeEventListener('pointermove',move);target.removeEventListener('pointerup',end);target.removeEventListener('pointercancel',cancel);const dx=(ev.clientX-x)/scale,dy=(ev.clientY-y)/scale;if(Math.abs(dx)+Math.abs(dy)<2)return;run(()=>store.transaction((_d,s)=>{for(const item of initial){const el=s.view.elements.find((e:D)=>e.id===item.id),b=item.geometry,q=(n:number)=>snap&&!ev.altKey?Math.round(n/10)*10:n;el.geometry=resize?{...b,...resizeRect(b,resize,q(dx),q(dy))}:{...b,x:q(b.x+dx),y:q(b.y+dy)};const binding=s.placeholderBindings?.find((p:D)=>p.elementId===el.id);if(binding)binding.overrides={...binding.overrides,geometry:copy(el.geometry)};}}));};const cancel=()=>{target.removeEventListener('pointermove',move);target.removeEventListener('pointerup',end);target.removeEventListener('pointercancel',cancel);initial.forEach((e,i)=>{const n=nodes[i];if(n){n.style.left=e.geometry.x+'px';n.style.top=e.geometry.y+'px';n.style.width=e.geometry.width+'px';n.style.height=e.geometry.height+'px';}});};target.addEventListener('pointermove',move);target.addEventListener('pointerup',end);target.addEventListener('pointercancel',cancel);}
+ function startDrag(id:string,event:PointerEvent,resize:ResizeDirection|false=false){
+  if(!event.isPrimary||event.button!==0||state.readOnly||safety.locked||safety.busy)return;
+  const object=slide.view.elements.find((e:D)=>e.id===id);if(!object||object.locked)return;
+  const chosen=event.shiftKey?[...new Set([...state.selected,id])]:state.selected.includes(id)?state.selected:[id];
+  store.select(chosen);
+  const initial=chosen.map(cid=>({id:cid,geometry:copy(effective(doc,slide,slide.view.elements.find((e:D)=>e.id===cid)).geometry)}));
+  const x=event.clientX,y=event.clientY,target=event.currentTarget as HTMLElement;
+  target.setPointerCapture(event.pointerId);
+  const nodes=initial.map(item=>viewport.current?.querySelector<HTMLElement>(`.stage [data-element-id="${CSS.escape(item.id)}"]`));
+  const connected=slide.view.elements.filter((e:D)=>['line','arrow','connector'].includes(e.type)&&[e.startAnchor?.elementId,e.endAnchor?.elementId].some((v:string)=>chosen.includes(v))).map((e:D)=>{
+   const node=viewport.current?.querySelector<HTMLElement>(`.stage [data-element-id="${CSS.escape(e.id)}"]`);
+   const line=node?.querySelector<SVGLineElement>('svg line');
+   const markers=Array.from(node?.querySelectorAll<SVGElement>('.line-end-marker')??[]);
+   return {element:e,line,markers,oldLine:line?{x1:line.getAttribute('x1'),y1:line.getAttribute('y1'),x2:line.getAttribute('x2'),y2:line.getAttribute('y2')}:null,oldMarkers:markers.map(m=>({m,points:m.getAttribute('points'),cx:m.getAttribute('cx'),cy:m.getAttribute('cy')}))};
+  });
+  const preview=(dx:number,dy:number,alt=false)=>{
+   const q=(n:number)=>snap&&!alt?Math.round(n/10)*10:n;
+   const geometries=slide.view.elements.map((e:D)=>{const changed=initial.find(t=>t.id===e.id);if(!changed)return {id:e.id,geometry:effective(doc,slide,e).geometry};const b=changed.geometry;return {id:e.id,geometry:resize?{...b,...resizeRect(b,resize,q(dx),q(dy))}:{...b,x:q(b.x+dx),y:q(b.y+dy)}};});
+   initial.forEach((item,i)=>{const node=nodes[i];if(!node)return;const next=geometries.find(g=>g.id===item.id)!.geometry;Object.assign(node.style,{left:next.x+'px',top:next.y+'px',width:next.width+'px',height:next.height+'px'});});
+   for(const record of connected){
+    if(!record.line)continue;
+    const endpoints=resolveLinePoints(record.element,geometries),b=record.element.geometry;
+    const coords={x1:endpoints.start.x-b.x,y1:endpoints.start.y-b.y,x2:endpoints.end.x-b.x,y2:endpoints.end.y-b.y};
+    for(const [key,value] of Object.entries(coords))record.line.setAttribute(key,String(value));
+    const kinds=endMarkers(record.element);
+    for(const which of ['start','end'] as const){
+     const node=record.markers.find(m=>m.getAttribute('data-marker-end')===which);
+     const g=markerGeometry(kinds[which],which==='start'?{x:coords.x1,y:coords.y1}:{x:coords.x2,y:coords.y2},which==='start'?{x:coords.x2,y:coords.y2}:{x:coords.x1,y:coords.y1});
+     if(!node||!g)continue;
+     if('points'in g)node.setAttribute('points',markerSvgPoints(g.points));
+     if('center'in g){node.setAttribute('cx',String(g.center.x));node.setAttribute('cy',String(g.center.y));}
+    }
+   }
+  };
+  const restore=()=>{
+   initial.forEach((item,i)=>{const node=nodes[i],b=item.geometry;if(node)Object.assign(node.style,{left:b.x+'px',top:b.y+'px',width:b.width+'px',height:b.height+'px'});});
+   for(const record of connected){
+    if(record.line&&record.oldLine)for(const [key,value] of Object.entries(record.oldLine))if(value!==null)record.line.setAttribute(key,value);
+    for(const old of record.oldMarkers)for(const [key,value] of Object.entries({points:old.points,cx:old.cx,cy:old.cy}))if(value===null)old.m.removeAttribute(key);else old.m.setAttribute(key,value);
+   }
+  };
+  const cleanup=()=>{target.removeEventListener('pointermove',move);target.removeEventListener('pointerup',end);target.removeEventListener('pointercancel',cancel);};
+  const move=(ev:globalThis.PointerEvent)=>preview((ev.clientX-x)/scale,(ev.clientY-y)/scale,ev.altKey);
+  const end=(ev:globalThis.PointerEvent)=>{
+   cleanup();const dx=(ev.clientX-x)/scale,dy=(ev.clientY-y)/scale;
+   if(Math.abs(dx)+Math.abs(dy)<2){restore();return;}
+   run(()=>store.transaction((_d,s)=>{for(const item of initial){
+    const el=s.view.elements.find((e:D)=>e.id===item.id),b=item.geometry,q=(n:number)=>snap&&!ev.altKey?Math.round(n/10)*10:n;
+    el.geometry=resize?{...b,...resizeRect(b,resize,q(dx),q(dy))}:{...b,x:q(b.x+dx),y:q(b.y+dy)};
+    const binding=s.placeholderBindings?.find((p:D)=>p.elementId===el.id);
+    if(binding)binding.overrides={...binding.overrides,geometry:copy(el.geometry)};
+   }}));
+  };
+  const cancel=()=>{cleanup();restore();};
+  target.addEventListener('pointermove',move);target.addEventListener('pointerup',end);target.addEventListener('pointercancel',cancel);
+ }
  function dragLineEndpoint(id:string,which:'start'|'end',event:PointerEvent){
   if(!event.isPrimary||event.button!==0||state.readOnly||safety.locked||safety.busy)return;
   const source=slide.view.elements.find((e:D)=>e.id===id);
