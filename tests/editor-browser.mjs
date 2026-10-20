@@ -134,6 +134,7 @@ try{
  assert.equal(await page.getByRole('tabpanel',{name:'Design'}).getByRole('button',{name:'Öppna designegenskaper'}).isVisible(),true);
  await ribbon.getByRole('tab',{name:'Visa'}).click();
  assert.equal(await page.getByRole('tabpanel',{name:'Visa'}).getByRole('button',{name:'Presentera'}).isVisible(),true);
+ assert.equal(await page.getByRole('tabpanel',{name:'Visa'}).getByRole('button',{name:'Presentera',exact:true}).count(),1,'Visa has one declarative presentation command');
  await ribbon.getByRole('tab',{name:'Infoga'}).click();
  assert.equal(await toolbar.getByRole('button',{name:'Text',exact:true}).isVisible(),true);
  pass('SF-UX-08:ribbon-tabs');
