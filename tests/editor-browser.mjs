@@ -28,6 +28,12 @@ try{
   await page.getByRole('button',{name:'Klar',exact:true}).click();
  }
  pass('SF-UX-04:initial-title-and-body-preserve-font-size');
+ assert.equal(await page.locator('.editor-header > .editor-menu-disclosure').count(),1,'Document menu belongs in header');
+ assert.equal(await page.locator('main ~ .workspace-controls-disclosure').count(),0,'Panel controls should not use an extra toolbar row');
+ await page.getByRole('tab',{name:'Visa'}).click();
+ assert.equal(await page.getByRole('tabpanel',{name:'Visa'}).locator('.workspace-controls-disclosure').count(),1,'Panel settings belong to Visa');
+ await page.getByRole('tab',{name:'Infoga'}).click();
+ pass('SF-UX-14:unified-navigation-hierarchy');
  const pane=page.locator('.editor-canvas-pane');const paneWidth=()=>pane.evaluate(el=>el.getBoundingClientRect().width);
  const baseWidth=await paneWidth();
  assert.equal(await page.locator('.workspace-controls-disclosure').evaluate(el=>el.hasAttribute('open')),false,'Secondary panel controls must be collapsed initially');
