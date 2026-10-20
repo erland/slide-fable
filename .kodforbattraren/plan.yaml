@@ -106,5 +106,34 @@ steps:
 
   - id: SF-UX-23
     title: Kompaktare mobilhuvud och verktygsfält
-    status: implemented_verification_pending
+    status: completed
     depends_on: [SF-UX-22]
+
+  - id: SF-SH-01
+    title: Geometrigrund och tester för formhandtag och linjeändpunkter
+    status: implemented_verification_pending
+
+  - id: SF-SH-02
+    title: Åtta resize-handtag för markerade objekt
+    status: pending
+    depends_on: [SF-SH-01]
+
+  - id: SF-SH-03
+    title: Flyttbara linjeändpunkter och riktade pilspetsar
+    status: pending
+    depends_on: [SF-SH-02]
+
+  - id: SF-SH-04
+    title: Visuell formväljare under Infoga
+    status: pending
+    depends_on: [SF-SH-03]
+
+  - id: SF-SH-05
+    title: Formatering av former under Rita
+    status: pending
+    depends_on: [SF-SH-04]
+
+  - id: SF-SH-06
+    title: Funktionell och visuell slutverifiering
+    status: pending
+    depends_on: [SF-SH-05]
