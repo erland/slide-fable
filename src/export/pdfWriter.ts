@@ -7,7 +7,6 @@ import {endMarkers} from '../core/endMarkers';
 import {hash} from '../core/contract';
 import {fontData,mountedSlide,rasterSlide} from './html';
 import {preflight} from './plan.ts';
-import {preflight} from './plan.ts';
 import {color,flatten,measure,rgbStyle,rasterObject,backgroundImage,sourceRecords} from './officeShared.ts';
 
 export async function pdfExport(doc:D,slides:D[],profile='editable-first',includeSources=true){const report=preflight({...doc,slides},'pdf',profile);report.sourceHash=await hash(doc);const pdf=await PDFDocument.create();pdf.registerFontkit(fontkit);const fonts=await fontData(),regular=await pdf.embedFont(fonts[0],{subset:true}),bold=await pdf.embedFont(fonts[1],{subset:true});const scale=.6,W=doc.document.canvas.width,H=doc.document.canvas.height;
