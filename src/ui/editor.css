@@ -100,7 +100,8 @@
 /* SF-UX-22: break the resize-observer/intrinsic-height feedback loop in portrait.
    The canvas must receive the remaining workspace height before it is fitted. */
 @media(max-width:900px) and (orientation:portrait){
- .editor-workspace .editor-canvas-pane{flex:1 1 auto;min-height:280px}
- .editor-workspace .editor-canvas-pane .canvas-scroll{flex:1 1 auto;height:auto;min-height:220px;box-sizing:border-box}
+ .editor-workspace{height:max(650px,calc(100dvh - 235px));overflow:visible}
+ .editor-workspace .editor-canvas-pane{flex:1 1 auto;min-height:400px}
+ .editor-workspace .editor-canvas-pane .canvas-scroll{flex:1 1 auto;height:auto;min-height:340px;box-sizing:border-box}
  .editor-workspace .filmstrip{flex:0 0 auto}
 }
