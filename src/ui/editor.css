@@ -133,3 +133,6 @@
 .editor-app .shape-picker-items button{display:flex;align-items:center;gap:7px;text-align:left;min-height:51px;padding:5px;white-space:normal;font-size:12px}
 .shape-picker-items svg{flex:0 0 48px}
 @media(max-width:520px){.shape-picker-items{left:-60px}}
+
+/* Keep the gallery visible despite generic details/menu rules. */
+.editor-app details.shape-picker[open] > .shape-picker-items{display:grid!important;visibility:visible!important;opacity:1!important}
