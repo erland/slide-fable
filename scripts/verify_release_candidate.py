@@ -15,6 +15,7 @@ run('Python contract regression',[sys.executable,'-m','unittest','discover','-s'
 with tempfile.TemporaryDirectory(prefix='slide-fable-final-') as temporary:
     env['EDITOR_OUTPUT']=os.environ.get('EDITOR_OUTPUT',str(Path(temporary)/'editor'))
     env['PWA_OUTPUT']=os.environ.get('PWA_OUTPUT',str(Path(temporary)/'pwa'))
+    run('document lifecycle browser regression',['npm','run','test:lifecycle'])
     run('editor browser flows',['npm','run','test:editor'])
     editor=json.loads((Path(env['EDITOR_OUTPUT'])/'editor-results.json').read_text())
     run('production build / typecheck / offline / updates',['npm','run','test:pwa'])

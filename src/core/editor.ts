@@ -1,21 +1,24 @@
 import {validateCore} from './contract.ts';
 import {blocks,box,copy,createDocument,effective,layoutOf,newSlide,plain,rich,setText,uid,type D} from './model.ts';
 import {updateSafety} from '../pwa/safety.ts';
-export type EditorState={doc:D;slideId:string;selected:string[];dirty:boolean;readOnly:boolean;original:string;warnings:string[];undo:number;redo:number};
+export type EditorState={doc:D;slideId:string;selected:string[];dirty:boolean;exportedRevision:number|null;readOnly:boolean;original:string;warnings:string[];undo:number;redo:number};
 export class EditorStore{
  private state:EditorState;private listeners=new Set<()=>void>();private past:D[]=[];private future:D[]=[];
- constructor(doc=createDocument()){validateCore(doc);this.state={doc,slideId:doc.slides[0].id,selected:[],dirty:false,readOnly:false,original:'',warnings:[],undo:0,redo:0};}
+ constructor(doc=createDocument()){validateCore(doc);this.state={doc,slideId:doc.slides[0].id,selected:[],dirty:false,exportedRevision:null,readOnly:false,original:'',warnings:[],undo:0,redo:0};}
  getSnapshot=()=>this.state;
  subscribe=(fn:()=>void)=>{this.listeners.add(fn);return ()=>{this.listeners.delete(fn);};};
  private publish(patch:Partial<EditorState>){this.state={...this.state,...patch,undo:this.past.length,redo:this.future.length};for(const fn of this.listeners)fn();}
  select(ids:string[]){this.publish({selected:ids});}
  selectSlide(id:string){if(this.state.doc.slides.some((s:D)=>s.id===id))this.publish({slideId:id,selected:[]});}
  get slide():D{return this.state.doc.slides.find((s:D)=>s.id===this.state.slideId)??this.state.doc.slides[0];}
- load(doc:D,readOnly=false,original='',warnings:string[]=[]){if(!readOnly)validateCore(doc);this.past=[];this.future=[];updateSafety.setDirty(false);this.publish({doc:copy(doc),slideId:doc.slides[0].id,selected:[],dirty:false,readOnly,original,warnings});}
+ load(doc:D,readOnly=false,original='',warnings:string[]=[]){if(!readOnly)validateCore(doc);this.past=[];this.future=[];updateSafety.setDirty(false);this.publish({doc:copy(doc),slideId:doc.slides[0].id,selected:[],dirty:false,exportedRevision:null,readOnly,original,warnings});}
  transaction(change:(doc:D,slide:D)=>void){if(this.state.readOnly)throw Error('READ_ONLY');if(updateSafety.getSnapshot().locked)throw Error('UPDATE_LOCKED');const next=copy(this.state.doc);const slide=next.slides.find((s:D)=>s.id===this.state.slideId)??next.slides[0];change(next,slide);next.document.revision=(Number(next.document.revision)||0)+1;next.document.modifiedAt=new Date().toISOString();delete next.build;validateCore(next);updateSafety.setDirty(true);this.past.push(this.state.doc);while(this.past.length>50)this.past.shift();let budget=0;for(let i=this.past.length-1;i>=0;i--){budget+=JSON.stringify(this.past[i]).length;if(budget>64*1024*1024&&i<this.past.length-1){this.past.splice(0,i+1);break;}}this.future=[];this.publish({doc:next,dirty:true});}
  undo(){if(!this.past.length||this.state.readOnly)return;if(!updateSafety.setDirty(true))return;this.future.push(this.state.doc);this.publish({doc:this.past.pop()!,selected:[],dirty:true});}
  redo(){if(!this.future.length||this.state.readOnly)return;if(!updateSafety.setDirty(true))return;this.past.push(this.state.doc);this.publish({doc:this.future.pop()!,selected:[],dirty:true});}
- markExported(revision:number){if(Number(this.state.doc.document.revision??0)!==revision)return;updateSafety.setDirty(false);this.publish({dirty:false});}
+ /** Export acknowledges only the downloaded revision, never local IndexedDB persistence. */
+ markExported(revision:number){if(Number(this.state.doc.document.revision??0)!==revision)return;this.publish({exportedRevision:revision});}
+ /** A completed CAS write may clear dirty only if this exact snapshot is still current. */
+ markPersisted(snapshot:D){if(this.state.doc!==snapshot)return false;updateSafety.setDirty(false);this.publish({dirty:false});return true;}
  updateDocument(patch:D){this.transaction(d=>Object.assign(d.document,patch));}
  updateSlide(patch:D){this.transaction((_d,s)=>Object.assign(s,patch));}
  updateElement(id:string,patch:D){this.transaction((d,s)=>{const e=s.view.elements.find((e:D)=>e.id===id);if(!e)return;Object.assign(e,copy(patch));const binding=s.placeholderBindings?.find((b:D)=>b.elementId===id);if(binding){binding.overrides={...binding.overrides};for(const k of ['geometry','style'])if(patch[k])binding.overrides[k]=copy(patch[k]);}});}
