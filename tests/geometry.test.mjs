@@ -6,7 +6,7 @@ test('all eight resize handles change only their respective edges',()=>{
  const expected={
   nw:{x:90,y:185,width:130,height:95},n:{x:100,y:185,width:120,height:95},ne:{x:100,y:185,width:130,height:95},
   e:{x:100,y:200,width:130,height:80},se:{x:100,y:200,width:130,height:95},s:{x:100,y:200,width:120,height:95},
-  sw:{x:90,y:200,width:130,height:80},w:{x:90,y:200,width:130,height:80}
+  sw:{x:90,y:200,width:130,height:95},w:{x:90,y:200,width:130,height:80}
  };
  for(const direction of resizeDirections)assert.deepEqual(resizeRect(rect,direction,direction.includes('w')?-10:10,direction.includes('n')?-15:15),expected[direction],direction);
 });
