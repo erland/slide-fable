@@ -262,6 +262,18 @@ try{
  const zip=await JSZip.loadAsync(new Uint8Array(result.pptx));assert.equal(Object.keys(zip.files).filter(n=>/^ppt\/slides\/slide\d+.xml$/.test(n)).length,3);const xml=(await Promise.all([1,2,3].map(i=>zip.file('ppt/slides/slide'+i+'.xml').async('string')))).join('');assert.ok(xml.includes('graphicFrame'));assert.ok(xml.includes('ÅÄÖ'));assert.ok(zip.file('customXml/item1.xml'));const iz=await JSZip.loadAsync(new Uint8Array(result.images));assert.equal(Object.keys(iz.files).length,3);pass('DEV013-014:PDF-PPTX-PNG-files-and-native-OOXML');
  await page.getByRole('button',{name:'Presentera',exact:true}).click();await page.getByRole('button',{name:'Svart skärm',exact:true}).click();assert.equal(await page.locator('.black-screen').count(),1);await page.getByRole('button',{name:'Visa bild',exact:true}).click();const popupPromise=page.waitForEvent('popup');await page.getByRole('button',{name:'Publikfönster',exact:true}).click();const audience=await popupPromise;await audience.locator('.audience').waitFor();assert.equal(await audience.getByText('HEMLIG ANTECKNING',{exact:true}).count(),0);const audienceSource=await audience.evaluate(async()=>(await import('/src/core/editor.ts')).editorStore.getSnapshot().doc);assert.ok(!JSON.stringify(audienceSource).includes('HEMLIG ANTECKNING'));await audience.close();await page.getByRole('button',{name:'Avsluta',exact:true}).click();pass('DEV012:presenter-blackout-and-private-notes-omitted-from-audience');
  // SF-UX-21: verify that the compact ribbon remains navigable at all target sizes.
+ const endpointId=await page.evaluate(async()=>{const store=(await import('/src/core/editor.ts')).editorStore;const id=store.add('arrow');store.select([id]);return id;});
+ const endpointHandles=page.locator('.line-endpoint-handle');
+ assert.equal(await endpointHandles.count(),2,'Line and arrow selection exposes two endpoint handles');
+ const endHandle=page.locator('.line-endpoint-handle[data-endpoint="end"]');
+ const eb=await endHandle.boundingBox();assert.ok(eb);
+ await page.mouse.move(eb.x+eb.width/2,eb.y+eb.height/2);
+ await page.mouse.down();await page.mouse.move(eb.x+eb.width/2-100,eb.y+eb.height/2+120,{steps:6});await page.mouse.up();
+ const endpointDoc=await model(),arrow=endpointDoc.slides.find(s=>s.id===endpointDoc.slides[endpointDoc.slides.length-1]?.id)?.view.elements.find(e=>e.id===endpointId)??endpointDoc.slides.flatMap(s=>s.view.elements).find(e=>e.id===endpointId);
+ assert.ok(arrow?.extensions?.slideFableLinePoints,'Endpoint edit must persist in PPD extension');
+ assert.notEqual(arrow.extensions.slideFableLinePoints.start.y,arrow.extensions.slideFableLinePoints.end.y,'Arrow must become diagonal');
+ assert.equal(await page.locator('.stage [data-element-id="'+endpointId+'"] svg polygon').count(),1,'Arrowhead still rendered');
+ pass('SF-SH-03:movable-line-endpoint-and-arrowhead');
  for(const [name,width,height] of [['desktop',1440,1000],['tablet',768,1024],['phone',390,844]]){
   await page.setViewportSize({width,height});
   await page.getByRole('tab',{name:'Visa'}).click();
