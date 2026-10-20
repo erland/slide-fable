@@ -5,12 +5,13 @@ export type Point={x:number;y:number};
 export function markerKind(value:unknown):MarkerKind{
  return typeof value==='string'&&markerKinds.includes(value as MarkerKind)?value as MarkerKind:'none';
 }
-export function endMarkers(element:{type:string;extensions?:{slideFableEndMarkers?:{start?:string;end?:string}}}):{start:MarkerKind;end:MarkerKind}{
+export function endMarkers(element:{type?:string;extensions?:{slideFableEndMarkers?:{start?:string;end?:string}}}):{start:MarkerKind;end:MarkerKind}{
  const specified=element.extensions?.slideFableEndMarkers;
  return {start:specified?.start===undefined?'none':markerKind(specified.start),end:specified?.end===undefined?(element.type==='arrow'?'filledArrow':'none'):markerKind(specified.end)};
 }
 /** Return marker geometry in slide-space, with tip at endpoint and normal pointing toward other endpoint. */
-export function markerGeometry(kind:MarkerKind,tip:Point,other:Point){
+export type MarkerGeometry={kind:'circle';center:Point;radius:number}|{kind:'diamond'|'bar'|'openArrow'|'filledArrow';points:Point[]}|null;
+export function markerGeometry(kind:MarkerKind,tip:Point,other:Point):MarkerGeometry{
  const distance=Math.hypot(other.x-tip.x,other.y-tip.y)||1;
  const ux=(other.x-tip.x)/distance,uy=(other.y-tip.y)/distance;
  const vx=-uy,vy=ux,length=22,half=12;
