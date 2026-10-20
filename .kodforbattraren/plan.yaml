@@ -61,5 +61,10 @@ steps:
 
   - id: SF-UX-14
     title: Sammanhållen navigering
-    status: implemented_verification_pending
+    status: completed
     depends_on: [SF-UX-13]
+
+  - id: SF-UX-15
+    title: Kompakt och expanderbart menyband
+    status: implemented_verification_pending
+    depends_on: [SF-UX-14]
