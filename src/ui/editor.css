@@ -105,3 +105,20 @@
  .editor-workspace .editor-canvas-pane .canvas-scroll{flex:1 1 auto;height:auto;min-height:340px;box-sizing:border-box}
  .editor-workspace .filmstrip{flex:0 0 auto}
 }
+
+/* SF-UX-23: compact phone header without hiding file/edit commands. */
+@media(max-width:520px){
+ .editor-header{gap:6px;padding:7px 10px;align-items:center}
+ .editor-header .brand{font-size:17px;flex:1 1 auto}
+ .editor-header .brand img{width:26px;height:26px}
+ .editor-header .document-title{order:2;flex-basis:100%;line-height:1.2;margin:0;font-size:11px}
+ .editor-header>button{min-height:34px;padding:5px 7px;font-size:11px}
+ .editor-header .editor-menu-disclosure>summary{min-height:34px;max-width:95px;padding:4px 7px}
+ .mobile-panels{padding:3px 8px;gap:4px}
+ .mobile-panels button{min-height:36px;padding:5px 6px}
+ .ribbon-collapse{min-height:30px;right:5px;top:3px;padding:4px 5px}
+ .ribbon-tabs{padding-right:102px}
+ .ribbon-tabs button{padding:5px 9px;min-height:33px}
+ .insert-tools{padding:5px 8px;gap:4px}
+ .insert-tools button{min-height:33px;padding:5px 7px}
+}
