@@ -153,3 +153,10 @@ shape_line_endpoints:
   implementation: extensions.slideFableLinePoints
   verification: pending_ci
   next_after_success: SF-SH-04
+
+shape_visual_picker:
+  current: SF-SH-04
+  state: implemented_verification_pending
+  previous_step_sf_sh_03: merged
+  verification: pending_ci
+  next_after_success: SF-SH-05
