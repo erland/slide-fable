@@ -76,5 +76,10 @@ steps:
 
   - id: SF-UX-17
     title: Utökad kommandokatalog för bild och ritverktyg
-    status: implemented_verification_pending
+    status: completed
     depends_on: [SF-UX-16]
+
+  - id: SF-UX-18
+    title: Deklarativ placering av delade menykommandon
+    status: implemented_verification_pending
+    depends_on: [SF-UX-17]
