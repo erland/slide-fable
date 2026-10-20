@@ -64,3 +64,10 @@ ux_unified_navigation:
   previous_step_sf_ux_13: pass_ci_runs_39348514657_39348495596
   verification: pending_ci
   next_after_success: command_catalog_and_collapsible_ribbon
+
+ux_ribbon_compact:
+  current: SF-UX-15
+  state: implemented_verification_pending
+  previous_step_sf_ux_14: pass_ci_runs_39350653215_39350648848
+  verification: pending_ci
+  next_after_success: command_catalog_refactor
