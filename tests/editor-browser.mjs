@@ -126,10 +126,11 @@ try{
  assert.equal(await page.getByRole('tabpanel',{name:'Start'}).getByRole('button',{name:'Klistra in',exact:true}).count(),1,'Shared Paste command stays available in Start');
  assert.equal(await page.locator('.editor-canvas-pane').isVisible(),true);
  await ribbon.getByRole('tab',{name:'Rita'}).click();
- assert.equal(await page.getByRole('tabpanel',{name:'Rita'}).getByRole('button',{name:'Linje'}).isVisible(),true);
- assert.deepEqual(await page.getByRole('tabpanel',{name:'Rita'}).locator('.ribbon-actions > button').allTextContents(),['Linje','Pil','Form'],'Rita command order must follow the tab configuration');
- assert.equal(await page.getByRole('tabpanel',{name:'Rita'}).getByRole('button',{name:'Pil'}).isVisible(),true);
- assert.equal(await page.getByRole('tabpanel',{name:'Rita'}).getByRole('button',{name:'Form'}).isVisible(),true);
+ const drawPanel=page.getByRole('tabpanel',{name:'Rita'});
+ assert.equal(await drawPanel.getByRole('button',{name:'Linje'}).count(),0,'Rita must not insert shapes');
+ for(const name of ['Rita fyllning','Rita linjefärg','Rita linjetjocklek','Rita opacitet'])assert.equal(await drawPanel.getByLabel(name).count(),1);
+ assert.equal(await drawPanel.getByLabel('Rita fyllning').isDisabled(),true,'Formatting requires a selected shape');
+ pass('SF-SH-05:draw-formatting-controls');
  await ribbon.getByRole('tab',{name:'Design'}).click();
  assert.equal(await page.getByRole('tabpanel',{name:'Design'}).getByRole('button',{name:'Öppna designegenskaper'}).isVisible(),true);
  await ribbon.getByRole('tab',{name:'Visa'}).click();
