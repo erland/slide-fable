@@ -100,3 +100,11 @@ ux_specialized_ribbon:
   previous_step_sf_ux_18: pass_ci_runs_39352232238_39352214758
   changes: [declarative_insert_groups, visa_presentation_command]
   verification: pending_ci
+
+ux_visa_deduplication:
+  current: SF-UX-20
+  state: implemented_verification_pending
+  previous_step_sf_ux_19: pass_ci_runs_39352642623_39352628196
+  changes: [single_slide_visibility_control, single_notes_visibility_control]
+  verification: pending_ci
+  next_after_success: visual_ux_review
