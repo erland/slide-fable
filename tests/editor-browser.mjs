@@ -312,6 +312,7 @@ try{
  await markerPanel.getByLabel('Rita startsymbol').selectOption('bar');
  assert.equal(await page.locator('.stage [data-element-id="'+lineId+'"] svg polyline.line-end-marker').count(),1);
  pass('SF-SH-11:independent-endpoint-markers');
+ await page.evaluate(async id=>(await import('/src/core/editor.ts')).editorStore.select([id]),endpointId);
 
  // Background clicks should clear selection, including the slide surface itself.
  const selection=()=>page.evaluate(async()=>[...(await import('/src/core/editor.ts')).editorStore.getSnapshot().selected]);
