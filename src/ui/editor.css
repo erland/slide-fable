@@ -89,3 +89,10 @@
 .ribbon-actions .workspace-controls-disclosure>summary{white-space:nowrap;min-height:34px}
 .ribbon-actions .workspace-controls-disclosure[open] .workspace-layout-controls{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
 @media(max-width:900px){.editor-header .editor-menu-disclosure>summary{max-width:100px;overflow:hidden;text-overflow:ellipsis}.ribbon-actions .workspace-controls-disclosure .workspace-layout-controls{max-width:min(70vw,340px)}}
+
+/* SF-UX-15: one tab row even when the contextual toolbar is collapsed. */
+.editor-canvas-pane{position:relative}
+.ribbon-collapse{position:absolute;right:9px;top:6px;z-index:3;min-height:30px;padding:4px 8px;font-size:12px;border:1px solid var(--line);border-radius:6px;background:var(--panel)}
+.ribbon-tabs{padding-right:115px}
+.ribbon-panel[hidden]{display:none!important}
+@media(max-width:900px){.ribbon-tabs{padding-right:105px}.ribbon-collapse{right:6px;top:4px;font-size:11px}}
