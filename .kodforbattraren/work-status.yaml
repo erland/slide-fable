@@ -42,3 +42,10 @@ ux_redesign:
   previous_step_sf_ux_09: pass_ci_runs_39318474081_39318444697
   previous_step_sf_ux_10: pass_ci_runs_39319032269_39319006229
   next_after_success: SF-UX-11-final-review
+
+ux_compact_layout:
+  current: SF-UX-12
+  state: implemented_verification_pending
+  changes: [collapsed_secondary_commands, zoom_in_visa_tab, portrait_slide_strip_reserved_height]
+  verification: pending_ci
+  next_after_success: manual_portrait_and_landscape_review

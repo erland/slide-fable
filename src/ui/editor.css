@@ -55,3 +55,20 @@
 
 /* SF-UX-09: contextual commands stay compact; secondary commands open on demand. */
 .ribbon-dropdown{position:relative;flex-shrink:0}.ribbon-dropdown>summary{cursor:pointer;list-style:none;min-height:34px;display:flex;align-items:center;padding:5px 10px;border:1px solid var(--line);border-radius:6px;background:var(--panel);font-size:12px}.ribbon-dropdown>summary::-webkit-details-marker{display:none}.ribbon-dropdown-items{position:absolute;top:calc(100% + 4px);right:0;display:flex;flex-direction:column;gap:4px;min-width:160px;padding:8px;background:var(--panel);border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 20px #0002;z-index:40}.ribbon-dropdown-items button{text-align:left}
+
+/* SF-UX-12: prioritize the canvas and reachable slide strip over permanent toolbars. */
+.editor-menu-disclosure{border-bottom:1px solid var(--line);padding:3px 12px}
+.editor-menu-disclosure>summary{display:inline-flex;align-items:center;min-height:32px;padding:4px 10px;border:1px solid var(--line);border-radius:6px;background:var(--panel);cursor:pointer;font-size:12px;list-style:none}
+.editor-menu-disclosure>summary::-webkit-details-marker{display:none}
+.editor-menu-disclosure .editor-menu{border-bottom:0;padding:5px 0}
+.ribbon-actions .canvas-controls{border:0;padding:0;display:flex;align-items:center;gap:10px;white-space:nowrap}
+@media(max-width:900px) and (orientation:portrait){
+ .editor-workspace{height:clamp(425px,calc(100dvh - 235px),850px);min-height:0;overflow:hidden}
+ .editor-workspace .editor-canvas-pane{flex:1 1 auto;min-height:0;overflow:hidden}
+ .editor-canvas-pane .canvas-scroll{flex:1 1 auto;height:auto;min-height:140px;overflow:auto}
+ .editor-workspace .filmstrip{flex:0 0 auto;max-height:190px;overflow:hidden}
+ .filmstrip .button-row{display:none}
+ .filmstrip ol{max-height:110px}
+ .editor-workspace[data-panel=properties][data-properties-open=true]>.properties{position:absolute;right:8px;bottom:8px;z-index:60;background:var(--panel);box-shadow:0 4px 20px #0003;max-height:55vh;width:min(330px,calc(100% - 16px));overflow:auto}
+ .editor-workspace{position:relative}
+}
