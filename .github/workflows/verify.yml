@@ -21,4 +21,18 @@ jobs:
       - run: python -m pip install -r requirements-dev.txt -r requirements-dev002.txt
       - run: npm ci
       - run: npx playwright install --with-deps chromium
-      - run: python scripts/verify_release_candidate.py
+      - name: Verify candidate and capture visual evidence
+        run: python scripts/verify_release_candidate.py
+        env:
+          EDITOR_OUTPUT: ${{ runner.temp }}/slide-fable-editor-evidence
+          PWA_OUTPUT: ${{ runner.temp }}/slide-fable-pwa-evidence
+      - name: Archive editor screenshots and test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: slide-fable-visual-evidence
+          path: |
+            ${{ runner.temp }}/slide-fable-editor-evidence/
+            ${{ runner.temp }}/slide-fable-pwa-evidence/
+          if-no-files-found: warn
+          retention-days: 14
