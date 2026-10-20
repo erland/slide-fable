@@ -49,3 +49,11 @@ ux_compact_layout:
   changes: [collapsed_secondary_commands, zoom_in_visa_tab, portrait_slide_strip_reserved_height]
   verification: pending_ci
   next_after_success: manual_portrait_and_landscape_review
+
+ux_secondary_controls:
+  current: SF-UX-13
+  state: implemented_verification_pending
+  previous_step_sf_ux_12: pass_ci_runs_39348117662_39348113636
+  changes: [collapsed_workspace_panel_controls, updated_browser_tests]
+  verification: pending_ci
+  next_after_success: visual_review_on_tablet_portrait

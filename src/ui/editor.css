@@ -72,3 +72,9 @@
  .editor-workspace[data-panel=properties][data-properties-open=true]>.properties{position:absolute;right:8px;bottom:8px;z-index:60;background:var(--panel);box-shadow:0 4px 20px #0003;max-height:55vh;width:min(330px,calc(100% - 16px));overflow:auto}
  .editor-workspace{position:relative}
 }
+
+/* SF-UX-13: secondary panel settings occupy one compact disclosure when unused. */
+.workspace-controls-disclosure{border-bottom:1px solid var(--line);padding:3px 12px}
+.workspace-controls-disclosure>summary{cursor:pointer;list-style:none;display:inline-flex;align-items:center;min-height:32px;padding:4px 10px;border:1px solid var(--line);border-radius:6px;background:var(--panel);font-size:12px}
+.workspace-controls-disclosure>summary::-webkit-details-marker{display:none}
+.workspace-controls-disclosure .workspace-layout-controls{border-bottom:0;padding:5px 0}
