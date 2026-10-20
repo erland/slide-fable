@@ -46,5 +46,10 @@ steps:
     depends_on: [SF-UX-09]
   - id: SF-UX-11
     title: Tillgänglighet och layoutslutgranskning
-    status: implemented_verification_pending
+    status: completed
     depends_on: [SF-UX-10]
+
+  - id: SF-UX-12
+    title: On-demand verktyg och synlig bildlista i porträtt
+    status: implemented_verification_pending
+    depends_on: [SF-UX-11]
