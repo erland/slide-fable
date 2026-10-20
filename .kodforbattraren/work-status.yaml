@@ -145,3 +145,11 @@ shape_resize_handles:
   previous_step_sf_sh_01: merged_with_green_ci
   verification: pending_ci
   next_after_success: SF-SH-03
+
+shape_line_endpoints:
+  current: SF-SH-03
+  state: implemented_verification_pending
+  previous_step_sf_sh_02: merged_ci_success_39368547578
+  implementation: extensions.slideFableLinePoints
+  verification: pending_ci
+  next_after_success: SF-SH-04
