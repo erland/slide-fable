@@ -1,5 +1,5 @@
 import {validateCore} from './contract.ts';
-import {blocks,box,copy,createDocument,effective,layoutOf,newSlide,plain,rich,setText,uid,type D} from './model.ts';
+import {blocks,box,copy,createDocument,effective,layoutOf,newSlide,plain,rich,setText,uid,isGeometry,isSlideCommand,isElementCommand,type Geometry,type D} from './model.ts';
 import {updateSafety} from '../pwa/safety.ts';
 export type EditorState={doc:D;slideId:string;selected:string[];dirty:boolean;exportedRevision:number|null;readOnly:boolean;original:string;warnings:string[];undo:number;redo:number};
 export class EditorStore{
@@ -19,6 +19,17 @@ export class EditorStore{
  markExported(revision:number){if(Number(this.state.doc.document.revision??0)!==revision)return;this.publish({exportedRevision:revision});}
  /** A completed CAS write may clear dirty only if this exact snapshot is still current. */
  markPersisted(snapshot:D){if(this.state.doc!==snapshot)return false;updateSafety.setDirty(false);this.publish({dirty:false});return true;}
+ /** Compile-time checked operations for the common editor command path. */
+ setSlideTitle(title:string){if(typeof title!=='string')throw Error('INVALID_SLIDE_TITLE');this.updateSlide({title});}
+ setElementGeometry(id:string,geometry:Geometry){
+  if(typeof id!=='string'||!isGeometry(geometry))throw Error('INVALID_GEOMETRY');
+  if(!this.slide.view.elements.some((element:D)=>element.id===id))return false;
+  this.updateElement(id,{geometry});return true;
+ }
+ insertTypedElement(element:import('./model.ts').ElementCommand){
+  if(!isElementCommand(element))throw Error('INVALID_ELEMENT');
+  this.insert(element);return element.id;
+ }
  updateDocument(patch:D){this.transaction(d=>Object.assign(d.document,patch));}
  updateSlide(patch:D){this.transaction((_d,s)=>Object.assign(s,patch));}
  updateElement(id:string,patch:D){this.transaction((d,s)=>{const e=s.view.elements.find((e:D)=>e.id===id);if(!e)return;Object.assign(e,copy(patch));const binding=s.placeholderBindings?.find((b:D)=>b.elementId===id);if(binding){binding.overrides={...binding.overrides};for(const k of ['geometry','style'])if(patch[k])binding.overrides[k]=copy(patch[k]);}});}

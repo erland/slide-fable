@@ -2,6 +2,32 @@
 // unknown until runtime validation; D is used only behind that boundary.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type D=Record<string,any>;
+/** Typed command boundary for common known PPD fields; unknown extensions remain in D. */
+export type Geometry={x:number;y:number;width:number;height:number;rotation?:number;unit?:string};
+export type SlideCommand={id:string;title:string;view:{elements:D[]}};
+export type ElementCommand={id:string;type:string;geometry:Geometry;style?:D};
+export type AssetCommand={storage:string;mimeType:string;uri?:string;sha256?:string};
+export type ElementGeometryPatch={geometry:Geometry};
+export function isGeometry(value:unknown):value is Geometry{
+ if(!value||typeof value!=='object')return false;
+ const v=value as Record<string,unknown>;
+ return ['x','y','width','height'].every(k=>typeof v[k]==='number'&&Number.isFinite(v[k]));
+}
+export function isSlideCommand(value:unknown):value is SlideCommand{
+ if(!value||typeof value!=='object')return false;
+ const v=value as Record<string,unknown>;
+ return typeof v.id==='string'&&typeof v.title==='string'&&!!v.view&&typeof v.view==='object'&&Array.isArray((v.view as D).elements);
+}
+export function isElementCommand(value:unknown):value is ElementCommand{
+ if(!value||typeof value!=='object')return false;
+ const v=value as Record<string,unknown>;
+ return typeof v.id==='string'&&typeof v.type==='string'&&isGeometry(v.geometry);
+}
+export function isAssetCommand(value:unknown):value is AssetCommand{
+ if(!value||typeof value!=='object')return false;
+ const v=value as Record<string,unknown>;
+ return typeof v.storage==='string'&&typeof v.mimeType==='string'&&(v.uri===undefined||typeof v.uri==='string')&&(v.sha256===undefined||typeof v.sha256==='string');
+}
 export const copy=<T>(value:T):T=>structuredClone(value);
 export const uid=(prefix='id')=>prefix+'-'+crypto.randomUUID();
 export const box=(x=100,y=100,width=500,height=160)=>({x,y,width,height,rotation:0,unit:'logical'});

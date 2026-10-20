@@ -34,3 +34,14 @@ test('moveSlide reorders valid slides and supports undo without losing reference
  assert.equal(s.getSnapshot().doc.document.revision,rev+1);validateCore(s.getSnapshot().doc);
  s.undo();assert.deepEqual(s.getSnapshot().doc.slides.map(x=>x.id),[first,second]);validateCore(s.getSnapshot().doc);
 });
+
+test('typed command boundary validates geometry and known objects without changing wire model',()=>{
+ const s=new EditorStore();const title=s.slide.view.elements[0];
+ const before=s.getSnapshot().doc.document.revision;
+ assert.throws(()=>s.setElementGeometry(title.id,{x:0,y:0,width:Infinity,height:12}),/INVALID_GEOMETRY/);
+ assert.equal(s.getSnapshot().doc.document.revision,before);
+ assert.equal(s.setElementGeometry('missing',{x:0,y:0,width:100,height:100}),false);
+ assert.equal(s.getSnapshot().doc.document.revision,before);
+ assert.equal(s.setElementGeometry(title.id,{x:30,y:50,width:500,height:100}),true);
+ s.setSlideTitle('Typad titel');assert.equal(s.slide.title,'Typad titel');validateCore(s.getSnapshot().doc);
+});
