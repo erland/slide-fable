@@ -223,6 +223,17 @@ try{
  const afterResize=(await model()).slides[2].view.elements.find(e=>e.id===newTextId).geometry;
  assert.ok(afterResize.width>beforeResize.width&&afterResize.height>beforeResize.height,'Resize must increase width and height');
  pass('SF-UX-05:resize-handle-updates-geometry');
+ assert.equal(await page.locator('.resize-handle').count(),8,'Selected object must expose eight resize handles');
+ const west=page.locator('.resize-handle[data-direction="w"]');
+ const beforeWest=(await model()).slides[2].view.elements.find(e=>e.id===newTextId).geometry;
+ const westBox=await west.boundingBox();assert.ok(westBox);
+ await page.mouse.move(westBox.x+westBox.width/2,westBox.y+westBox.height/2);
+ await page.mouse.down();await page.mouse.move(westBox.x+westBox.width/2-40,westBox.y+westBox.height/2,{steps:5});await page.mouse.up();
+ const afterWest=(await model()).slides[2].view.elements.find(e=>e.id===newTextId).geometry;
+ assert.ok(afterWest.x<beforeWest.x&&afterWest.width>beforeWest.width,'West resize must move left edge while growing width');
+ assert.equal(afterWest.x+afterWest.width,beforeWest.x+beforeWest.width,'West resize must preserve right edge');
+ pass('SF-SH-02:eight-handles-and-west-resize');
+
  const firstId=(await model()).slides[2].view.elements[0].id;
  await page.locator('.editor-canvas-pane .stage [data-element-id="'+newTextId+'"]').click();
  await page.locator('.editor-canvas-pane .stage [data-element-id="'+firstId+'"]').click({modifiers:['Shift']});

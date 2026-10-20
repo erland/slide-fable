@@ -138,3 +138,10 @@ shape_editing:
   verification: pending_ci
   next_after_success: SF-SH-02
   constraints: preserve_wire_format_and_existing_resize_behavior
+
+shape_resize_handles:
+  current: SF-SH-02
+  state: implemented_verification_pending
+  previous_step_sf_sh_01: merged_with_green_ci
+  verification: pending_ci
+  next_after_success: SF-SH-03

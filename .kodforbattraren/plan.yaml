@@ -111,11 +111,11 @@ steps:
 
   - id: SF-SH-01
     title: Geometrigrund och tester för formhandtag och linjeändpunkter
-    status: implemented_verification_pending
+    status: completed
 
   - id: SF-SH-02
     title: Åtta resize-handtag för markerade objekt
-    status: pending
+    status: implemented_verification_pending
     depends_on: [SF-SH-01]
 
   - id: SF-SH-03
