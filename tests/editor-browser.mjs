@@ -130,6 +130,18 @@ try{
  await ribbon.getByRole('tab',{name:'Infoga'}).click();
  assert.equal(await toolbar.getByRole('button',{name:'Text',exact:true}).isVisible(),true);
  pass('SF-UX-08:ribbon-tabs');
+ const toggleRibbon=page.getByRole('button',{name:'Dölj verktyg'});
+ await toggleRibbon.click();
+ assert.equal(await page.getByRole('button',{name:'Visa verktyg'}).getAttribute('aria-expanded'),'false');
+ assert.equal(await page.locator('#slide-ribbon-panel').isVisible(),false,'Ribbon command strip should be hidden');
+ assert.equal(await ribbon.getByRole('tab',{name:'Start'}).isVisible(),true,'Tabs must remain accessible');
+ await ribbon.getByRole('tab',{name:'Rita'}).click();
+ assert.equal(await page.locator('#slide-ribbon-panel').isVisible(),true,'Choosing a tab restores its tools');
+ await page.getByRole('button',{name:'Dölj verktyg'}).click();
+ await page.getByRole('button',{name:'Visa verktyg'}).click();
+ await ribbon.getByRole('tab',{name:'Infoga'}).click();
+ pass('SF-UX-15:collapsible-ribbon');
+
  await page.evaluate(async()=> (await import('/src/core/editor.ts')).editorStore.select([]));
  await ribbon.getByRole('tab',{name:'Infoga'}).focus();
  await page.keyboard.press('ArrowRight');
