@@ -108,3 +108,11 @@ ux_visa_deduplication:
   changes: [single_slide_visibility_control, single_notes_visibility_control]
   verification: pending_ci
   next_after_success: visual_ux_review
+
+ux_responsive_review:
+  current: SF-UX-21
+  state: implemented_verification_pending
+  previous_step_sf_ux_20: merged_with_green_ci
+  coverage: [desktop_compact, tablet_compact, phone_compact]
+  evidence: [desktop-compact-ribbon.png, tablet-compact-ribbon.png, phone-compact-ribbon.png]
+  verification: pending_ci
