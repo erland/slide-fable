@@ -1,0 +1,51 @@
+{
+  "case": "editable-and-fallback-v1",
+  "objects": [
+    {
+      "id": "fixture-native-text",
+      "type": "text",
+      "expect": {
+        "pptx": "native",
+        "pdf": "native"
+      }
+    },
+    {
+      "id": "fixture-chart",
+      "type": "chart",
+      "expect": {
+        "pptx": "native",
+        "pdf": "rasterized"
+      }
+    },
+    {
+      "id": "fixture-equation",
+      "type": "equation",
+      "expect": {
+        "pptx": "rasterized",
+        "pdf": "rasterized"
+      }
+    },
+    {
+      "id": "fixture-effect",
+      "type": "shape",
+      "effects": [
+        {
+          "type": "backdropBlur"
+        }
+      ],
+      "expect": {
+        "pptx": "rasterized",
+        "pdf": "rasterized"
+      }
+    },
+    {
+      "id": "fixture-group",
+      "type": "group",
+      "expect": {
+        "pptx": "hybrid",
+        "pdf": "hybrid"
+      }
+    }
+  ],
+  "expectedWarningFragment": "backdrop blur"
+}

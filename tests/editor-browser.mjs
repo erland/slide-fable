@@ -13,6 +13,34 @@ async function model(){return page.evaluate(async()=>(await import('/src/core/ed
 async function api(fn,arg){return page.evaluate(async({source,arg})=>{const store=(await import('/src/core/editor.ts')).editorStore;return new Function('store','arg',source)(store,arg);},{source:fn,arg});}
 try{
  await page.goto('http://127.0.0.1:5178/');await page.getByRole('button',{name:'Lägg till bild',exact:true}).waitFor();
+
+ const exportFixture=JSON.parse(await readFile(path.resolve('fixtures/export-regression-v1.json'),'utf8'));
+ const fixtureReports=await page.evaluate(async fixture=>{
+  const {createDocument,box}=await import('/src/core/model.ts');
+  const {preflight}=await import('/src/export/office.ts');
+  const doc=createDocument(),slide=doc.slides[0];slide.view.elements=[];
+  for(const item of fixture.objects){
+   const e={id:item.id,type:item.type,geometry:box(0,0,200,100),style:{}};
+   if(item.type==='text')e.text='Fixture title';
+   if(item.type==='chart'){e.chartType='bar';e.dataset={categories:['A'],series:[{id:'one',name:'One',values:[1]}]};}
+   if(item.type==='equation')e.equation={sourceFormat:'latex',source:'x^2',altText:'x squared'};
+   if(item.type==='group')e.children=[];
+   if(item.effects)e.effects=item.effects;
+   slide.view.elements.push(e);
+  }
+  return {pptx:preflight(doc,'pptx'),pdf:preflight(doc,'pdf'),flattened:preflight(doc,'pptx','flattened')};
+ },exportFixture);
+ for(const format of ['pptx','pdf']){
+  const report=fixtureReports[format],byId=new Map(report.objects.map(o=>[o.elementId,o]));
+  for(const item of exportFixture.objects){
+   assert.equal(byId.get(item.id)?.status,item.expect[format],format+' '+item.id);
+   assert.ok(byId.get(item.id)?.reason,format+' '+item.id+' reason');
+  }
+  assert.ok(report.warnings.some(w=>w.toLowerCase().includes(exportFixture.expectedWarningFragment)),format+' backdrop warning');
+  assert.equal(new Set(report.objects.map(o=>o.elementId)).size,exportFixture.objects.length);
+ }
+ for(const item of exportFixture.objects)assert.equal(fixtureReports.flattened.objects.find(o=>o.elementId===item.id)?.status,'rasterized','flattened '+item.id);
+ pass('IP-008:PDF-and-PPTX-native-hybrid-fallback-and-warning-fixtures');
  const starterTexts=page.locator('.editor-canvas-pane .stage .render-element.type-text');
  assert.ok(await starterTexts.count()>=2,'New presentation must have title and body text');
  for(const expectedSize of ['72px','36px']){
