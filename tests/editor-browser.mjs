@@ -250,6 +250,21 @@ try{
  await writeFile(path.join(output,'presentation.pdf'),new Uint8Array(result.pdf));await writeFile(path.join(output,'presentation.pptx'),new Uint8Array(result.pptx));await writeFile(path.join(output,'images.zip'),new Uint8Array(result.images));await writeFile(path.join(output,'export-reports.json'),JSON.stringify({pdf:result.pdfReport,pptx:result.pptxReport},null,2));
  const zip=await JSZip.loadAsync(new Uint8Array(result.pptx));assert.equal(Object.keys(zip.files).filter(n=>/^ppt\/slides\/slide\d+.xml$/.test(n)).length,3);const xml=(await Promise.all([1,2,3].map(i=>zip.file('ppt/slides/slide'+i+'.xml').async('string')))).join('');assert.ok(xml.includes('graphicFrame'));assert.ok(xml.includes('ÅÄÖ'));assert.ok(zip.file('customXml/item1.xml'));const iz=await JSZip.loadAsync(new Uint8Array(result.images));assert.equal(Object.keys(iz.files).length,3);pass('DEV013-014:PDF-PPTX-PNG-files-and-native-OOXML');
  await page.getByRole('button',{name:'Presentera',exact:true}).click();await page.getByRole('button',{name:'Svart skärm',exact:true}).click();assert.equal(await page.locator('.black-screen').count(),1);await page.getByRole('button',{name:'Visa bild',exact:true}).click();const popupPromise=page.waitForEvent('popup');await page.getByRole('button',{name:'Publikfönster',exact:true}).click();const audience=await popupPromise;await audience.locator('.audience').waitFor();assert.equal(await audience.getByText('HEMLIG ANTECKNING',{exact:true}).count(),0);const audienceSource=await audience.evaluate(async()=>(await import('/src/core/editor.ts')).editorStore.getSnapshot().doc);assert.ok(!JSON.stringify(audienceSource).includes('HEMLIG ANTECKNING'));await audience.close();await page.getByRole('button',{name:'Avsluta',exact:true}).click();pass('DEV012:presenter-blackout-and-private-notes-omitted-from-audience');
+ // SF-UX-21: verify that the compact ribbon remains navigable at all target sizes.
+ for(const [name,width,height] of [['desktop',1440,1000],['tablet',768,1024],['phone',390,844]]){
+  await page.setViewportSize({width,height});
+  await page.getByRole('tab',{name:'Visa'}).click();
+  await page.getByRole('button',{name:'Dölj verktyg'}).click();
+  assert.equal(await page.locator('#slide-ribbon-panel').isVisible(),false,name+': ribbon panel must be hidden');
+  assert.equal(await page.getByRole('tab',{name:'Visa'}).isVisible(),true,name+': primary tabs must remain visible');
+  assert.equal(await page.locator('.editor-canvas-pane .stage').isVisible(),true,name+': stage must remain visible');
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),name+': no horizontal page overflow');
+  await page.screenshot({path:path.join(output,name+'-compact-ribbon.png'),fullPage:true});
+  await page.getByRole('tab',{name:'Infoga'}).click();
+  assert.equal(await page.locator('#slide-ribbon-panel').isVisible(),true,name+': selecting a tab must restore tools');
+  pass('SF-UX-21:compact-ribbon-'+name);
+ }
+ await page.setViewportSize({width:1440,height:1000});
  for(const [name,width,height] of [['desktop',1440,1000],['tablet',768,1024],['phone',390,844]]){await page.setViewportSize({width,height});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);if(width<=800){await page.getByRole('button',{name:'Egenskaper',exact:true}).click();await page.getByRole('button',{name:'Objekt',exact:true}).waitFor();await page.getByRole('button',{name:'Arbetsyta',exact:true}).click();}await page.screenshot({path:path.join(output,name+'.png'),fullPage:true});pass('responsive:'+name);}
  assert.deepEqual(errors,[]);pass('browser:no-unhandled-errors');
 }finally{await writeFile(path.join(output,'editor-results.json'),JSON.stringify({checks,engine:browser.version()},null,2));await context.close();await browser.close();server.kill();}

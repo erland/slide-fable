@@ -91,5 +91,10 @@ steps:
 
   - id: SF-UX-20
     title: Eliminera överlappande Visa-kommandon
-    status: implemented_verification_pending
+    status: completed
     depends_on: [SF-UX-19]
+
+  - id: SF-UX-21
+    title: Responsiv UX-verifiering av kompakt menyband
+    status: implemented_verification_pending
+    depends_on: [SF-UX-20]
