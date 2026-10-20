@@ -122,3 +122,17 @@
  .insert-tools{padding:5px 8px;gap:4px}
  .insert-tools button{min-height:33px;padding:5px 7px}
 }
+
+/* SF-SH-04: pictorial shape gallery, shared by mouse and touch layouts. */
+.shape-picker{position:relative;flex:0 0 auto}
+.shape-picker>summary{list-style:none;cursor:pointer;display:flex;align-items:center;min-height:35px;box-sizing:border-box;padding:7px 11px;border:1px solid var(--line);border-radius:6px;background:var(--panel);font-size:12px}
+.shape-picker>summary::-webkit-details-marker{display:none}
+.shape-picker-items{position:absolute;top:calc(100% + 5px);left:0;z-index:65;width:min(290px,calc(100vw - 24px));max-height:min(420px,65dvh);overflow-y:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;padding:8px;background:var(--panel);border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 20px #0002}
+.shape-picker:not([open]) .shape-picker-items{display:none}
+.shape-picker[open] .shape-picker-items{display:grid}
+.editor-app .shape-picker-items button{display:flex;align-items:center;gap:7px;text-align:left;min-height:51px;padding:5px;white-space:normal;font-size:12px}
+.shape-picker-items svg{flex:0 0 48px}
+@media(max-width:520px){.shape-picker-items{left:-60px}}
+
+/* Keep the gallery visible despite generic details/menu rules. */
+.editor-app details.shape-picker[open] > .shape-picker-items{display:grid!important;visibility:visible!important;opacity:1!important}

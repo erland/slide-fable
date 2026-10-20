@@ -21,9 +21,9 @@ export class EditorStore{
  updateElement(id:string,patch:D){this.transaction((d,s)=>{const e=s.view.elements.find((e:D)=>e.id===id);if(!e)return;Object.assign(e,copy(patch));const binding=s.placeholderBindings?.find((b:D)=>b.elementId===id);if(binding){binding.overrides={...binding.overrides};for(const k of ['geometry','style'])if(patch[k])binding.overrides[k]=copy(patch[k]);}});}
  editText(id:string,value:D|string){this.transaction((_d,s)=>{const e=s.view.elements.find((e:D)=>e.id===id);if(e)setText(s,e,copy(value));});}
  insert(element:D){this.transaction((_d,s)=>s.view.elements.push(element));this.select([element.id]);}
- add(type:string){const g=box(180+this.slide.view.elements.length*12,220,600,240),base:D={id:uid(type),type,geometry:g,style:{}};
+ add(type:string,shapeType='rect'){const g=box(180+this.slide.view.elements.length*12,220,600,240),base:D={id:uid(type),type,geometry:g,style:{}};
  if(type==='text'){base.text=rich('Ny text');base.style={fontSize:40,color:'#183641'};}
- if(type==='shape'){base.shapeType='rect';base.style={fill:{color:'#d5e5df'},stroke:{color:'#183641'},strokeWidth:2,cornerRadius:12};}
+ if(type==='shape'){base.shapeType=shapeType==='round'?'rect':shapeType;base.style={fill:{color:'#d5e5df'},stroke:{color:'#183641'},strokeWidth:2,cornerRadius:shapeType==='round'?30:12};}
  if(type==='line'||type==='arrow'){base.geometry=box(200,300,600,10);base.style={stroke:{color:'#cf694c'},strokeWidth:5};}
  if(type==='table'){base.cells=[[{id:uid('cell'),text:'Rubrik A',header:true},{id:uid('cell'),text:'Rubrik B',header:true}],[{id:uid('cell'),text:'Värde A'},{id:uid('cell'),text:'Värde B'}]];base.geometry=box(150,300,1100,300);}
  if(type==='chart'){base.chartType='bar';base.dataset={categories:['A','B','C'],series:[{id:uid('series'),name:'Serie 1',values:[4,8,6]}]};base.geometry=box(180,260,1100,500);}
