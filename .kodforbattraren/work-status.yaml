@@ -123,3 +123,10 @@ ux_responsive_canvas:
   approach: definite_flex_height_prevents_fit_feedback_loop
   coverage: [tablet_slide_size, mobile_slide_size]
   verification: pending_ci
+
+ux_mobile_toolbar:
+  current: SF-UX-23
+  state: implemented_verification_pending
+  previous_step_sf_ux_22: merged_and_ci_green
+  coverage: [mobile_header_height, document_menu_reachability]
+  verification: pending_ci

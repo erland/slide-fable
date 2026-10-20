@@ -270,6 +270,12 @@ try{
    assert.ok(fit.slideWidth<=fit.viewportWidth+2,name+': slide width should fit the viewport');
    pass('SF-UX-22:usable-portrait-slide-'+name);
   }
+ if(name==='phone'){
+  const header=await page.locator('.editor-header').boundingBox();
+  assert.ok(header&&header.height<=115,'Mobile header must stay compact: '+JSON.stringify(header));
+  assert.equal(await page.locator('.editor-header .editor-menu-disclosure > summary').isVisible(),true,'Document commands stay reachable on phone');
+  pass('SF-UX-23:compact-mobile-header');
+ }
  pass('SF-UX-21:compact-ribbon-'+name);
  }
  await page.setViewportSize({width:1440,height:1000});
