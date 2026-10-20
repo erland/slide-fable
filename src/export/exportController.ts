@@ -2,7 +2,9 @@
 import {copy,type D} from '../core/model.ts';
 import {validateFull} from '../core/contract.ts';
 import {download,imageExport,standaloneHtml} from './html.tsx';
-import {pdfExport,pptxExport,preflight} from './office.ts';
+import {preflight} from './plan.ts';
+import {writePdf} from './adapters/pdf.ts';
+import {writePptx} from './adapters/pptx.ts';
 import {updateSafety} from '../pwa/safety.ts';
 
 export type ExportFormat='html'|'png'|'jpg'|'pdf'|'pptx';
@@ -35,7 +37,7 @@ export async function exportPresentation(options:ExportOptions):Promise<D>{
    download(await imageExport(source,slides,imageWidth,format),source.document.title+'-'+format+'.zip');
    result=preflight({...source,slides},format);
   }else if(format==='pdf'||format==='pptx'){
-   const output=await (format==='pdf'?pdfExport:pptxExport)(source,slides,profile,includePrivate);
+   const output=await (format==='pdf'?writePdf:writePptx)(source,slides,profile,includePrivate);
    download(output.file,source.document.title+'.'+format);
    result=output.report;
   }else throw Error('Okänt exportformat: '+format);
