@@ -328,6 +328,21 @@ try{
  assert.equal(styledShape.style.strokeWidth,6);
  assert.ok((await page.locator('.stage [data-element-id="'+shapeId+'"] svg ellipse').getAttribute('stroke-dasharray'))?.length,'Ellipse renders dotted border');
  pass('SF-SH-09:stroke-style-and-width-for-lines-and-shapes');
+ // SF-SH-10: text is stored on a shape, rendered inside it and editable in-place.
+ const textShapeId=await page.evaluate(async()=>{const store=(await import('/src/core/editor.ts')).editorStore;const id=store.add('shape','rect');store.updateElement(id,{geometry:{x:35,y:35,width:340,height:140,rotation:0,unit:'logical'}});return id;});
+ const shapeNode=page.locator('.stage [data-element-id="'+textShapeId+'"]');
+ await shapeNode.dblclick();
+ const shapeEditor=page.getByRole('group',{name:'Redigera text på bilden'});
+ assert.equal(await shapeEditor.isVisible(),true,'Double-clicking shape opens text editor');
+ await shapeEditor.getByRole('textbox',{name:'Redigera objektets text'}).fill('Beslut fattat');
+ await shapeEditor.getByRole('button',{name:'Klar'}).click();
+ const afterShapeText=(await model()).slides.flatMap(slide=>slide.view.elements).find(e=>e.id===textShapeId);
+ assert.ok(JSON.stringify(afterShapeText.text).includes('Beslut fattat'),'Shape stores rich text on same object');
+ assert.equal(await shapeNode.locator('.shape-text').innerText(),'Beslut fattat');
+ await page.evaluate(async id=>{const store=(await import('/src/core/editor.ts')).editorStore;store.updateElement(id,{geometry:{x:70,y:50,width:400,height:180,rotation:0,unit:'logical'}});},textShapeId);
+ assert.equal(await shapeNode.locator('.shape-text').innerText(),'Beslut fattat','Shape text follows geometry changes');
+ pass('SF-SH-10:editable-shape-text');
+
 
 
  for(const [name,width,height] of [['desktop',1440,1000],['tablet',768,1024],['phone',390,844]]){
