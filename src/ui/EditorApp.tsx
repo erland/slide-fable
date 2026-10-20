@@ -1,6 +1,7 @@
 import {useEffect,useRef,useState,useSyncExternalStore,type PointerEvent} from 'react';
 import {editorStore as store} from '../core/editor';
 import {resizeRect,resizeDirections,lineBounds,moveEndpoint,type ResizeDirection} from '../core/geometry';
+import {markerGeometry,markerSvgPoints,endMarkers} from '../core/endMarkers';
 import {box,copy,createDocument,effective,layoutOf,masterOf,plain,textOf,uid,type D} from '../core/model';
 import {bytesHash,importDocument,validateFull} from '../core/contract';
 import {deleteDraft,listDrafts,saveDraft,type Draft} from '../core/persistence';
@@ -77,10 +78,10 @@ export function App(){
   // Preview the endpoint in the rendered SVG without creating an undo entry per pointer event.
   const rendered=Array.from(document.querySelectorAll<HTMLElement>('.stage .render-element')).find(n=>n.dataset.elementId===id);
   const line=rendered?.querySelector<SVGLineElement>('svg line');
-  const arrowhead=rendered?.querySelector<SVGPolygonElement>('svg polygon');
+  const markerNodes=Array.from(rendered?.querySelectorAll<SVGElement>('.line-end-marker')??[]);
+  const originalMarkers=markerNodes.map(node=>({node,points:node.getAttribute('points'),cx:node.getAttribute('cx'),cy:node.getAttribute('cy')}));
   const originalStyle=rendered?.getAttribute('style')??'';
   const originalLine=line?{x1:line.getAttribute('x1'),y1:line.getAttribute('y1'),x2:line.getAttribute('x2'),y2:line.getAttribute('y2')}:undefined;
-  const originalArrowhead=arrowhead?.getAttribute('points');
   const handleStyle=target.getAttribute('style')??'';
   const position=(ev:globalThis.PointerEvent)=>{
    const dx=(ev.clientX-x)/scale,dy=(ev.clientY-y)/scale;
@@ -94,13 +95,21 @@ export function App(){
    Object.assign(rendered.style,{left:bounds.x+'px',top:bounds.y+'px',width:bounds.width+'px',height:bounds.height+'px'});
    const x1=points.start.x-bounds.x,y1=points.start.y-bounds.y,x2=points.end.x-bounds.x,y2=points.end.y-bounds.y;
    line.setAttribute('x1',String(x1));line.setAttribute('y1',String(y1));line.setAttribute('x2',String(x2));line.setAttribute('y2',String(y2));
-   if(arrowhead){const len=Math.hypot(x2-x1,y2-y1)||1,ux=(x2-x1)/len,uy=(y2-y1)/len;arrowhead.setAttribute('points',`${x2},${y2} ${x2-22*ux+12*uy},${y2-22*uy-12*ux} ${x2-22*ux-12*uy},${y2-22*uy+12*ux}`);}
+   const configured=endMarkers(source);
+   for(const end of ['start','end'] as const){
+    const node=markerNodes.find(n=>n.getAttribute('data-marker-end')===end);
+    if(!node)continue;
+    const geometry=markerGeometry(configured[end],end==='start'?{x:x1,y:y1}:{x:x2,y:y2},end==='start'?{x:x2,y:y2}:{x:x1,y:y1});
+    if(!geometry)continue;
+    if('points'in geometry)node.setAttribute('points',markerSvgPoints(geometry.points));
+    if('center'in geometry){node.setAttribute('cx',String(geometry.center.x));node.setAttribute('cy',String(geometry.center.y));}
+   }
    const p=which==='start'?points.start:points.end;target.style.left=(p.x-12)+'px';target.style.top=(p.y-12)+'px';
   };
   const restore=()=>{
    if(rendered)rendered.setAttribute('style',originalStyle);
    if(line&&originalLine)for(const [key,value] of Object.entries(originalLine))if(value!==null)line.setAttribute(key,value);
-   if(arrowhead&&originalArrowhead!==null&&originalArrowhead!==undefined)arrowhead.setAttribute('points',originalArrowhead);
+   for(const {node,points,cx,cy} of originalMarkers)for(const [key,value] of Object.entries({points,cx,cy})){if(value===null)node.removeAttribute(key);else node.setAttribute(key,value);}
    target.setAttribute('style',handleStyle);
   };
   const cleanup=()=>{target.removeEventListener('pointermove',preview);target.removeEventListener('pointerup',finish);target.removeEventListener('pointercancel',cancel);};
