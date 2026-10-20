@@ -282,7 +282,13 @@ try{
  const endHandle=page.locator('.line-endpoint-handle[data-endpoint="end"]');
  const eb=await endHandle.boundingBox();assert.ok(eb);
  await page.mouse.move(eb.x+eb.width/2,eb.y+eb.height/2);
- await page.mouse.down();await page.mouse.move(eb.x+eb.width/2-100,eb.y+eb.height/2+120,{steps:6});await page.mouse.up();
+ const beforeLive=await page.locator('.stage [data-element-id="'+endpointId+'"] svg line').getAttribute('x2');
+ await page.mouse.down();await page.mouse.move(eb.x+eb.width/2-100,eb.y+eb.height/2+120,{steps:6});
+ const duringLive=await page.locator('.stage [data-element-id="'+endpointId+'"] svg line').getAttribute('x2');
+ assert.notEqual(duringLive,beforeLive,'Arrow line endpoint must visually update while dragging before pointerup');
+ assert.equal((await model()).slides.flatMap(s=>s.view.elements).find(e=>e.id===endpointId)?.extensions?.slideFableLinePoints,undefined,'Drag preview must not commit document before pointerup');
+ await page.mouse.up();
+ assert.equal(await page.locator('.stage [data-element-id="'+endpointId+'"]').evaluate(el=>getComputedStyle(el).outlineStyle),'none','Selected arrow has handles without bounding selection outline');
  const endpointDoc=await model(),arrow=endpointDoc.slides.find(s=>s.id===endpointDoc.slides[endpointDoc.slides.length-1]?.id)?.view.elements.find(e=>e.id===endpointId)??endpointDoc.slides.flatMap(s=>s.view.elements).find(e=>e.id===endpointId);
  assert.ok(arrow?.extensions?.slideFableLinePoints,'Endpoint edit must persist in PPD extension');
  assert.notEqual(arrow.extensions.slideFableLinePoints.start.y,arrow.extensions.slideFableLinePoints.end.y,'Arrow must become diagonal');

@@ -74,16 +74,45 @@ export function App(){
   const end={x:b.x+(stored?.end?.x??b.width),y:b.y+(stored?.end?.y??b.height/2)};
   const x=event.clientX,y=event.clientY,target=event.currentTarget as HTMLElement;
   target.setPointerCapture(event.pointerId);
-  const finish=(ev:globalThis.PointerEvent)=>{
-   target.removeEventListener('pointerup',finish);target.removeEventListener('pointercancel',cancel);
+  // Preview the endpoint in the rendered SVG without creating an undo entry per pointer event.
+  const rendered=Array.from(document.querySelectorAll<HTMLElement>('.stage .render-element')).find(n=>n.dataset.elementId===id);
+  const line=rendered?.querySelector<SVGLineElement>('svg line');
+  const arrowhead=rendered?.querySelector<SVGPolygonElement>('svg polygon');
+  const originalStyle=rendered?.getAttribute('style')??'';
+  const originalLine=line?{x1:line.getAttribute('x1'),y1:line.getAttribute('y1'),x2:line.getAttribute('x2'),y2:line.getAttribute('y2')}:undefined;
+  const originalArrowhead=arrowhead?.getAttribute('points');
+  const handleStyle=target.getAttribute('style')??'';
+  const position=(ev:globalThis.PointerEvent)=>{
    const dx=(ev.clientX-x)/scale,dy=(ev.clientY-y)/scale;
-   if(Math.abs(dx)+Math.abs(dy)<2)return;
    const q=(v:number)=>snap&&!ev.altKey?Math.round(v/10)*10:v;
    const points=moveEndpoint(start,end,which,q(dx),q(dy)),bounds=lineBounds(points.start,points.end);
+   return {points,bounds,changed:Math.abs(dx)+Math.abs(dy)>=2};
+  };
+  const preview=(ev:globalThis.PointerEvent)=>{
+   const {points,bounds}=position(ev);
+   if(!rendered||!line)return;
+   Object.assign(rendered.style,{left:bounds.x+'px',top:bounds.y+'px',width:bounds.width+'px',height:bounds.height+'px'});
+   const x1=points.start.x-bounds.x,y1=points.start.y-bounds.y,x2=points.end.x-bounds.x,y2=points.end.y-bounds.y;
+   line.setAttribute('x1',String(x1));line.setAttribute('y1',String(y1));line.setAttribute('x2',String(x2));line.setAttribute('y2',String(y2));
+   if(arrowhead){const len=Math.hypot(x2-x1,y2-y1)||1,ux=(x2-x1)/len,uy=(y2-y1)/len;arrowhead.setAttribute('points',`${x2},${y2} ${x2-22*ux+12*uy},${y2-22*uy-12*ux} ${x2-22*ux-12*uy},${y2-22*uy+12*ux}`);}
+   const p=which==='start'?points.start:points.end;target.style.left=(p.x-12)+'px';target.style.top=(p.y-12)+'px';
+  };
+  const restore=()=>{
+   if(rendered)rendered.setAttribute('style',originalStyle);
+   if(line&&originalLine)for(const [key,value] of Object.entries(originalLine))if(value!==null)line.setAttribute(key,value);
+   if(arrowhead&&originalArrowhead!==null&&originalArrowhead!==undefined)arrowhead.setAttribute('points',originalArrowhead);
+   target.setAttribute('style',handleStyle);
+  };
+  const cleanup=()=>{target.removeEventListener('pointermove',preview);target.removeEventListener('pointerup',finish);target.removeEventListener('pointercancel',cancel);};
+  const finish=(ev:globalThis.PointerEvent)=>{
+   cleanup();const {points,bounds,changed}=position(ev);
+   if(!changed){restore();return;}
    run(()=>store.updateElement(id,{geometry:{...b,...bounds},extensions:{...source.extensions,slideFableLinePoints:{start:{x:points.start.x-bounds.x,y:points.start.y-bounds.y},end:{x:points.end.x-bounds.x,y:points.end.y-bounds.y}}}}));
   };
-  const cancel=()=>{target.removeEventListener('pointerup',finish);target.removeEventListener('pointercancel',cancel);};
-  target.addEventListener('pointerup',finish);target.addEventListener('pointercancel',cancel);
+  const cancel=()=>{cleanup();restore();};
+  target.addEventListener('pointermove',preview);
+  target.addEventListener('pointerup',finish);
+  target.addEventListener('pointercancel',cancel);
  }
  const patch=(p:D)=>run(()=>store.updateElement(element.id,p));
  async function exportFile(){const end=updateSafety.beginOperation();try{const source=copy(doc),slides=source.slides.filter((s:D)=>!s.hidden&&(exportScope==='all'||s.id===slide.id));if(!slides.length)throw Error('Minst en synlig bild behövs.');await validateFull(source);let result;if(format==='html'){download(await standaloneHtml(source,includePrivate),source.document.title+'.html','text/html');result=preflight(source,'html');}else if(format==='png'||format==='jpg'){download(await imageExport(source,slides,imageWidth,format),source.document.title+'-'+format+'.zip');result=preflight({...source,slides},format);}else{const output=await (format==='pdf'?pdfExport:pptxExport)(source,slides,profile,includePrivate);download(output.file,source.document.title+'.'+format);result=output.report;}const json=JSON.stringify(result,null,2);setReport(json);download(json,source.document.title+'-exportrapport.json','application/json');setMessage('Exporten är skapad. Läs rapporten för objekt som rasteriserats.');}catch(e){setMessage('Exporten misslyckades: '+String(e));}finally{end();}}
