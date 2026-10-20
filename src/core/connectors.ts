@@ -16,8 +16,8 @@ export function nearestPort(point:Point,items:Array<{id:string;geometry:Rect}>,l
  for(const item of items)for(const port of ports){const p=portPoint(item.geometry,port),d=Math.hypot(point.x-p.x,point.y-p.y);if(d<=dist){dist=d;best={elementId:item.id,port};}}
  return best;
 }
-export function resolveLinePoints(line:{geometry:Rect;extensions?:{slideFableLinePoints?:{start?:Point;end?:Point}};startAnchor?:Anchor;endAnchor?:Anchor},elements:Array<{id:string;geometry:Rect}>):{start:Point;end:Point}{
- const b=line.geometry,stored=line.extensions?.slideFableLinePoints;
+export function resolveLinePoints(line:{geometry?:Rect;extensions?:{slideFableLinePoints?:{start?:Point;end?:Point}};startAnchor?:Anchor;endAnchor?:Anchor},elements:Array<{id:string;geometry:Rect}>):{start:Point;end:Point}{
+ const b=line.geometry??{x:0,y:0,width:1,height:1},stored=line.extensions?.slideFableLinePoints;
  const anchor=(a:Anchor|undefined)=>{const e=elements.find(e=>e.id===a?.elementId);return e?portPoint(e.geometry,a?.port):undefined;};
  return {start:anchor(line.startAnchor)??{x:b.x+(stored?.start?.x??0),y:b.y+(stored?.start?.y??b.height/2)},end:anchor(line.endAnchor)??{x:b.x+(stored?.end?.x??b.width),y:b.y+(stored?.end?.y??b.height/2)}};
 }
