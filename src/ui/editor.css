@@ -96,3 +96,11 @@
 .ribbon-tabs{padding-right:115px}
 .ribbon-panel[hidden]{display:none!important}
 @media(max-width:900px){.ribbon-tabs{padding-right:105px}.ribbon-collapse{right:6px;top:4px;font-size:11px}}
+
+/* SF-UX-22: break the resize-observer/intrinsic-height feedback loop in portrait.
+   The canvas must receive the remaining workspace height before it is fitted. */
+@media(max-width:900px) and (orientation:portrait){
+ .editor-workspace .editor-canvas-pane{flex:1 1 0%;height:0;min-height:0}
+ .editor-workspace .editor-canvas-pane .canvas-scroll{flex:1 1 0%;height:0;min-height:0;box-sizing:border-box}
+ .editor-workspace .filmstrip{flex:0 0 auto}
+}
