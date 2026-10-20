@@ -307,6 +307,28 @@ try{
  await page.locator('.line-endpoint-handle').first().click();
  assert.deepEqual(await selection(),[endpointId],'Clicking an endpoint handle must preserve selection');
  pass('SF-SH-08:canvas-background-deselect');
+ // SF-SH-09: shape borders and line strokes share editable color/width/pattern controls.
+ await page.getByRole('tab',{name:'Rita'}).click();
+ const strokePanel=page.getByRole('tabpanel',{name:'Rita'});
+ await strokePanel.getByLabel('Rita linjestil').selectOption('dashed');
+ await strokePanel.getByLabel('Rita linjetjocklek').fill('8');
+ await strokePanel.getByLabel('Rita linjetjocklek').press('Tab');
+ await strokePanel.getByLabel('Rita linjefärg').fill('#0066cc');
+ const styledArrow=(await model()).slides.flatMap(slide=>slide.view.elements).find(e=>e.id===endpointId);
+ assert.equal(styledArrow.extensions.slideFableStrokeStyle,'dashed');
+ assert.equal(styledArrow.style.strokeWidth,8);
+ assert.equal(styledArrow.style.stroke.color,'#0066cc');
+ assert.ok((await page.locator('.stage [data-element-id="'+endpointId+'"] svg line').getAttribute('stroke-dasharray'))?.length,'SVG line renders dash pattern');
+ const shapeId=await page.evaluate(async()=>{const store=(await import('/src/core/editor.ts')).editorStore;return store.add('shape','ellipse');});
+ await strokePanel.getByLabel('Rita linjestil').selectOption('dotted');
+ await strokePanel.getByLabel('Rita linjetjocklek').fill('6');
+ await strokePanel.getByLabel('Rita linjetjocklek').press('Tab');
+ const styledShape=(await model()).slides.flatMap(slide=>slide.view.elements).find(e=>e.id===shapeId);
+ assert.equal(styledShape.extensions.slideFableStrokeStyle,'dotted');
+ assert.equal(styledShape.style.strokeWidth,6);
+ assert.ok((await page.locator('.stage [data-element-id="'+shapeId+'"] svg ellipse').getAttribute('stroke-dasharray'))?.length,'Ellipse renders dotted border');
+ pass('SF-SH-09:stroke-style-and-width-for-lines-and-shapes');
+
 
  for(const [name,width,height] of [['desktop',1440,1000],['tablet',768,1024],['phone',390,844]]){
   await page.setViewportSize({width,height});
