@@ -136,3 +136,6 @@
 
 /* Keep the gallery visible despite generic details/menu rules. */
 .editor-app details.shape-picker[open] > .shape-picker-items{display:grid!important;visibility:visible!important;opacity:1!important}
+
+/* SF-SH-05: compact, responsive formatting controls in Rita. */
+.draw-formatting{display:flex;flex-wrap:wrap;align-items:end;gap:8px;padding:5px 0}.draw-formatting label{display:flex;flex-direction:column;gap:3px;margin:0;font-size:11px;min-width:90px}.draw-formatting input[type=color]{width:54px;min-width:54px}.draw-formatting input[type=number]{width:90px;min-width:75px;padding:6px}
