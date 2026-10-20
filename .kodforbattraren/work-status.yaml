@@ -93,3 +93,10 @@ ux_declarative_tabs:
   previous_step_sf_ux_17: pass_ci_runs_39351920574_39351887595
   verification: pending_ci
   next_after_success: consolidate_specialized_ribbon_groups
+
+ux_specialized_ribbon:
+  current: SF-UX-19
+  state: implemented_verification_pending
+  previous_step_sf_ux_18: pass_ci_runs_39352232238_39352214758
+  changes: [declarative_insert_groups, visa_presentation_command]
+  verification: pending_ci
