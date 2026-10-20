@@ -120,11 +120,14 @@ try{
  assert.equal(await ribbon.getByRole('tab',{name:'Infoga'}).getAttribute('aria-selected'),'true');
  await ribbon.getByRole('tab',{name:'Start'}).click();
  assert.equal(await page.getByRole('tabpanel',{name:'Start'}).getByRole('button',{name:'Ny bild'}).isVisible(),true);
+ assert.equal(await page.getByRole('tabpanel',{name:'Start'}).getByRole('button',{name:'Ny bild'}).isEnabled(),true,'Shared New slide command is enabled in editable mode');
  assert.equal(await page.getByRole('tabpanel',{name:'Start'}).getByRole('button',{name:'Kopiera',exact:true}).count(),1,'Shared Copy command stays available in Start');
  assert.equal(await page.getByRole('tabpanel',{name:'Start'}).getByRole('button',{name:'Klistra in',exact:true}).count(),1,'Shared Paste command stays available in Start');
  assert.equal(await page.locator('.editor-canvas-pane').isVisible(),true);
  await ribbon.getByRole('tab',{name:'Rita'}).click();
  assert.equal(await page.getByRole('tabpanel',{name:'Rita'}).getByRole('button',{name:'Linje'}).isVisible(),true);
+ assert.equal(await page.getByRole('tabpanel',{name:'Rita'}).getByRole('button',{name:'Pil'}).isVisible(),true);
+ assert.equal(await page.getByRole('tabpanel',{name:'Rita'}).getByRole('button',{name:'Form'}).isVisible(),true);
  await ribbon.getByRole('tab',{name:'Design'}).click();
  assert.equal(await page.getByRole('tabpanel',{name:'Design'}).getByRole('button',{name:'Öppna designegenskaper'}).isVisible(),true);
  await ribbon.getByRole('tab',{name:'Visa'}).click();
