@@ -30,6 +30,8 @@ try{
  pass('SF-UX-04:initial-title-and-body-preserve-font-size');
  const pane=page.locator('.editor-canvas-pane');const paneWidth=()=>pane.evaluate(el=>el.getBoundingClientRect().width);
  const baseWidth=await paneWidth();
+ assert.equal(await page.locator('.workspace-controls-disclosure').evaluate(el=>el.hasAttribute('open')),false,'Secondary panel controls must be collapsed initially');
+ await page.locator('.workspace-controls-disclosure > summary').click();
  await page.getByRole('button',{name:'Dölj bilder',exact:true}).click();
  assert.equal(await page.locator('#slide-filmstrip').isVisible(),false);
  assert.ok((await paneWidth())>baseWidth+100,'Canvas must grow when slides are hidden');
@@ -40,6 +42,7 @@ try{
  await page.getByRole('button',{name:'Visa egenskaper',exact:true}).click();
  assert.equal(await page.locator('#slide-filmstrip').isVisible(),true);
  assert.equal(await page.locator('.properties').isVisible(),true);
+ await page.locator('.workspace-controls-disclosure > summary').click();
  pass('SF-UX-01:desktop-panel-toggle-and-canvas-growth');
  const fitMeasurements=await page.evaluate(()=>{const viewport=document.querySelector('.canvas-scroll'),space=document.querySelector('.stage-space');if(!viewport||!space)throw Error('Canvas elements missing');return {vw:viewport.clientWidth,vh:viewport.clientHeight,sw:space.getBoundingClientRect().width,sh:space.getBoundingClientRect().height};});
  assert.ok(fitMeasurements.sw<=fitMeasurements.vw+1,'Fit must respect viewport width');
