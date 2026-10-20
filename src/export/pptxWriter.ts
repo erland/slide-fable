@@ -8,8 +8,7 @@ import {resolveLinePoints} from '../core/connectors';
 import {hash} from '../core/contract';
 import {rasterSlide} from './html';
 import {preflight} from './plan.ts';
-import {preflight} from './plan.ts';
-import {color,flatten,measure,rasterObject,backgroundImage,sourceRecords} from './officeShared.ts';
+import {flatten,measure,rasterObject,backgroundImage,sourceRecords} from './officeShared.ts';
 
 export async function pptxExport(doc:D,slides:D[],profile='editable-first',includeSources=true){const report=preflight({...doc,slides},'pptx',profile);report.sourceHash=await hash(doc);const pptx=new PptxGenJS(),W=doc.document.canvas.width,H=doc.document.canvas.height,units=W/13.3333333333;const factor=72/units;pptx.defineLayout({name:'CUSTOM',width:W/units,height:H/units});pptx.layout='CUSTOM';pptx.title=doc.document.title;pptx.author='Slide Fable';
  for(const slide of slides){const page=pptx.addSlide();if(profile==='flattened'){page.addImage({data:await rasterSlide(doc,slide),x:0,y:0,w:W/units,h:H/units});continue;}page.addImage({data:profile==='visual-first'?await rasterSlide(doc,slide,W,false,true):await backgroundImage(doc,slide),x:0,y:0,w:W/units,h:H/units});for(const e of flatten(doc,slide)){if(profile==='visual-first'&&e.type!=='text')continue;const b=e.geometry,position={x:b.x/units,y:b.y/units,w:b.width/units,h:b.height/units,rotate:b.rotation??0};const complex=e.effects?.length||e._shear;
