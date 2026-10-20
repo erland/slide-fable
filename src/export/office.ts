@@ -6,7 +6,7 @@ import {toPng,getFontEmbedCSS} from 'html-to-image';
 import {backgroundCss,diagramLayout,PALETTE} from '../editor/Renderer';
 import {copy,effective,layoutOf,masterOf,plain,textOf,type D} from '../core/model';
 import {strokeStyle,dashArray} from '../core/stroke';
-import {endMarkers,pptxMarker,markerGeometry,type MarkerKind} from '../core/endMarkers';
+import {endMarkers,pptxMarker} from '../core/endMarkers';
 import {hash} from '../core/contract';
 import {fontData,mountedSlide,rasterSlide} from './html';
 
