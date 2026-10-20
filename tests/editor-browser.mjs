@@ -386,6 +386,40 @@ try{
  assert.equal(afterConnect.startAnchor.port,'right');
  assert.equal(afterConnect.endAnchor.port,'left');
  pass('SF-SH-12:attached-line-follows-shape-live');
+ // SF-SH-13: assembled visual acceptance fixture, PPD validation, and editable PPTX.
+ await page.evaluate(async({first,second,line})=>{
+  const store=(await import('/src/core/editor.ts')).editorStore;
+  store.updateElement(first,{text:{paragraphs:[{id:'acceptance-p',runs:[{text:'Beslut'}]}]}});
+  store.updateElement(line,{style:{stroke:{color:'#0066cc'},strokeWidth:7},
+   extensions:{slideFableStrokeStyle:'dashed',slideFableEndMarkers:{start:'circle',end:'filledArrow'}}});
+  store.select([line]);
+ },connection);
+ const configuredLine=page.locator('.stage [data-element-id="'+connection.line+'"]');
+ assert.equal(await configuredLine.locator('svg circle.line-end-marker').count(),1);
+ assert.equal(await configuredLine.locator('svg polygon.line-end-marker').count(),1);
+ assert.ok((await configuredLine.locator('svg line').getAttribute('stroke-dasharray'))?.length);
+ assert.equal(await page.locator('.stage [data-element-id="'+connection.first+'"] .shape-text').innerText(),'Beslut');
+ const accepted=await page.evaluate(async({first,second,line})=>{
+  const store=(await import('/src/core/editor.ts')).editorStore;
+  const source=store.getSnapshot().doc;
+  const {copy}=await import('/src/core/model.ts');
+  const {validateFull}=await import('/src/core/contract.ts');
+  const {pptxExport,preflight}=await import('/src/export/office.ts');
+  const doc=copy(source);
+  await validateFull(doc);
+  const exported=await pptxExport(doc,doc.slides);
+  return {pptx:Array.from(exported.file),report:preflight(doc,'pptx')};
+ },connection);
+ const acceptanceZip=await JSZip.loadAsync(new Uint8Array(accepted.pptx));
+ const acceptanceXml=(await Promise.all(Object.keys(acceptanceZip.files).filter(n=>/^ppt\/slides\/slide\d+\.xml$/.test(n)).map(n=>acceptanceZip.file(n).async('string')))).join('');
+ assert.ok(acceptanceXml.includes('Beslut'),'Shape text should survive editable PowerPoint export');
+ assert.ok(acceptanceXml.includes('0066CC'),'Connection stroke color should survive PowerPoint export');
+ assert.ok(acceptanceXml.includes('dash'),'Connection dash pattern should survive PowerPoint export');
+ assert.equal(accepted.report.objects.filter(o=>[connection.first,connection.second,connection.line].includes(o.elementId)&&o.status==='native').length,3,'Forms and line remain native editable PPTX objects');
+ await writeFile(path.join(output,'sf-sh-13-acceptance.pptx'),new Uint8Array(accepted.pptx));
+ await page.screenshot({path:path.join(output,'sf-sh-13-shapes-and-connectors.png'),fullPage:true});
+ pass('SF-SH-13:combined-shape-text-connector-symbol-pattern-and-editable-PPTX');
+
 
 
 
