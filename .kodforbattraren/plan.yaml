@@ -115,12 +115,12 @@ steps:
 
   - id: SF-SH-02
     title: Åtta resize-handtag för markerade objekt
-    status: implemented_verification_pending
+    status: completed
     depends_on: [SF-SH-01]
 
   - id: SF-SH-03
     title: Flyttbara linjeändpunkter och riktade pilspetsar
-    status: pending
+    status: implemented_verification_pending
     depends_on: [SF-SH-02]
 
   - id: SF-SH-04
