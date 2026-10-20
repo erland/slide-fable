@@ -25,8 +25,11 @@ with tempfile.TemporaryDirectory(prefix='slide-fable-final-') as temporary:
     assert len(pdf.pages)==3 and 'ÅÄÖ' in '\n'.join(p.extract_text() for p in pdf.pages)
     checks.append({'name':'PDF three pages and searchable Swedish text','result':'PASS'})
 run('source, references, machine status and project hygiene',[sys.executable,'scripts/verify_planning.py'])
+# Derive explicit per-platform/per-format gates from actual named CI checks.
+from release_gates import load_profile, summarize
+release_gate_results=summarize(load_profile(),checks)
 # The build is done by test:pwa and restored to the package version before exit.
 files={str(p.relative_to(ROOT)):hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(ROOT.rglob('*')) if p.is_file() and not any(x in ('node_modules','dist','generated','__pycache__','test-results','playwright-report','.system-builder') for x in p.parts)}
-result={'result':'AUTOMATED_PASS_RELEASE_NOT_READY','version':json.loads((ROOT/'package.json').read_text())['version'],'release_readiness':'NOT_READY','checks':checks,'unit_output':unit,'contract_fixture_cases':58,'editor':editor,'pwa':pwa,'source_sha256':hashlib.sha256(json.dumps(files,sort_keys=True,separators=(',',':')).encode()).hexdigest(),'material_files':files,'open_gates':'docs/release-review.md','not_run':['physical Safari/iPad/iPhone installation and editing','WebKit (missing host libraries)','PowerPoint Mac/Windows open and edit','full visual reference suite','remote GitHub Actions']}
+result={'result':'AUTOMATED_PASS_RELEASE_NOT_READY','version':json.loads((ROOT/'package.json').read_text())['version'],'release_readiness':'NOT_READY','release_gates':release_gate_results,'checks':checks,'unit_output':unit,'contract_fixture_cases':58,'editor':editor,'pwa':pwa,'source_sha256':hashlib.sha256(json.dumps(files,sort_keys=True,separators=(',',':')).encode()).hexdigest(),'material_files':files,'open_gates':'docs/release-review.md','not_run':['physical Safari/iPad/iPhone installation and editing','WebKit (missing host libraries)','PowerPoint Mac/Windows open and edit','full visual reference suite','remote GitHub Actions']}
 print(json.dumps(result,ensure_ascii=False,indent=2))
 if args.require_ready:raise SystemExit(2)

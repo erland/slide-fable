@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "scope": "Slide Fable 0.5.0 MVP; green CI is not full acceptance",
+  "gates": [
+    {"id":"RG-001","area":"Code quality and compatibility","kind":"AUTOMATED","status":"PENDING","scope":"Lint, TS contract, update safety and unit tests","ci_check":"lint","evidence":"scripts/verify_release_candidate.py"},
+    {"id":"RG-002","area":"Document lifecycle","kind":"AUTOMATED","status":"PENDING","scope":"HTML export, CAS persistence and Chromium lifecycle regressions","ci_check":"document lifecycle browser regression","evidence":"tests/lifecycle-browser.mjs"},
+    {"id":"RG-003","area":"Editor and export","kind":"AUTOMATED","status":"PENDING","scope":"Chromium editor flows, PPTX structure and searchable PDF checks","ci_check":"editor browser flows","evidence":"tests/editor-browser.mjs"},
+    {"id":"RG-004","area":"PWA and offline","kind":"AUTOMATED","status":"PENDING","scope":"Built-app Chromium offline, updates, scope and multiple tabs","ci_check":"production build / typecheck / offline / updates","evidence":"tests/pwa.mjs"},
+    {"id":"RG-005","area":"Physical Apple devices","kind":"MANUAL","status":"PENDING","scope":"Safari iPhone/iPad installed PWA, offline restart, storage eviction, touch and export","evidence":"docs/verification-strategy.md"},
+    {"id":"RG-006","area":"PowerPoint interoperability","kind":"MANUAL","status":"PENDING","scope":"Open, edit and resave in PowerPoint Mac and Windows","evidence":"docs/release-review.md"},
+    {"id":"RG-007","area":"Accessibility and visual fidelity","kind":"MANUAL","status":"PENDING","scope":"Screen reader, keyboard and verified visual reference corpus","evidence":"docs/release-review.md"},
+    {"id":"RG-008","area":"Independent PDF reader","kind":"MANUAL","status":"PENDING","scope":"PDF pages, Swedish searchable text and formatting in real independent PDF reader","evidence":"docs/verification-strategy.md"},
+    {"id":"RG-009","area":"Historical migration","kind":"BLOCKED","status":"BLOCKED","scope":"Full PPD 0.1/0.2 historical compatibility with genuine source files and schema","evidence":"docs/release-review.md"},
+    {"id":"RG-010","area":"Full feature acceptance","kind":"MANUAL","status":"PENDING","scope":"Remaining AT-201–218 and AT-301–310 matrix not covered by scoped automated tests","evidence":"docs/release-review.md"}
+  ]
+}
