@@ -68,6 +68,17 @@ try{
  assert.ok(landscapeLayout.beside,'Landscape must show slide strip beside canvas');
  await page.setViewportSize({width:1440,height:1000});
  pass('SF-UX-07:portrait-bottom-strip-landscape-sidebar');
+ await page.setViewportSize({width:768,height:1024});
+ const portraitReach=await page.evaluate(()=>{const strip=document.querySelector('#slide-filmstrip')?.getBoundingClientRect();return {bottom:strip?.bottom??Infinity,height:window.innerHeight};});
+ assert.ok(portraitReach.bottom<=portraitReach.height+2,'Portrait slide picker must stay within viewport');
+ await page.setViewportSize({width:1440,height:1000});
+ assert.equal(await page.locator('.editor-menu-disclosure').evaluate(el=>el.hasAttribute('open')),false,'Secondary command menu is collapsed by default');
+ await page.getByRole('tab',{name:'Visa'}).click();
+ assert.equal(await page.getByRole('tabpanel',{name:'Visa'}).getByLabel('Zoom').isVisible(),true,'Zoom is available within Visa');
+ await page.getByRole('tab',{name:'Infoga'}).click();
+ assert.equal(await page.locator('.canvas-controls').isVisible(),false,'Zoom row is hidden outside Visa');
+ pass('SF-UX-12:collapsed-tools-and-portrait-filmstrip');
+
 
  await page.setViewportSize({width:390,height:844});
  const mobileNav=page.getByRole('navigation',{name:'Arbetsytans paneler'});
