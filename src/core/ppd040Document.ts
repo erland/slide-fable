@@ -1,5 +1,4 @@
-/** Explicit PPD 0.4 document creation and JSON reading boundary.
- * Does not switch active 0.3.1 editing, import or export. */
+/** PPD 0.4 document creation and strict JSON read/write boundary. */
 import {createDocument,copy,type D} from './model.ts';
 import {parseJson,PpdError} from './contract.ts';
 import {inspectPpd040} from './ppd040Preflight.ts';
