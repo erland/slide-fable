@@ -218,6 +218,16 @@ try{
  await ribbon.getByRole('tab',{name:'Infoga'}).click();
  pass('SF-UX-09:contextual-object-menu');
 
+ await page.evaluate(async()=>{const store=(await import('/src/core/editor.ts')).editorStore;store.select(store.slide.view.elements.slice(0,2).map(e=>e.id));});
+ await page.locator('#slide-properties .multi-selection-properties').waitFor();
+ assert.match(await page.locator('#slide-properties .multi-selection-properties h2').innerText(),/2 markerade objekt/);
+ assert.equal(await page.locator('#slide-properties .multi-selection-properties').getByRole('button',{name:'Gruppera'}).count(),1);
+ assert.equal(await page.locator('#slide-properties .geometry-fields').count(),0,'Multiple selection must not edit the first object implicitly');
+ await page.evaluate(async()=> (await import('/src/core/editor.ts')).editorStore.select([]));
+ await page.locator('#slide-properties .multi-selection-properties').waitFor({state:'detached'});
+ pass('UX-003:contextual-multi-selection');
+
+
 
  await page.getByRole('button',{name:'Lägg till bild',exact:true}).click();await page.getByRole('button',{name:'Lägg till bild',exact:true}).click();assert.equal((await model()).slides.length,3);pass('DEV005:create-three-slides');
  await toolbar.locator('.shape-picker').evaluate(el=>{el.open=false;});await toolbar.locator('.shape-picker > summary').click();assert.equal(await toolbar.locator('.shape-picker').evaluate(el=>el.open),true,'Shape picker must remain open after click');await toolbar.locator('.shape-picker-items button',{hasText:'Rektangel'}).first().click();await page.getByLabel('Bredd',{exact:true}).fill('470');await page.getByLabel('Bredd',{exact:true}).press('Enter');assert.equal((await model()).slides[2].view.elements.at(-1).geometry.width,470);await page.getByRole('button',{name:'Ångra',exact:true}).click();assert.equal((await model()).slides[2].view.elements.at(-1).geometry.width,600);await page.getByRole('button',{name:'Gör om',exact:true}).click();pass('DEV005:geometry-and-undo');
