@@ -220,3 +220,18 @@
  .editor-workspace[data-properties-open=true]>.properties{display:block}
  .editor-workspace .canvas-scroll{height:48vh;min-height:260px}
 }
+
+
+/* UX-portrait: the inspector visibility toggle is the source of truth.
+   Previously at 801–900 CSS px the sheet was only shown for data-panel=properties,
+   while the toolbar toggled data-properties-open without changing data-panel. */
+@media (max-width:1200px) and (orientation:portrait){
+ .editor-workspace[data-properties-open=true]>.properties{
+  display:block;position:relative;inset:auto;right:auto;bottom:auto;
+  order:3;flex:0 0 auto;box-sizing:border-box;width:100%;max-width:100%;
+  z-index:1;max-height:min(48dvh,430px);overflow-y:auto;overscroll-behavior:contain;
+  background:var(--panel);border:0;border-top:2px solid var(--line);
+  border-radius:16px 16px 0 0
+ }
+ .editor-workspace[data-properties-open=false]>.properties{display:none}
+}
