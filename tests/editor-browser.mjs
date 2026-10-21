@@ -529,5 +529,21 @@ try{
   pass('UX-portrait:inspector-visibility-'+width);
  }
  await page.setViewportSize({width:1440,height:1000});
+ const surfaceSupport=await page.evaluate(async()=>{
+  const {elementStyle}=await import('/src/editor/Renderer.tsx');
+  const doc=(await import('/src/core/editor.ts')).editorStore.getSnapshot().doc;
+  const style={fill:{color:'#ABCDEF'},stroke:{color:'#123456'},strokeWidth:4};
+  const geometry={x:0,y:0,width:100,height:50,rotation:0};
+  const text=elementStyle(doc,{type:'text',geometry,style});
+  const shape=elementStyle(doc,{type:'shape',geometry,style});
+  return {textBackground:text.background??null,textBorder:text.border??null,
+   shapeBackground:shape.background??null,shapeBorder:shape.border??null};
+ });
+ assert.ok(surfaceSupport.shapeBackground,'Shape surface is rendered');
+ assert.ok(surfaceSupport.shapeBorder.includes('4px'),'Shape stroke is rendered');
+ // Record the current text rendering gap explicitly until UX-005 implements it.
+ assert.equal(surfaceSupport.textBackground,null,'Known gap: text fill not yet rendered');
+ assert.equal(surfaceSupport.textBorder,null,'Known gap: text stroke not yet rendered');
+ pass('PPD-002:surface-renderer-gap-characterized');
  assert.deepEqual(errors,[]);pass('browser:no-unhandled-errors');
 }finally{await writeFile(path.join(output,'editor-results.json'),JSON.stringify({checks,engine:browser.version()},null,2));await context.close();await browser.close();server.kill();}
