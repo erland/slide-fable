@@ -1,0 +1,31 @@
+name: Profile editor history
+on:
+  pull_request:
+    paths:
+      - 'scripts/profile-history.mjs'
+      - 'docs/history-profiling.md'
+      - 'package.json'
+      - '.github/workflows/profile-history.yml'
+  workflow_dispatch:
+jobs:
+  profile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Measure history scenarios
+        run: |
+          set -o pipefail
+          npm run profile:history | tee history-profile.json
+          node -e "const fs=require('fs'); const s=fs.readFileSync('history-profile.json','utf8'); const p=JSON.parse(s.slice(s.indexOf('{'))); if(p.measurements?.length!==2)process.exit(1)"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: slide-fable-history-profile
+          path: history-profile.json
+          if-no-files-found: warn
