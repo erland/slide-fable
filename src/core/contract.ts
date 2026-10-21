@@ -1,3 +1,4 @@
+import {inspectPpd040} from './ppd040Preflight.ts';
 import Ajv from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
 import canonicalize from 'canonicalize';
@@ -41,15 +42,16 @@ function acyclic(graph:Map<string,string[]>,code:string){const done=new Set(),ac
 export function negotiate(model:D){
  if(model.format!=='ppd')return {mode:'blocked',code:'FORMAT'};
  if((model.document?.featureRequirements??[]).some((f:string)=>!FEATURES.has(f)))return {mode:'blocked',code:'REQUIRED_FEATURE'};
- if(!['0.3.0','0.3.1'].includes(model.schemaVersion))return {mode:'read_only',code:'UNVERIFIED_VERSION'};
- const min=model.minReaderVersion??'0.0.0';if(!/^\d+\.\d+\.\d+$/.test(min))return {mode:'blocked',code:'READER_VERSION'};const parts=min.split('.').map(Number);if(parts[0]>0||parts[1]>3||(parts[1]===3&&parts[2]>1))return {mode:'blocked',code:'READER_TOO_OLD'};
+ if(!['0.3.0','0.3.1','0.4.0'].includes(model.schemaVersion))return {mode:'read_only',code:'UNVERIFIED_VERSION'};
+ const min=model.minReaderVersion??'0.0.0';if(!/^\d+\.\d+\.\d+$/.test(min))return {mode:'blocked',code:'READER_VERSION'};const parts=min.split('.').map(Number);if(parts[0]>0||parts[1]>4||(parts[1]===4&&parts[2]>0))return {mode:'blocked',code:'READER_TOO_OLD'};
  if(allElements(model).some(e=>!TYPES.has(e.type)))return {mode:'read_only',code:'UNKNOWN_OBJECT'};
  if(allElements(model).some(e=>['area','scatter','combo'].includes(e.chartType)))return {mode:'read_only',code:'CHART_OUTSIDE_EDITOR_PROFILE'};
  return {mode:'editable_candidate',code:'VALIDATION_REQUIRED'};
 }
 export function migrate030(model:D){if(!validateOriginal(model))fail('SOURCE_SCHEMA');if(negotiate(model).mode!=='editable_candidate')fail('MIGRATION_UNSUPPORTED');const d=copy(model);for(const el of allElements(d)){if(el.box){if(el.geometry&&canonicalize(el.box)!==canonicalize(el.geometry))fail('GEOMETRY_CONFLICT',el.id);el.geometry=el.box;delete el.box;}}d.schemaVersion='0.3.1';delete d.build;validateCore(d);return d;}
 export function validateCore(model:D){
- if(!validateSchema(model))fail('SCHEMA',validateSchema.errors?.[0]?.instancePath??'');
+ if(model.schemaVersion==='0.4.0'){const report=inspectPpd040(model);if(!report.ready)fail('SCHEMA_040',report.issues[0]?.path??'');}
+ else if(!validateSchema(model))fail('SCHEMA',validateSchema.errors?.[0]?.instancePath??'');
  try{canonicalize(model);}catch{fail('CANONICAL_JSON');}
  const slides=unique(model.slides,'slides'),masters=unique(model.masters??[],'masters'),components=unique(model.components??[],'components'),elements=allElements(model),elementMap=unique(elements,'elements'),sections=unique(model.presentation.sections??[],'sections');
  if(elements.length>10000||model.slides.length>200)fail('DOCUMENT_LIMIT');
