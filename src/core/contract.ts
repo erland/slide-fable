@@ -1,3 +1,4 @@
+import legacy031Schema from '../../schemas/ppd-0.3.1.schema.json' with {type:'json'};
 import {inspectPpd040} from './ppd040Preflight.ts';
 import Ajv from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
@@ -11,7 +12,7 @@ import {allElements,blocks,copy,scenes,type D} from './model.ts';
 export class PpdError extends Error{code:string;path:string;constructor(code:string,path=''){super(code+(path?': '+path:''));this.code=code;this.path=path;}}
 const fail=(code:string,path=''):never=>{throw new PpdError(code,path);};
 const ajv=new Ajv({allErrors:true,strict:false,allowUnionTypes:true});addFormats(ajv);
-const validateSchema=ajv.compile(schema),validateOriginal=ajv.compile(originalSchema);
+const validateSchema=ajv.compile(schema),validateLegacy031=ajv.compile(legacy031Schema),validateOriginal=ajv.compile(originalSchema);
 export const FEATURES=new Set(['ppd.core','ppd.rich-text','ppd.masters','ppd.semantic-diagram','ppd.equation','ppd.vector-path']);
 const TYPES=new Set(schema.$defs.element.properties.type.enum);
 
@@ -51,7 +52,7 @@ export function negotiate(model:D){
 export function migrate030(model:D){if(!validateOriginal(model))fail('SOURCE_SCHEMA');if(negotiate(model).mode!=='editable_candidate')fail('MIGRATION_UNSUPPORTED');const d=copy(model);for(const el of allElements(d)){if(el.box){if(el.geometry&&canonicalize(el.box)!==canonicalize(el.geometry))fail('GEOMETRY_CONFLICT',el.id);el.geometry=el.box;delete el.box;}}d.schemaVersion='0.3.1';delete d.build;validateCore(d);return d;}
 export function validateCore(model:D){
  if(model.schemaVersion==='0.4.0'){const report=inspectPpd040(model);if(!report.ready)fail('SCHEMA_040',report.issues[0]?.path??'');}
- else if(!validateSchema(model))fail('SCHEMA',validateSchema.errors?.[0]?.instancePath??'');
+ else if(!(model.schemaVersion==='0.3.1'?validateLegacy031(model):validateSchema(model)))fail('SCHEMA',model.schemaVersion==='0.3.1'?validateLegacy031.errors?.[0]?.instancePath??'':validateSchema.errors?.[0]?.instancePath??'');
  try{canonicalize(model);}catch{fail('CANONICAL_JSON');}
  const slides=unique(model.slides,'slides'),masters=unique(model.masters??[],'masters'),components=unique(model.components??[],'components'),elements=allElements(model),elementMap=unique(elements,'elements'),sections=unique(model.presentation.sections??[],'sections');
  if(elements.length>10000||model.slides.length>200)fail('DOCUMENT_LIMIT');
