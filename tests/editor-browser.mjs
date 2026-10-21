@@ -377,7 +377,7 @@ try{
  await strokePanel.getByLabel('Rita linjetjocklek').press('Tab');
  await strokePanel.getByLabel('Rita linjefärg').fill('#0066cc');
  const styledArrow=(await model()).slides.flatMap(slide=>slide.view.elements).find(e=>e.id===endpointId);
- assert.equal(styledArrow.extensions.slideFableStrokeStyle,'dashed');
+ assert.equal(styledArrow.style.outline.dash,'dash');
  assert.equal(styledArrow.style.outline.width,8);
  assert.equal(styledArrow.style.outline.paint.color,'#0066cc');
  assert.ok((await page.locator('.stage [data-element-id="'+endpointId+'"] svg line').getAttribute('stroke-dasharray'))?.length,'SVG line renders dash pattern');
@@ -386,7 +386,7 @@ try{
  await strokePanel.getByLabel('Rita linjetjocklek').fill('6');
  await strokePanel.getByLabel('Rita linjetjocklek').press('Tab');
  const styledShape=(await model()).slides.flatMap(slide=>slide.view.elements).find(e=>e.id===shapeId);
- assert.equal(styledShape.extensions.slideFableStrokeStyle,'dotted');
+ assert.equal(styledShape.style.outline.dash,'dot');
  assert.equal(styledShape.style.outline.width,6);
  assert.ok((await page.locator('.stage [data-element-id="'+shapeId+'"] svg ellipse').getAttribute('stroke-dasharray'))?.length,'Ellipse renders dotted border');
  pass('SF-SH-09:stroke-style-and-width-for-lines-and-shapes');
