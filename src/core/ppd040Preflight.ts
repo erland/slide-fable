@@ -14,7 +14,7 @@ export type Ppd040Report={ready:boolean;issues:Ppd040Issue[];document:D|null};
 
 export function inspectPpd040(source:D):Ppd040Report{
  const issues:Ppd040Issue[]=[];
- let document:D|null=null;
+ let document:D|null;
  try{
   document=source.schemaVersion==='0.3.1'?stagePpd040(source):
    source.schemaVersion==='0.4.0'?copy(source):null;
