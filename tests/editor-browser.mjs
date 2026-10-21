@@ -542,8 +542,8 @@ try{
  assert.ok(surfaceSupport.shapeBackground,'Shape surface is rendered');
  assert.ok(surfaceSupport.shapeBorder.includes('4px'),'Shape stroke is rendered');
  // Record the current text rendering gap explicitly until UX-005 implements it.
- assert.equal(surfaceSupport.textBackground,null,'Known gap: text fill not yet rendered');
- assert.equal(surfaceSupport.textBorder,null,'Known gap: text stroke not yet rendered');
- pass('PPD-002:surface-renderer-gap-characterized');
+ assert.ok(surfaceSupport.textBackground,'Text fill is rendered');
+ assert.ok(surfaceSupport.textBorder?.includes('4px'),'Text stroke is rendered');
+ pass('PPD-040:text-surface-rendered');
  assert.deepEqual(errors,[]);pass('browser:no-unhandled-errors');
 }finally{await writeFile(path.join(output,'editor-results.json'),JSON.stringify({checks,engine:browser.version()},null,2));await context.close();await browser.close();server.kill();}
