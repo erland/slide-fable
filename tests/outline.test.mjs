@@ -40,3 +40,17 @@ test('unsupported 0.4-only options are never silently discarded from active form
  assert.throws(()=>patchOutline({}, {width:Infinity},'0.3.1'),/INVALID_OUTLINE_WIDTH/);
  assert.throws(()=>patchOutline({}, {width:1},'0.8.0'),/UNKNOWN_PPD_VERSION/);
 });
+
+test('drawing controls preserve paint when width changes and preserve width when paint changes',()=>{
+ const base={fill:{color:'#EEEEEE'},stroke:{color:'#112233'},strokeWidth:5};
+ const width=patchOutline(base,{width:8},'0.3.1');
+ assert.equal(width.stroke.color,'#112233');
+ assert.equal(width.strokeWidth,8);
+ const paint=patchOutline(width,{paint:{...readOutline(width).paint,color:'#778899'}},'0.3.1');
+ assert.equal(paint.strokeWidth,8);
+ assert.equal(paint.stroke.color,'#778899');
+ assert.deepEqual(base,{fill:{color:'#EEEEEE'},stroke:{color:'#112233'},strokeWidth:5});
+ const future=patchOutline({outline:{paint:{color:'#112233'},width:5,dash:'dash'}},{width:8},'0.4.0');
+ assert.equal(future.outline.dash,'dash');
+ assert.equal(future.outline.width,8);
+});
