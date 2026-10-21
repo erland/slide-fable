@@ -1,6 +1,11 @@
 /** PPD 0.3.1-compatible stroke style: optional named extension on elements. */
 export type StrokeStyle='solid'|'dashed'|'dotted'|'dashdot';
-export function strokeStyle(element:{extensions?:{slideFableStrokeStyle?:string}}):StrokeStyle{
+export function strokeStyle(element:{style?:{outline?:{dash?:string}};extensions?:{slideFableStrokeStyle?:string}}):StrokeStyle{
+ const canonical=element.style?.outline?.dash;
+ if(canonical==='dash')return 'dashed';
+ if(canonical==='dot')return 'dotted';
+ if(canonical==='dash-dot')return 'dashdot';
+ if(canonical==='solid')return 'solid';
  const candidate=element.extensions?.slideFableStrokeStyle;
  return candidate==='dashed'||candidate==='dotted'||candidate==='dashdot'?candidate:'solid';
 }

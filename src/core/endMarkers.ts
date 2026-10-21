@@ -5,7 +5,10 @@ export type Point={x:number;y:number};
 export function markerKind(value:unknown):MarkerKind{
  return typeof value==='string'&&markerKinds.includes(value as MarkerKind)?value as MarkerKind:'none';
 }
-export function endMarkers(element:{type?:string;extensions?:{slideFableEndMarkers?:{start?:string;end?:string}}}):{start:MarkerKind;end:MarkerKind}{
+export function endMarkers(element:{type?:string;style?:{outline?:{startMarker?:string;endMarker?:string}};extensions?:{slideFableEndMarkers?:{start?:string;end?:string}}}):{start:MarkerKind;end:MarkerKind}{
+ const outline=element.style?.outline;
+ const convert=(value:string|undefined):MarkerKind|undefined=>value===undefined?undefined:({triangle:'filledArrow',stealth:'filledArrow',oval:'circle','open-arrow':'openArrow'} as Record<string,MarkerKind>)[value]??markerKind(value);
+ if(outline&&(outline.startMarker!==undefined||outline.endMarker!==undefined))return {start:convert(outline.startMarker)??'none',end:convert(outline.endMarker)??(element.type==='arrow'?'filledArrow':'none')};
  const specified=element.extensions?.slideFableEndMarkers;
  return {start:specified?.start===undefined?'none':markerKind(specified.start),end:specified?.end===undefined?(element.type==='arrow'?'filledArrow':'none'):markerKind(specified.end)};
 }
