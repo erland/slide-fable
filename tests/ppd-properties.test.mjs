@@ -18,8 +18,8 @@ test('PPD contract permits independent fill, stroke and font style on text and s
  assert.doesNotThrow(()=>validateCore(reopened));
  for(const id of [textId,shapeId]){
   const element=reopened.slides[0].view.elements.find(e=>e.id===id);
-  assert.equal(element.style.strokeWidth,4);
-  assert.equal(element.style.stroke.color,'#136A70');
+  assert.equal(element.style.outline.width,4);
+  assert.equal(element.style.outline.paint.color,'#136A70');
   assert.equal(element.style.color,'#182F36');
   assert.equal(element.style.fontSize,38);
   assert.ok(element.style.fill.color.startsWith('#'));
@@ -37,7 +37,7 @@ test('text content and explicit run formatting survive unrelated surface patches
  store.undo();
  assert.equal(store.slide.view.elements.find(e=>e.id===id).style.fill,undefined);
  store.redo();
- assert.equal(store.slide.view.elements.find(e=>e.id===id).style.strokeWidth,3);
+ assert.equal(store.slide.view.elements.find(e=>e.id===id).style.outline.width,3);
 });
 
 test('effective styles retain surface and text values for a content-bound text object',()=>{
@@ -46,6 +46,6 @@ test('effective styles retain surface and text values for a content-bound text o
  store.updateElement(element.id,{style:{fill:{color:'#EEF0FF'},stroke:{color:'#112233'},strokeWidth:2}});
  const result=effective(store.getSnapshot().doc,store.slide,store.slide.view.elements[0]);
  assert.equal(result.style.fill.color,'#EEF0FF');
- assert.equal(result.style.strokeWidth,2);
+ assert.equal(result.style.outline.width,2);
  assert.ok(textOf(store.slide,element).paragraphs.length>0);
 });

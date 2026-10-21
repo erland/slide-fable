@@ -4,7 +4,7 @@ import {createDocument,box} from '../src/core/model.ts';
 import {inspectPpd040} from '../src/core/ppd040Preflight.ts';
 
 test('PPD 0.4 preflight stages a document without modifying its active 0.3.1 source',()=>{
- const source=createDocument(),before=JSON.stringify(source);
+ const source=createDocument();source.schemaVersion='0.3.1';const before=JSON.stringify(source);
  source.slides[0].view.elements.push({id:'stroke-probe',type:'shape',geometry:box(),shapeType:'rect',
   style:{stroke:{color:'#234567'},strokeWidth:4}});
  const snapshot=JSON.stringify(source);

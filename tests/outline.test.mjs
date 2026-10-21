@@ -2,10 +2,11 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readOutline,patchOutline} from '../src/core/outline.ts';
 import {EditorStore} from '../src/core/editor.ts';
+import {createDocument} from '../src/core/model.ts';
 import {validateCore} from '../src/core/contract.ts';
 
 test('PPD 0.3.1 outline edits preserve schema and unrelated style values',()=>{
- const store=new EditorStore();
+ const legacy=createDocument();legacy.schemaVersion='0.3.1';const store=new EditorStore(legacy);
  const id=store.add('text');
  const element=store.slide.view.elements.find(e=>e.id===id);
  const style=patchOutline(element.style,{paint:{color:'#336699'},width:3},store.getSnapshot().doc.schemaVersion);

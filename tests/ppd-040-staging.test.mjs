@@ -10,7 +10,7 @@ const ajv=new Ajv({strict:false,allErrors:true,allowUnionTypes:true});addFormats
 const validate=ajv.compile(schema);
 
 test('stage PPD 0.4 keeps source immutable and validates generated outline',()=>{
- const source=createDocument();
+ const source=createDocument();source.schemaVersion='0.3.1';
  const shape={id:'stage-shape',type:'shape',shapeType:'rect',geometry:{x:5,y:5,width:120,height:50},
   style:{fill:{color:'#ffffff'},stroke:{color:'#123456'},strokeWidth:3},text:'Hello'};
  source.slides[0].view.elements.push(shape);
@@ -25,7 +25,7 @@ test('stage PPD 0.4 keeps source immutable and validates generated outline',()=>
  assert.equal(validate(JSON.parse(JSON.stringify(staged))),true);
 });
 test('staging handles theme styles, table cell styles and nested overrides',()=>{
- const source=createDocument();
+ const source=createDocument();source.schemaVersion='0.3.1';
  source.theme.styles.custom={stroke:{color:'#123456'},strokeWidth:4};
  source.slides[0].view.elements.push({id:'stage-table',type:'table',geometry:{x:0,y:0,width:200,height:200},
   cells:[[{id:'cell-staged',text:'Sample',style:{stroke:{color:'#ABCDEF'},strokeWidth:2}}]],
