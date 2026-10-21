@@ -196,3 +196,27 @@
   flex:1 1 auto;min-height:230px
  }
 }
+
+
+/* Portrait iPad CSS viewports can be 1024px or wider: do not leave a
+   narrow three-column editor with an inspector pushed out of view. */
+@media (min-width:901px) and (max-width:1200px) and (orientation:portrait){
+ .editor-workspace,
+ .editor-workspace[data-slides-open=false],
+ .editor-workspace[data-properties-open=false],
+ .editor-workspace[data-slides-open=false][data-properties-open=false]{
+  display:flex;flex-direction:column;grid-template-columns:none;
+  height:auto;min-height:0;overflow:visible
+ }
+ .editor-workspace>.editor-canvas-pane{order:1;flex:1 1 auto;min-width:0}
+ .editor-workspace>.filmstrip{order:2;border-right:0;border-top:1px solid var(--line);padding:8px 12px}
+ .editor-workspace[data-slides-open=false]>.filmstrip{display:none}
+ .editor-workspace>.filmstrip ol{display:flex;gap:10px;overflow-x:auto;padding-bottom:8px}
+ .editor-workspace>.filmstrip li{flex:0 0 150px;margin:0}
+ .editor-workspace>.properties{order:3;position:relative;inset:auto;width:100%;max-width:100%;
+  box-sizing:border-box;max-height:min(50dvh,480px);overflow-y:auto;overscroll-behavior:contain;
+  border:0;border-top:2px solid var(--line);box-shadow:none;background:var(--panel)}
+ .editor-workspace[data-properties-open=false]>.properties{display:none}
+ .editor-workspace[data-properties-open=true]>.properties{display:block}
+ .editor-workspace .canvas-scroll{height:48vh;min-height:260px}
+}
