@@ -142,3 +142,14 @@
 
 /* Lines and arrows are selected through their endpoint handles, not a bounding rectangle. */
 .stage .render-element[data-selected=true]:is(.type-line,.type-arrow,.type-connector){outline:none;box-shadow:none}
+
+
+/* UX-001: one discoverable inspector toggle, docked rather than a desktop overlay. */
+.properties-toggle{align-self:flex-end;margin:5px 124px 4px 8px;min-height:32px!important;font-size:12px}
+.properties-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;position:sticky;top:-12px;background:var(--panel);z-index:4;padding:4px 0 8px}
+.properties-heading h2{margin:0;font-size:17px}
+.properties-heading button{min-height:32px;padding:4px 8px;font-size:12px}
+@media(min-width:801px){
+ .editor-workspace>.properties{position:relative;box-shadow:none;z-index:auto;background:var(--panel)}
+}
+@media(max-width:800px){.properties-toggle{margin-right:116px}}
