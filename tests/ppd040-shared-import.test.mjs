@@ -15,7 +15,7 @@ test('shared validation and ordinary import accept an explicit PPD 0.4 document'
  assert.deepEqual(opened.doc,doc);
 });
 test('shared validation still accepts PPD 0.3.1 and rejects invalid 0.4',async()=>{
- const legacy=createDocument();
+ const legacy=createDocument();legacy.schemaVersion='0.3.1';
  assert.doesNotThrow(()=>validateCore(legacy));
  const malformed=createPpd040();
  malformed.slides[0].animations=[{id:'bad-animation',targetId:'not-an-object',trigger:'on-click',effect:'fade',durationMs:100}];
