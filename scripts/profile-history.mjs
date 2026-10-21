@@ -15,7 +15,7 @@ for(const scenario of scenarios){
  // Embedded payload is deliberately valid data URI and digest, not external network data.
  const bytes=Buffer.alloc(scenario.assetKiB*1024,73);
  const id='profile-image';
- doc.assets[id]={storage:'embedded',mimeType:'image/png',uri:'data:image/png;base64,'+bytes.toString('base64'),sha256:createHash('sha256').update(bytes).digest('hex')};
+ doc.assets[id]={kind:'data',storage:'embedded',mimeType:'image/png',uri:'data:image/png;base64,'+bytes.toString('base64'),sha256:createHash('sha256').update(bytes).digest('hex')};
  // Do not reference the generated asset as an image: this profiles document cloning and history.
  const store=new EditorStore(doc);
  updateSafety.setDirty(false);
