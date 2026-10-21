@@ -1,18 +1,26 @@
+import {inspectPpd040} from './ppd040Preflight.ts';
+import {toOutline} from './ppd040Staging.ts';
 import {validateCore} from './contract.ts';
 import {blocks,box,copy,createDocument,effective,layoutOf,newSlide,plain,rich,setText,uid,isGeometry,isElementCommand,type Geometry,type D} from './model.ts';
 import {updateSafety} from '../pwa/safety.ts';
 export type EditorState={doc:D;slideId:string;selected:string[];dirty:boolean;exportedRevision:number|null;readOnly:boolean;original:string;warnings:string[];undo:number;redo:number};
+function validateEditorDocument(doc:D){
+ if(doc.schemaVersion==='0.4.0'){
+  const report=inspectPpd040(doc);
+  if(!report.ready)throw Error('PPD_040_INVALID: '+(report.issues[0]?.code??'UNKNOWN'));
+ }else validateCore(doc);
+}
 export class EditorStore{
  private state:EditorState;private listeners=new Set<()=>void>();private past:D[]=[];private future:D[]=[];
- constructor(doc=createDocument()){validateCore(doc);this.state={doc,slideId:doc.slides[0].id,selected:[],dirty:false,exportedRevision:null,readOnly:false,original:'',warnings:[],undo:0,redo:0};}
+ constructor(doc=createDocument()){validateEditorDocument(doc);this.state={doc,slideId:doc.slides[0].id,selected:[],dirty:false,exportedRevision:null,readOnly:false,original:'',warnings:[],undo:0,redo:0};}
  getSnapshot=()=>this.state;
  subscribe=(fn:()=>void)=>{this.listeners.add(fn);return ()=>{this.listeners.delete(fn);};};
  private publish(patch:Partial<EditorState>){this.state={...this.state,...patch,undo:this.past.length,redo:this.future.length};for(const fn of this.listeners)fn();}
  select(ids:string[]){this.publish({selected:ids});}
  selectSlide(id:string){if(this.state.doc.slides.some((s:D)=>s.id===id))this.publish({slideId:id,selected:[]});}
  get slide():D{return this.state.doc.slides.find((s:D)=>s.id===this.state.slideId)??this.state.doc.slides[0];}
- load(doc:D,readOnly=false,original='',warnings:string[]=[]){if(!readOnly)validateCore(doc);this.past=[];this.future=[];updateSafety.setDirty(false);this.publish({doc:copy(doc),slideId:doc.slides[0].id,selected:[],dirty:false,exportedRevision:null,readOnly,original,warnings});}
- transaction(change:(doc:D,slide:D)=>void){if(this.state.readOnly)throw Error('READ_ONLY');if(updateSafety.getSnapshot().locked)throw Error('UPDATE_LOCKED');const next=copy(this.state.doc);const slide=next.slides.find((s:D)=>s.id===this.state.slideId)??next.slides[0];change(next,slide);next.document.revision=(Number(next.document.revision)||0)+1;next.document.modifiedAt=new Date().toISOString();delete next.build;validateCore(next);updateSafety.setDirty(true);this.past.push(this.state.doc);while(this.past.length>50)this.past.shift();let budget=0;for(let i=this.past.length-1;i>=0;i--){budget+=JSON.stringify(this.past[i]).length;if(budget>64*1024*1024&&i<this.past.length-1){this.past.splice(0,i+1);break;}}this.future=[];this.publish({doc:next,dirty:true});}
+ load(doc:D,readOnly=false,original='',warnings:string[]=[]){if(!readOnly)validateEditorDocument(doc);this.past=[];this.future=[];updateSafety.setDirty(false);this.publish({doc:copy(doc),slideId:doc.slides[0].id,selected:[],dirty:false,exportedRevision:null,readOnly,original,warnings});}
+ transaction(change:(doc:D,slide:D)=>void){if(this.state.readOnly)throw Error('READ_ONLY');if(updateSafety.getSnapshot().locked)throw Error('UPDATE_LOCKED');const next=copy(this.state.doc);const slide=next.slides.find((s:D)=>s.id===this.state.slideId)??next.slides[0];change(next,slide);next.document.revision=(Number(next.document.revision)||0)+1;next.document.modifiedAt=new Date().toISOString();delete next.build;validateEditorDocument(next);updateSafety.setDirty(true);this.past.push(this.state.doc);while(this.past.length>50)this.past.shift();let budget=0;for(let i=this.past.length-1;i>=0;i--){budget+=JSON.stringify(this.past[i]).length;if(budget>64*1024*1024&&i<this.past.length-1){this.past.splice(0,i+1);break;}}this.future=[];this.publish({doc:next,dirty:true});}
  undo(){if(!this.past.length||this.state.readOnly)return;if(!updateSafety.setDirty(true))return;this.future.push(this.state.doc);this.publish({doc:this.past.pop()!,selected:[],dirty:true});}
  redo(){if(!this.future.length||this.state.readOnly)return;if(!updateSafety.setDirty(true))return;this.past.push(this.state.doc);this.publish({doc:this.future.pop()!,selected:[],dirty:true});}
  /** Export acknowledges only the downloaded revision, never local IndexedDB persistence. */
@@ -32,9 +40,11 @@ export class EditorStore{
  }
  updateDocument(patch:D){this.transaction(d=>Object.assign(d.document,patch));}
  updateSlide(patch:D){this.transaction((_d,s)=>Object.assign(s,patch));}
- updateElement(id:string,patch:D){this.transaction((d,s)=>{const e=s.view.elements.find((e:D)=>e.id===id);if(!e)return;Object.assign(e,copy(patch));const binding=s.placeholderBindings?.find((b:D)=>b.elementId===id);if(binding){binding.overrides={...binding.overrides};for(const k of ['geometry','style'])if(patch[k])binding.overrides[k]=copy(patch[k]);}});}
+ updateElement(id:string,patch:D){this.transaction((d,s)=>{const e=s.view.elements.find((e:D)=>e.id===id);if(!e)return;const adjusted=copy(patch);
+ if(d.schemaVersion==='0.4.0'&&adjusted.style)adjusted.style=toOutline(adjusted.style);
+ Object.assign(e,adjusted);const binding=s.placeholderBindings?.find((b:D)=>b.elementId===id);if(binding){binding.overrides={...binding.overrides};for(const k of ['geometry','style'])if(adjusted[k])binding.overrides[k]=copy(adjusted[k]);}});}
  editText(id:string,value:D|string){this.transaction((_d,s)=>{const e=s.view.elements.find((e:D)=>e.id===id);if(e)setText(s,e,copy(value));});}
- insert(element:D){this.transaction((_d,s)=>s.view.elements.push(element));this.select([element.id]);}
+ insert(element:D){this.transaction((d,s)=>s.view.elements.push(d.schemaVersion==='0.4.0'&&element.style?{...element,style:toOutline(element.style)}:element));this.select([element.id]);}
  add(type:string,shapeType='rect'){const g=box(180+this.slide.view.elements.length*12,220,600,240),base:D={id:uid(type),type,geometry:g,style:{}};
  if(type==='text'){base.text=rich('Ny text');base.style={fontSize:40,color:'#183641'};}
  if(type==='shape'){base.shapeType=shapeType==='round'?'rect':shapeType;base.style={fill:{color:'#d5e5df'},stroke:{color:'#183641'},strokeWidth:2,cornerRadius:shapeType==='round'?30:12,fontSize:32,color:'#183641',align:'center',verticalAlign:'middle',padding:14};base.text=rich('');}
@@ -44,6 +54,7 @@ export class EditorStore{
  if(type==='semanticDiagram'){base.semanticDiagram={kind:'process',nodes:[{id:uid('node'),label:'Förbered'},{id:uid('node'),label:'Besluta'},{id:uid('node'),label:'Genomför'}],edges:[],layout:{algorithm:'flow',direction:'lr'}};const n=base.semanticDiagram.nodes;base.semanticDiagram.edges=n.slice(1).map((v:D,i:number)=>({id:uid('edge'),from:n[i].id,to:v.id}));base.geometry=box(120,320,1300,260);}
  if(type==='equation'){base.equation={sourceFormat:'latex',source:'E = mc^2',altText:'Energi är massa gånger ljushastigheten i kvadrat'};base.geometry=box(350,300,800,200);}
  if(type==='vectorPath'){base.vectorPath={format:'svg-path',pathData:'M 0 100 C 120 0 240 200 360 100 L 360 200 L 0 200 Z',viewBox:'0 0 360 200'};base.style={fill:{color:'#d5e5df'},stroke:{color:'#183641'},strokeWidth:3};}
+ if(this.state.doc.schemaVersion==='0.4.0')base.style=toOutline(base.style);
  this.insert(base);return base.id;}
  addSlide(layout='title'){let id='';this.transaction(d=>{const s=newSlide(d,layout);d.slides.push(s);id=s.id;});this.selectSlide(id);}
  removeSlides(ids:string[]){let next='';this.transaction(d=>{d.slides=d.slides.filter((s:D)=>!ids.includes(s.id));if(!d.slides.length)d.slides.push(newSlide(d,'blank'));if(ids.includes(d.presentation.initialSlideId))delete d.presentation.initialSlideId;for(const s of d.slides)for(const e of s.view.elements)e.actions=e.actions?.filter((a:D)=>a.kind!=='navigate-slide'||!ids.includes(a.targetId));next=d.slides[0].id;});this.selectSlide(next);}
