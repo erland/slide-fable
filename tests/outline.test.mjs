@@ -54,3 +54,12 @@ test('drawing controls preserve paint when width changes and preserve width when
  assert.equal(future.outline.dash,'dash');
  assert.equal(future.outline.width,8);
 });
+
+test('outline supports contour-only documents at export read boundary',()=>{
+ const style={outline:{paint:{color:'#123456'},width:7,dash:'dash'}};
+ const contour=readOutline(style);
+ assert.equal(contour.paint.color,'#123456');
+ assert.equal(contour.width,7);
+ assert.equal(contour.dash,'dash');
+ assert.equal('stroke' in style,false);
+});
