@@ -510,5 +510,24 @@ try{
  assert.ok(ipadPortrait.inspectorRight<=ipadPortrait.viewportWidth+2,'1024px portrait inspector must fit width');
  pass('UX-004:ipad-1024px-portrait-inspector');
  await page.setViewportSize({width:1440,height:1000});
+ for(const [width,height] of [[820,1180],[900,1200],[1024,1366]]){
+  await page.setViewportSize({width,height});
+  const toggle=page.locator('.properties-toggle');
+  if((await toggle.getAttribute('aria-expanded'))!=='true')await toggle.click();
+  await page.locator('#slide-properties').waitFor({state:'visible'});
+  const p=await page.evaluate(()=>{
+   const pane=document.querySelector('#slide-properties');
+   const rect=pane.getBoundingClientRect();
+   return {display:getComputedStyle(pane).display,left:rect.left,right:rect.right,width:innerWidth};
+  });
+  assert.notEqual(p.display,'none',width+': inspector visible when toggled open');
+  assert.ok(p.right<=p.width+2,width+': inspector within viewport');
+  await toggle.click();
+  assert.equal(await page.locator('#slide-properties').isVisible(),false,width+': toggle closes inspector');
+  await toggle.click();
+  assert.equal(await page.locator('#slide-properties').isVisible(),true,width+': toggle reopens inspector');
+  pass('UX-portrait:inspector-visibility-'+width);
+ }
+ await page.setViewportSize({width:1440,height:1000});
  assert.deepEqual(errors,[]);pass('browser:no-unhandled-errors');
 }finally{await writeFile(path.join(output,'editor-results.json'),JSON.stringify({checks,engine:browser.version()},null,2));await context.close();await browser.close();server.kill();}
