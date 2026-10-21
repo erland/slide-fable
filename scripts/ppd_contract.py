@@ -82,14 +82,15 @@ def negotiate(model):
     if set(model.get('document', {}).get('featureRequirements', [])) - FEATURES:
         return {'mode': 'blocked', 'code': 'REQUIRED_FEATURE'}
     version = model.get('schemaVersion')
-    if version not in ('0.3.0', VERSION):
+    if version not in ('0.3.0', VERSION, '0.4.0'):
         return {'mode': 'read_only', 'code': 'UNVERIFIED_VERSION'}
     minimum = model.get('minReaderVersion', '0.0.0')
     if not re.fullmatch(r'\d+\.\d+\.\d+', minimum):
         return {'mode': 'blocked', 'code': 'READER_VERSION'}
-    if tuple(map(int, minimum.split('.'))) > (0, 3, 1):
+    if tuple(map(int, minimum.split('.'))) > (0, 4, 0):
         return {'mode': 'blocked', 'code': 'READER_TOO_OLD'}
-    schema = json.loads((ROOT/'schemas/ppd.schema.json').read_text())
+    schema_file = 'ppd-0.3.1.schema.json' if model.get('schemaVersion') == '0.3.1' else 'ppd.schema.json'
+    schema = json.loads((ROOT/'schemas'/schema_file).read_text())
     types = set(schema['$defs']['element']['properties']['type']['enum'])
     for el in elements(model):
         if el.get('type') not in types:
@@ -169,7 +170,8 @@ def safe_svg(svg, path):
 
 
 def validate(model, profile='core'):
-    schema = json.loads((ROOT/'schemas/ppd.schema.json').read_text())
+    schema_file = 'ppd-0.3.1.schema.json' if model.get('schemaVersion') == '0.3.1' else 'ppd.schema.json'
+    schema = json.loads((ROOT/'schemas'/schema_file).read_text())
     errors = sorted(Draft202012Validator(schema, format_checker=FormatChecker()).iter_errors(model), key=lambda e: str(list(e.path)))
     if errors:
         fail('SCHEMA', '/'.join(map(str, errors[0].path)))
