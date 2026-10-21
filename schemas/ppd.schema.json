@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:slide-fable:ppd:0.3.1",
-  "title": "Slide Fable PPD 0.3.1 data contract",
-  "description": "Versioned clarification of attached PPD 0.3.0; see docs/ppd-contract.md.",
+  "$id": "urn:slide-fable:ppd:0.4.0",
+  "title": "Slide Fable PPD 0.4.0 data contract",
+  "description": "Next-generation format proposal; intentionally allowed breaking changes. Not used by current Slide Fable runtime until explicitly adopted.",
   "type": "object",
   "required": [
     "format",
@@ -18,7 +18,7 @@
       "const": "ppd"
     },
     "schemaVersion": {
-      "const": "0.3.1"
+      "const": "0.4.0"
     },
     "minReaderVersion": {
       "type": "string"
@@ -538,13 +538,6 @@
         "fill": {
           "$ref": "#/$defs/fill"
         },
-        "stroke": {
-          "$ref": "#/$defs/fill"
-        },
-        "strokeWidth": {
-          "type": "number",
-          "minimum": 0
-        },
         "color": {
           "type": "string",
           "pattern": "^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$"
@@ -613,6 +606,22 @@
         },
         "lineSpacing": {
           "type": "number"
+        },
+        "outline": {
+          "$ref": "#/$defs/strokeStyle"
+        },
+        "textDecoration": {
+          "type": "object",
+          "properties": {
+            "highlight": {
+              "type": "string",
+              "pattern": "^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$"
+            },
+            "letterSpacing": {
+              "type": "number"
+            }
+          },
+          "additionalProperties": false
         }
       },
       "required": [],
@@ -712,6 +721,20 @@
         },
         "language": {
           "type": "string"
+        },
+        "baseline": {
+          "enum": [
+            "normal",
+            "superscript",
+            "subscript"
+          ]
+        },
+        "highlight": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$"
+        },
+        "letterSpacing": {
+          "type": "number"
         }
       },
       "required": [
@@ -1058,6 +1081,39 @@
         },
         "header": {
           "type": "boolean"
+        },
+        "borders": {
+          "type": "object",
+          "properties": {
+            "top": {
+              "$ref": "#/$defs/strokeStyle"
+            },
+            "right": {
+              "$ref": "#/$defs/strokeStyle"
+            },
+            "bottom": {
+              "$ref": "#/$defs/strokeStyle"
+            },
+            "left": {
+              "$ref": "#/$defs/strokeStyle"
+            }
+          },
+          "additionalProperties": false
+        },
+        "padding": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 4,
+              "maxItems": 4
+            }
+          ]
         }
       },
       "required": [
@@ -1357,6 +1413,98 @@
         },
         "name": {
           "type": "string"
+        },
+        "flipX": {
+          "type": "boolean"
+        },
+        "flipY": {
+          "type": "boolean"
+        },
+        "shapeAdjustments": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "number"
+          }
+        },
+        "tableLayout": {
+          "type": "object",
+          "properties": {
+            "columnWidths": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
+            },
+            "rowHeights": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
+            },
+            "cellPadding": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "minItems": 4,
+                  "maxItems": 4
+                }
+              ]
+            },
+            "collapseBorders": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        },
+        "chartFormatting": {
+          "type": "object",
+          "properties": {
+            "series": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "seriesId": {
+                    "$ref": "#/$defs/id"
+                  },
+                  "fill": {
+                    "$ref": "#/$defs/fill"
+                  },
+                  "outline": {
+                    "$ref": "#/$defs/strokeStyle"
+                  },
+                  "showDataLabels": {
+                    "type": "boolean"
+                  },
+                  "dataLabelFormat": {
+                    "type": "string"
+                  },
+                  "axis": {
+                    "enum": [
+                      "primary",
+                      "secondary"
+                    ]
+                  }
+                },
+                "required": [
+                  "seriesId"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "showDataLabels": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
         }
       },
       "required": [
@@ -2090,6 +2238,12 @@
         "extensions": {
           "type": "object",
           "additionalProperties": true
+        },
+        "animations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/animation"
+          }
         }
       },
       "required": [
@@ -2605,6 +2759,164 @@
       },
       "required": [
         "geoFormat"
+      ],
+      "additionalProperties": false
+    },
+    "strokeStyle": {
+      "type": "object",
+      "properties": {
+        "paint": {
+          "$ref": "#/$defs/fill"
+        },
+        "width": {
+          "type": "number",
+          "minimum": 0
+        },
+        "dash": {
+          "enum": [
+            "solid",
+            "dash",
+            "dot",
+            "dash-dot",
+            "custom"
+          ]
+        },
+        "dashArray": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "minItems": 2
+        },
+        "cap": {
+          "enum": [
+            "butt",
+            "round",
+            "square"
+          ]
+        },
+        "join": {
+          "enum": [
+            "miter",
+            "round",
+            "bevel"
+          ]
+        },
+        "miterLimit": {
+          "type": "number",
+          "minimum": 1
+        },
+        "startMarker": {
+          "enum": [
+            "none",
+            "triangle",
+            "stealth",
+            "diamond",
+            "oval",
+            "bar",
+            "open-arrow"
+          ]
+        },
+        "endMarker": {
+          "enum": [
+            "none",
+            "triangle",
+            "stealth",
+            "diamond",
+            "oval",
+            "bar",
+            "open-arrow"
+          ]
+        }
+      },
+      "required": [
+        "paint",
+        "width"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "dash": {
+                "const": "custom"
+              }
+            },
+            "required": [
+              "dash"
+            ]
+          },
+          "then": {
+            "required": [
+              "dashArray"
+            ]
+          }
+        }
+      ]
+    },
+    "animation": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "targetId": {
+          "$ref": "#/$defs/id"
+        },
+        "trigger": {
+          "enum": [
+            "on-click",
+            "with-previous",
+            "after-previous"
+          ]
+        },
+        "effect": {
+          "enum": [
+            "appear",
+            "fade",
+            "fly-in",
+            "fly-out",
+            "move",
+            "scale",
+            "spin"
+          ]
+        },
+        "phase": {
+          "enum": [
+            "entrance",
+            "emphasis",
+            "exit",
+            "motion"
+          ]
+        },
+        "durationMs": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "delayMs": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "easing": {
+          "type": "string"
+        },
+        "from": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/point"
+          }
+        },
+        "to": {
+          "$ref": "#/$defs/point"
+        }
+      },
+      "required": [
+        "id",
+        "targetId",
+        "trigger",
+        "effect",
+        "durationMs"
       ],
       "additionalProperties": false
     }
