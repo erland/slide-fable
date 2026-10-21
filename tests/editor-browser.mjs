@@ -573,11 +573,9 @@ try{
   for(const id of ppd040Exports.ids)assert.ok(report.objects.some(item=>item.elementId===id),'export report includes object '+id);
  pass('PPD-040:real-pdf-pptx-artifacts');
  // Render a dedicated PPD 0.4 slide and verify measured styles and visible object geometry.
- const visual040=await page.evaluate(async()=>{
+ await page.evaluate(async()=>{
   const {createPpd040}=await import('/src/core/ppd040Document.ts');
-  const {SlideView}=await import('/src/editor/Renderer.tsx');
-  const {createRoot}=await import('/node_modules/react-dom/client.js');
-  const React=await import('/node_modules/react/index.js');
+  const {editorStore}=await import('/src/core/editor.ts');
   const doc=createPpd040(),slide=doc.slides[0];
   slide.view.elements=[
    {id:'visual-text',type:'text',geometry:{x:50,y:40,width:360,height:120},text:'PPD text',style:{fill:{color:'#FFEECC'},outline:{paint:{color:'#123456'},width:4},fontSize:32}},
@@ -585,18 +583,21 @@ try{
    {id:'visual-line',type:'line',geometry:{x:60,y:250,width:510,height:10},style:{outline:{paint:{color:'#EE5500'},width:5,dash:'dash'}}},
    {id:'visual-table',type:'table',geometry:{x:60,y:340,width:520,height:190},cells:[[{id:'cell-v1',text:'Kolumn A'},{id:'cell-v2',text:'Kolumn B'}]]}
   ];
-  const host=document.createElement('div');host.id='ppd040-visual-host';host.style.cssText='position:fixed;top:0;left:0;width:900px;height:600px;z-index:99999;background:#fff;overflow:hidden';document.body.append(host);
-  const root=createRoot(host);
-  root.render(React.createElement(SlideView,{doc,slide,editable:false}));
-  await new Promise(resolve=>setTimeout(resolve,250));
-  const all=[...host.querySelectorAll('[data-element-id]')];
-  const samples=all.map(el=>({id:el.getAttribute('data-element-id'),background:getComputedStyle(el).backgroundColor,border:getComputedStyle(el).border,rect:{w:el.getBoundingClientRect().width,h:el.getBoundingClientRect().height}}));
-  return {samples,hostPresent:!!host.querySelector('table'),lineVisible:!!host.querySelector('svg line')};
+  editorStore.load(doc);
  });
- assert.ok(visual040.samples.length>=3,'PPD 0.4 visual objects are mounted');
- assert.ok(visual040.hostPresent,'PPD 0.4 table is rendered');
+ for(const id of ['visual-text','visual-shape','visual-line','visual-table'])
+  await page.locator('[data-element-id="'+id+'"]').first().waitFor({state:'visible'});
+ const visual040=await page.evaluate(()=>{
+  const sample=id=>{const el=document.querySelector('[data-element-id="'+id+'"]');const css=getComputedStyle(el);const rect=el.getBoundingClientRect();return {background:css.backgroundColor,border:css.border,width:rect.width,height:rect.height};};
+  return {text:sample('visual-text'),shape:sample('visual-shape'),line:sample('visual-line'),tableVisible:!!document.querySelector('[data-element-id="visual-table"] table')};
+ });
+ assert.match(visual040.text.background,/255, 238, 204/,'PPD 0.4 text background');
+ assert.match(visual040.text.border,/4px/,'PPD 0.4 text outline');
+ assert.match(visual040.shape.background,/204, 221, 255/,'PPD 0.4 shape fill');
+ assert.match(visual040.shape.border,/3px/,'PPD 0.4 shape outline');
+ assert.ok(visual040.line.width>0,'PPD 0.4 line has visual width');
+ assert.ok(visual040.tableVisible,'PPD 0.4 table renders');
  await page.screenshot({path:path.join(output,'ppd040-visual-regression.png')});
  pass('PPD-040:browser-visual-regression-screenshot');
- await page.evaluate(()=>document.querySelector('#ppd040-visual-host')?.remove());
  assert.deepEqual(errors,[]);pass('browser:no-unhandled-errors');
 }finally{await writeFile(path.join(output,'editor-results.json'),JSON.stringify({checks,engine:browser.version()},null,2));await context.close();await browser.close();server.kill();}
