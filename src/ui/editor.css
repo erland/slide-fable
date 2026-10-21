@@ -178,3 +178,21 @@
  }
  .editor-workspace .properties .properties-heading button{min-height:44px}
 }
+
+
+/* UX-004: portrait inspector takes bounded space within workspace.
+   Override the older absolute-positioned portrait rule and preserve scroll access. */
+@media(max-width:900px) and (orientation:portrait){
+ .editor-workspace[data-panel=properties][data-properties-open=true]{
+  height:max(650px,calc(100dvh - 235px));overflow:visible
+ }
+ .editor-workspace[data-panel=properties][data-properties-open=true]>.properties{
+  display:block;position:relative;inset:auto;right:auto;bottom:auto;
+  width:100%;max-width:100%;flex:0 0 auto;order:3;z-index:1;
+  max-height:min(48dvh,430px);overflow-y:auto;overscroll-behavior:contain;
+  box-sizing:border-box;border-radius:16px 16px 0 0
+ }
+ .editor-workspace[data-panel=properties][data-properties-open=true]>.editor-canvas-pane{
+  flex:1 1 auto;min-height:230px
+ }
+}
