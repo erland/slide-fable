@@ -378,8 +378,8 @@ try{
  await strokePanel.getByLabel('Rita linjefärg').fill('#0066cc');
  const styledArrow=(await model()).slides.flatMap(slide=>slide.view.elements).find(e=>e.id===endpointId);
  assert.equal(styledArrow.extensions.slideFableStrokeStyle,'dashed');
- assert.equal(styledArrow.style.strokeWidth,8);
- assert.equal(styledArrow.style.stroke.color,'#0066cc');
+ assert.equal(styledArrow.style.outline.width,8);
+ assert.equal(styledArrow.style.outline.paint.color,'#0066cc');
  assert.ok((await page.locator('.stage [data-element-id="'+endpointId+'"] svg line').getAttribute('stroke-dasharray'))?.length,'SVG line renders dash pattern');
  const shapeId=await page.evaluate(async()=>{const store=(await import('/src/core/editor.ts')).editorStore;return store.add('shape','ellipse');});
  await strokePanel.getByLabel('Rita linjestil').selectOption('dotted');
@@ -387,7 +387,7 @@ try{
  await strokePanel.getByLabel('Rita linjetjocklek').press('Tab');
  const styledShape=(await model()).slides.flatMap(slide=>slide.view.elements).find(e=>e.id===shapeId);
  assert.equal(styledShape.extensions.slideFableStrokeStyle,'dotted');
- assert.equal(styledShape.style.strokeWidth,6);
+ assert.equal(styledShape.style.outline.width,6);
  assert.ok((await page.locator('.stage [data-element-id="'+shapeId+'"] svg ellipse').getAttribute('stroke-dasharray'))?.length,'Ellipse renders dotted border');
  pass('SF-SH-09:stroke-style-and-width-for-lines-and-shapes');
  // SF-SH-10: text is stored on a shape, rendered inside it and editable in-place.
