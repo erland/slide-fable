@@ -344,7 +344,9 @@ try{
  await markerPanel.getByLabel('Rita startsymbol').selectOption('circle');
  await markerPanel.getByLabel('Rita slutsymbol').selectOption('openArrow');
  const customMarkers=(await model()).slides.flatMap(s=>s.view.elements).find(e=>e.id===endpointId);
- assert.deepEqual(customMarkers.extensions.slideFableEndMarkers,{start:'circle',end:'openArrow'});
+ assert.equal(customMarkers.style.outline.startMarker,'oval');
+  assert.equal(customMarkers.style.outline.endMarker,'open-arrow');
+  assert.equal(customMarkers.extensions?.slideFableEndMarkers,undefined);
  assert.equal(await page.locator('.stage [data-element-id="'+endpointId+'"] svg circle.line-end-marker').count(),1);
  assert.equal(await page.locator('.stage [data-element-id="'+endpointId+'"] svg polyline.line-end-marker').count(),1);
  await markerPanel.getByLabel('Rita slutsymbol').selectOption('diamond');
