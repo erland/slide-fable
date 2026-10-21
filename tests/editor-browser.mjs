@@ -545,5 +545,32 @@ try{
  assert.ok(surfaceSupport.textBackground,'Text fill is rendered');
  assert.ok(surfaceSupport.textBorder?.includes('4px'),'Text stroke is rendered');
  pass('PPD-040:text-surface-rendered');
+ const ppd040Exports=await page.evaluate(async()=>{
+  const {createPpd040}=await import('/src/core/ppd040Document.ts');
+  const {EditorStore}=await import('/src/core/editor.ts');
+  const {pdfExport,pptxExport}=await import('/src/export/office.ts');
+  const doc=createPpd040();doc.slides[0].view.elements=[];
+  const editor=new EditorStore(doc);
+  const id=editor.add('shape');
+  editor.updateElement(id,{style:{fill:{color:'#FFEECC'},outline:{paint:{color:'#123456'},width:3,dash:'dash'}}});
+  const textId=editor.add('text');
+  editor.updateElement(textId,{style:{fill:{color:'#FFFFFF'},outline:{paint:{color:'#445566'},width:2}}});
+  const current=editor.getSnapshot().doc;
+  const pdf=await pdfExport(current,current.slides);
+  const pptx=await pptxExport(current,current.slides);
+  return {pdf:Array.from(pdf.file),pptx:Array.from(pptx.file),pdfReport:pdf.report,pptxReport:pptx.report,ids:[id,textId]};
+ });
+ const {PDFDocument}=await import('pdf-lib');
+ const outputPdf=await PDFDocument.load(Uint8Array.from(ppd040Exports.pdf));
+ assert.equal(outputPdf.getPageCount(),1,'PPD 0.4 actual PDF can be opened');
+ assert.ok(ppd040Exports.pdf.length>500,'nonempty PDF');
+ const pptxArchive=await JSZip.loadAsync(Uint8Array.from(ppd040Exports.pptx));
+ assert.ok(pptxArchive.file('ppt/slides/slide1.xml'),'PPD 0.4 PPTX has first slide');
+ const pptxXml=await pptxArchive.file('ppt/slides/slide1.xml').async('string');
+ assert.ok(pptxXml.includes('123456'),'PPTX preserves canonical outline color');
+ assert.ok(pptxXml.includes('FFEECC'),'PPTX preserves fill color');
+ for(const report of [ppd040Exports.pdfReport,ppd040Exports.pptxReport])
+  for(const id of ppd040Exports.ids)assert.ok(report.objects.some(item=>item.elementId===id),'export report includes object '+id);
+ pass('PPD-040:real-pdf-pptx-artifacts');
  assert.deepEqual(errors,[]);pass('browser:no-unhandled-errors');
 }finally{await writeFile(path.join(output,'editor-results.json'),JSON.stringify({checks,engine:browser.version()},null,2));await context.close();await browser.close();server.kill();}
