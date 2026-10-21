@@ -496,5 +496,19 @@ try{
  await page.setViewportSize({width:1440,height:1000});
  for(const [name,width,height] of [['desktop',1440,1000],['tablet',768,1024],['phone',390,844]]){await page.setViewportSize({width,height});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);if(width<=800){await page.getByRole('button',{name:'Egenskaper',exact:true}).click();await page.getByRole('button',{name:'Objekt',exact:true}).waitFor();if(width<=800){const sheet=page.locator('#slide-properties');assert.equal(await sheet.isVisible(),true,name+': inspector opens');const metrics=await page.evaluate(()=>{const sheet=document.querySelector('#slide-properties'),canvas=document.querySelector('.editor-canvas-pane');const a=sheet.getBoundingClientRect(),b=canvas.getBoundingClientRect();return {sheetBottom:a.bottom,canvasBottom:b.bottom,position:getComputedStyle(sheet).position,screenWidth:document.documentElement.scrollWidth};});assert.equal(metrics.position,'relative',name+': sheet must not float above canvas');
  assert.ok(metrics.sheetBottom>metrics.canvasBottom-1,name+': portrait sheet follows the workspace canvas');assert.ok(metrics.sheetBottom>=metrics.canvasBottom-1,name+': sheet must follow canvas');assert.ok(metrics.screenWidth<=width,name+': sheet must not cause horizontal overflow');await sheet.getByRole('button',{name:'Stäng egenskapspanel'}).click();assert.equal(await sheet.isVisible(),false,name+': close hides inspector');}await page.getByRole('button',{name:'Arbetsyta',exact:true}).click();}await page.getByRole('tab',{name:'Infoga'}).click();const picker=page.locator('.shape-picker');assert.equal(await picker.locator('summary').isVisible(),true,name+': shape picker reachable');await picker.evaluate(el=>{el.open=false;});await picker.locator('summary').click();assert.equal(await picker.evaluate(el=>el.open),true,name+': shape gallery opens');assert.equal(await picker.locator('button',{hasText:'Triangel'}).isVisible(),true,name+': gallery choices visible');await picker.locator('button',{hasText:'Triangel'}).click();assert.equal(await picker.evaluate(el=>el.open),false,name+': gallery closes after insertion');await page.getByRole('tab',{name:'Rita'}).click();assert.equal(await page.getByRole('tabpanel',{name:'Rita'}).getByLabel('Rita linjefärg').count(),1,name+': draw formatting available');pass('SF-SH-06:shape-gallery-and-draw-'+name);await page.screenshot({path:path.join(output,name+'.png'),fullPage:true});pass('responsive:'+name);}
+ await page.setViewportSize({width:1024,height:1366});
+ await page.getByRole('button',{name:'Visa egenskapspanel',exact:true}).click();
+ await page.locator('#slide-properties').waitFor({state:'visible'});
+ const ipadPortrait=await page.evaluate(()=>{
+  const inspector=document.querySelector('#slide-properties').getBoundingClientRect();
+  const canvas=document.querySelector('.editor-canvas-pane').getBoundingClientRect();
+  return {inspectorTop:inspector.top,canvasBottom:canvas.bottom,inspectorRight:inspector.right,
+   viewportWidth:innerWidth,position:getComputedStyle(document.querySelector('#slide-properties')).position};
+ });
+ assert.equal(ipadPortrait.position,'relative','1024px portrait inspector must be docked');
+ assert.ok(ipadPortrait.inspectorTop>=ipadPortrait.canvasBottom-1,'1024px portrait inspector must follow canvas');
+ assert.ok(ipadPortrait.inspectorRight<=ipadPortrait.viewportWidth+2,'1024px portrait inspector must fit width');
+ pass('UX-004:ipad-1024px-portrait-inspector');
+ await page.setViewportSize({width:1440,height:1000});
  assert.deepEqual(errors,[]);pass('browser:no-unhandled-errors');
 }finally{await writeFile(path.join(output,'editor-results.json'),JSON.stringify({checks,engine:browser.version()},null,2));await context.close();await browser.close();server.kill();}
