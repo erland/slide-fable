@@ -153,3 +153,28 @@
  .editor-workspace>.properties{position:relative;box-shadow:none;z-index:auto;background:var(--panel)}
 }
 @media(max-width:800px){.properties-toggle{margin-right:116px}}
+
+
+/* UX-002: small screens get an in-flow bottom inspector, not a floating overlay. */
+@media(max-width:900px){
+ .editor-workspace{position:relative}
+ .editor-workspace[data-panel=properties][data-properties-open=true]>.properties{
+  display:block;position:relative;inset:auto;right:auto;bottom:auto;z-index:1;
+  flex:0 0 auto;order:3;width:100%;max-width:100%;box-sizing:border-box;
+  max-height:min(48dvh,430px);overflow-y:auto;overscroll-behavior:contain;
+  padding:12px 16px max(14px,env(safe-area-inset-bottom));
+  border:0;border-top:2px solid var(--line);border-radius:16px 16px 0 0;
+  box-shadow:0 -4px 14px #0002;background:var(--panel)
+ }
+ .editor-workspace[data-panel=properties][data-properties-open=true]>.editor-canvas-pane{
+  flex:1 1 auto;min-height:230px
+ }
+ .editor-workspace[data-panel=properties][data-properties-open=true] .canvas-scroll{
+  min-height:180px
+ }
+ .editor-workspace .properties .properties-heading{
+  position:sticky;top:-12px;z-index:5;background:var(--panel);
+  border-bottom:1px solid var(--line);margin-bottom:8px
+ }
+ .editor-workspace .properties .properties-heading button{min-height:44px}
+}
