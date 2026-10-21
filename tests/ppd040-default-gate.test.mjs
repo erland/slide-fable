@@ -8,7 +8,7 @@ test('PPD 0.4 readiness gate reports unresolved default-version blockers explici
  assert.equal(byId['040-document-roundtrip'].passed,true);
  assert.equal(byId['040-editor-core'].passed,true);
  assert.equal(byId['040-version-negotiation'].passed,true);
- assert.equal(byId['standard-document-version'].passed,false);
- assert.equal(byId['canonical-schema-source'].passed,false);
- assert.equal(report.ready,false,'never report default format ready while blockers remain');
+ assert.equal(byId['standard-document-version'].passed,true);
+ assert.equal(byId['canonical-schema-source'].passed,true);
+ assert.equal(report.ready,true,'default version and schema are promoted');
 });
