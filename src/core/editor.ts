@@ -1,5 +1,5 @@
 import {inspectPpd040} from './ppd040Preflight.ts';
-import {toOutline} from './ppd040Staging.ts';
+import {toOutline,normalizePpd040Styles} from './ppd040Staging.ts';
 import {validateCore} from './contract.ts';
 import {blocks,box,copy,createDocument,effective,layoutOf,newSlide,plain,rich,setText,uid,isGeometry,isElementCommand,type Geometry,type D} from './model.ts';
 import {updateSafety} from '../pwa/safety.ts';
@@ -20,7 +20,7 @@ export class EditorStore{
  selectSlide(id:string){if(this.state.doc.slides.some((s:D)=>s.id===id))this.publish({slideId:id,selected:[]});}
  get slide():D{return this.state.doc.slides.find((s:D)=>s.id===this.state.slideId)??this.state.doc.slides[0];}
  load(doc:D,readOnly=false,original='',warnings:string[]=[]){if(!readOnly)validateEditorDocument(doc);this.past=[];this.future=[];updateSafety.setDirty(false);this.publish({doc:copy(doc),slideId:doc.slides[0].id,selected:[],dirty:false,exportedRevision:null,readOnly,original,warnings});}
- transaction(change:(doc:D,slide:D)=>void){if(this.state.readOnly)throw Error('READ_ONLY');if(updateSafety.getSnapshot().locked)throw Error('UPDATE_LOCKED');const next=copy(this.state.doc);const slide=next.slides.find((s:D)=>s.id===this.state.slideId)??next.slides[0];change(next,slide);next.document.revision=(Number(next.document.revision)||0)+1;next.document.modifiedAt=new Date().toISOString();delete next.build;validateEditorDocument(next);updateSafety.setDirty(true);this.past.push(this.state.doc);while(this.past.length>50)this.past.shift();let budget=0;for(let i=this.past.length-1;i>=0;i--){budget+=JSON.stringify(this.past[i]).length;if(budget>64*1024*1024&&i<this.past.length-1){this.past.splice(0,i+1);break;}}this.future=[];this.publish({doc:next,dirty:true});}
+ transaction(change:(doc:D,slide:D)=>void){if(this.state.readOnly)throw Error('READ_ONLY');if(updateSafety.getSnapshot().locked)throw Error('UPDATE_LOCKED');const next=copy(this.state.doc);const slide=next.slides.find((s:D)=>s.id===this.state.slideId)??next.slides[0];change(next,slide);next.document.revision=(Number(next.document.revision)||0)+1;next.document.modifiedAt=new Date().toISOString();delete next.build;if(next.schemaVersion==='0.4.0')normalizePpd040Styles(next);validateEditorDocument(next);updateSafety.setDirty(true);this.past.push(this.state.doc);while(this.past.length>50)this.past.shift();let budget=0;for(let i=this.past.length-1;i>=0;i--){budget+=JSON.stringify(this.past[i]).length;if(budget>64*1024*1024&&i<this.past.length-1){this.past.splice(0,i+1);break;}}this.future=[];this.publish({doc:next,dirty:true});}
  undo(){if(!this.past.length||this.state.readOnly)return;if(!updateSafety.setDirty(true))return;this.future.push(this.state.doc);this.publish({doc:this.past.pop()!,selected:[],dirty:true});}
  redo(){if(!this.future.length||this.state.readOnly)return;if(!updateSafety.setDirty(true))return;this.past.push(this.state.doc);this.publish({doc:this.future.pop()!,selected:[],dirty:true});}
  /** Export acknowledges only the downloaded revision, never local IndexedDB persistence. */

@@ -51,3 +51,21 @@ export function stagePpd040(source:D):D{
  doc.schemaVersion='0.4.0';
  return doc;
 }
+
+/** Normalize legacy style fragments introduced by editor commands into the canonical
+ * 0.4 outline representation. Operates on the transaction's private draft only. */
+export function normalizePpd040Styles(doc:D):void{
+ if(doc.schemaVersion!=='0.4.0')throw new Error('PPD_NORMALIZE_VERSION');
+ const seen=new WeakSet<object>();
+ const walk=(node:unknown):void=>{
+  if(!node||typeof node!=='object'||seen.has(node))return;
+  seen.add(node);
+  if(Array.isArray(node)){for(const item of node)walk(item);return;}
+  const obj=node as D;
+  if(obj.style&&typeof obj.style==='object'&&!Array.isArray(obj.style))obj.style=toOutline(obj.style);
+  for(const [key,value] of Object.entries(obj))if(key!=='style')walk(value);
+ };
+ walk(doc);
+ for(const [name,style] of Object.entries(doc.theme?.styles??{}))
+  if(style&&typeof style==='object')doc.theme.styles[name]=toOutline(style as D);
+}
