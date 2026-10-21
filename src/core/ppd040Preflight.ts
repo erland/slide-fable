@@ -1,7 +1,7 @@
-/** Isolated PPD 0.4 readiness checks, independent of the active 0.3.1 editor. */
+/** PPD 0.4 validation and legacy upgrade checks. */
 import Ajv from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
-import proposal from '../../proposals/ppd-0.4.0.schema.json' with {type:'json'};
+import proposal from '../../schemas/ppd.schema.json' with {type:'json'};
 import {allElements,copy,type D} from './model.ts';
 import {stagePpd040} from './ppd040Staging.ts';
 
