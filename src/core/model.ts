@@ -1,3 +1,4 @@
+import {normalizePpd040Styles} from './ppd040Staging.ts';
 // PPD is an extensible wire format governed by JSON Schema. External values are
 // unknown until runtime validation; D is used only behind that boundary.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -52,12 +53,12 @@ export function newSlide(doc:D,layout='title'){
  return slide;
 }
 export function createDocument():D{
- const doc:D={format:'ppd',schemaVersion:'0.3.1',document:{id:uid('doc'),title:'Min presentation',language:'sv-SE',revision:0,canvas:{width:1600,height:900,unit:'logical'}},theme:{id:'theme',colors:{ink:'#183641',surface:'#faf8f2',accent:'#cf694c'},typography:{body:'Fable'},styles:{heading:{fontSize:72,color:'#183641',fontWeight:700},body:{fontSize:36,color:'#183641'}}},masters:[{id:'master',name:'Grundmaster',background:{type:'color',color:'#faf8f2'},elements:[],layouts:[
+ const doc:D={format:'ppd',schemaVersion:'0.4.0',document:{id:uid('doc'),title:'Min presentation',language:'sv-SE',revision:0,canvas:{width:1600,height:900,unit:'logical'}},theme:{id:'theme',colors:{ink:'#183641',surface:'#faf8f2',accent:'#cf694c'},typography:{body:'Fable'},styles:{heading:{fontSize:72,color:'#183641',fontWeight:700},body:{fontSize:36,color:'#183641'}}},masters:[{id:'master',name:'Grundmaster',background:{type:'color',color:'#faf8f2'},elements:[],layouts:[
  {id:'title',name:'Titel',placeholders:[{id:'title',role:'title',geometry:box(100,200,1400,160),styleRef:'heading'},{id:'body',role:'body',geometry:box(100,450,1200,220),styleRef:'body'}]},
  {id:'content',name:'Innehåll',placeholders:[{id:'title',role:'title',geometry:box(100,70,1400,140),styleRef:'heading'},{id:'body',role:'body',geometry:box(100,300,1400,480),styleRef:'body'}]},
  {id:'columns',name:'Två kolumner',placeholders:[{id:'title',role:'title',geometry:box(100,70,1400,140),styleRef:'heading'},{id:'left',role:'body',geometry:box(100,300,650,480),styleRef:'body'},{id:'right',role:'body',geometry:box(850,300,650,480),styleRef:'body'}]},
  {id:'image-text',name:'Bild + text',placeholders:[{id:'title',role:'title',geometry:box(100,70,1400,140),styleRef:'heading'},{id:'body',role:'body',geometry:box(850,300,650,480),styleRef:'body'},{id:'image',role:'image',geometry:box(100,300,650,480)}]},
  {id:'blank',name:'Tom',placeholders:[]}
  ]}],components:[],slides:[],assets:{},presentation:{navigation:{keyboard:true,touch:true}},provenance:{privacyProfile:'full'}};
- const slide=newSlide(doc);slide.title='En idé att berätta';setText(slide,slide.view.elements[0],rich('En idé. En berättelse.'));setText(slide,slide.view.elements[1],rich('Ge dina tankar en tydlig form.'));doc.slides.push(slide);return doc;
+ const slide=newSlide(doc);slide.title='En idé att berätta';setText(slide,slide.view.elements[0],rich('En idé. En berättelse.'));setText(slide,slide.view.elements[1],rich('Ge dina tankar en tydlig form.'));doc.slides.push(slide);normalizePpd040Styles(doc);return doc;
 }
