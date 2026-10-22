@@ -692,6 +692,17 @@ try{
  await page.getByLabel('Överkant cellmarginal').press('Tab');
  assert.equal((await model()).slides[0].view.elements.find(e=>e.id==='table-layout-040').tableLayout.cellPadding[0],9);
  pass('PPD-040:table-layout-inspector-controls');
+ await page.locator('.stage [data-element-id="table-layout-040"]').first().click();
+ const borderDetails=page.getByText('Kantlinjer',{exact:true}).first();
+ await borderDetails.click();
+ await page.getByLabel('Cell 1 1 top bredd').fill('5');
+ await page.getByLabel('Cell 1 1 top bredd').press('Tab');
+ const savedBorder=(await model()).slides[0].view.elements.find(e=>e.id==='table-layout-040').cells[0][0].borders.top;
+ assert.equal(savedBorder.width,5,'border is stored in canonical PPD 0.4 cell model');
+ const borderWidth=await page.locator('.stage [data-element-id="table-layout-040"] td').first().evaluate(el=>getComputedStyle(el).borderTopWidth);
+ assert.equal(borderWidth,'5px','top edge renders its own width');
+ pass('PPD-040:individual-table-cell-edge-borders');
+
  const tableExportCheck=await page.evaluate(async()=>{
   const {pdfExport,pptxExport}=await import('/src/export/office.ts');
   const {editorStore}=await import('/src/core/editor.ts');
