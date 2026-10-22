@@ -682,5 +682,15 @@ try{
  assert.deepEqual(layout040.widths,['250px','450px']);
  assert.ok(parseFloat(layout040.height)>=130);
  pass('PPD-040:table-layout-rendering');
+ await page.locator('.stage [data-element-id="table-layout-040"]').first().click();
+ const tableControls=page.getByLabel('Kolumn 1 bredd');
+ await tableControls.waitFor({state:'visible'});
+ await tableControls.fill('300');
+ await tableControls.press('Tab');
+ assert.equal((await model()).slides[0].view.elements.find(e=>e.id==='table-layout-040').tableLayout.columnWidths[0],300);
+ await page.getByLabel('Överkant cellmarginal').fill('9');
+ await page.getByLabel('Överkant cellmarginal').press('Tab');
+ assert.equal((await model()).slides[0].view.elements.find(e=>e.id==='table-layout-040').tableLayout.cellPadding[0],9);
+ pass('PPD-040:table-layout-inspector-controls');
  assert.deepEqual(errors,[]);pass('browser:no-unhandled-errors');
 }finally{await writeFile(path.join(output,'editor-results.json'),JSON.stringify({checks,engine:browser.version()},null,2));await context.close();await browser.close();server.kill();}
