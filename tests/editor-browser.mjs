@@ -617,5 +617,28 @@ try{
  assert.equal(richStyle.baseline,'super','PPD 0.4 superscript is rendered');
  assert.equal(richStyle.spacing,'2px','PPD 0.4 character spacing is rendered');
  pass('PPD-040:rich-run-visual-formatting');
+ const editorRunConversion=await page.evaluate(async()=>{
+  const {toEditor,fromEditor}=await import('/src/editor/RichEditor.tsx');
+  const original={paragraphs:[{id:'rich-paragraph',runs:[
+   {text:'Highlight',highlight:'#FFEE00',baseline:'superscript',letterSpacing:1.5,marks:{bold:true}},
+   {text:'Sub',baseline:'subscript',letterSpacing:0},
+   {text:'Normal',baseline:'normal'},
+   {text:'Hej',color:'#123456',size:28,fontFamily:'Arial',highlight:'#AABBCC',letterSpacing:2}
+  ]}]};
+  return fromEditor(toEditor(original),original);
+ });
+ const convertedRuns=editorRunConversion.paragraphs[0].runs;
+ assert.equal(convertedRuns[0].highlight,'#FFEE00');
+ assert.equal(convertedRuns[0].baseline,'superscript');
+ assert.equal(convertedRuns[0].letterSpacing,1.5);
+ assert.deepEqual(convertedRuns[0].marks,{bold:true});
+ assert.equal(convertedRuns[1].baseline,'subscript');
+ assert.equal(convertedRuns[1].letterSpacing,0);
+ assert.equal(convertedRuns[2].baseline,undefined);
+ assert.equal(convertedRuns[3].color,'#123456');
+ assert.equal(convertedRuns[3].size,28);
+ assert.equal(convertedRuns[3].fontFamily,'Arial');
+ assert.equal(convertedRuns[3].highlight,'#AABBCC');
+ pass('PPD-040:rich-editor-run-attribute-roundtrip');
  assert.deepEqual(errors,[]);pass('browser:no-unhandled-errors');
 }finally{await writeFile(path.join(output,'editor-results.json'),JSON.stringify({checks,engine:browser.version()},null,2));await context.close();await browser.close();server.kill();}
