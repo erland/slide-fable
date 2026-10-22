@@ -601,5 +601,21 @@ try{
  assert.ok(visual040.tableVisible,'PPD 0.4 table renders');
  await page.screenshot({path:path.join(output,'ppd040-visual-regression.png')});
  pass('PPD-040:browser-visual-regression-screenshot');
+ const richVisual=await page.evaluate(async()=>{
+  const {createDocument}=await import('/src/core/model.ts');
+  const {editorStore}=await import('/src/core/editor.ts');
+  const doc=createDocument(),slide=doc.slides[0];
+  slide.view.elements=[{id:'run-format-check',type:'text',geometry:{x:40,y:50,width:700,height:150},text:{paragraphs:[{id:'run-p',runs:[{text:'Highlighted',highlight:'#FFFF00',baseline:'superscript',letterSpacing:2}]}]}}];
+  editorStore.load(doc);
+  return doc.schemaVersion;
+ });
+ assert.equal(richVisual,'0.4.0');
+ const run=page.locator('[data-element-id="run-format-check"] [data-run]').first();
+ await run.waitFor({state:'visible'});
+ const richStyle=await run.evaluate(el=>{const cs=getComputedStyle(el);return {background:cs.backgroundColor,baseline:cs.verticalAlign,spacing:cs.letterSpacing};});
+ assert.match(richStyle.background,/255, 255, 0/,'PPD 0.4 run highlight is rendered');
+ assert.equal(richStyle.baseline,'super','PPD 0.4 superscript is rendered');
+ assert.equal(richStyle.spacing,'2px','PPD 0.4 character spacing is rendered');
+ pass('PPD-040:rich-run-visual-formatting');
  assert.deepEqual(errors,[]);pass('browser:no-unhandled-errors');
 }finally{await writeFile(path.join(output,'editor-results.json'),JSON.stringify({checks,engine:browser.version()},null,2));await context.close();await browser.close();server.kill();}
