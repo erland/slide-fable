@@ -1,7 +1,7 @@
 import {copy,uid,type D} from '../core/model';
 export function TableEditor({element,onChange}:{element:D;onChange:(p:D)=>void}){
  const edit=(fn:(cells:D[][])=>void)=>{const cells=copy(element.cells);fn(cells);onChange({cells});};
- const setEdge=(row:number,col:number,side:'top'|'right'|'bottom'|'left',field:'width'|'color',value:string)=>edit(cells=>{const cell=cells[row][col];const edges=cell.borders??{};const prev=edges[side]??{width:2,paint:{type:'solid',color:'#70858a'}};edges[side]={...prev,...(field==='width'?{width:Math.max(0,Number(value))}:{paint:{type:'solid',color:value}})};cell.borders=edges;});
+ const setEdge=(row:number,col:number,side:'top'|'right'|'bottom'|'left',field:'width'|'color',value:string)=>edit(cells=>{const cell=cells[row][col];const edges=cell.borders??{};const prev=edges[side]??{width:2,paint:{color:'#70858a'}};edges[side]={...prev,...(field==='width'?{width:Math.max(0,Number(value))}:{paint:{color:value}})};cell.borders=edges;});
 
  const layout=element.tableLayout??{};
  const updateLayout=(change:D)=>onChange({tableLayout:{...layout,...change}});
