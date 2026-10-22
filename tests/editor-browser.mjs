@@ -695,7 +695,7 @@ try{
  const tableExportCheck=await page.evaluate(async()=>{
   const {pdfExport,pptxExport}=await import('/src/export/office.ts');
   const {editorStore}=await import('/src/core/editor.ts');
-  const doc=editorStore.doc;
+  const doc=editorStore.getSnapshot().doc;
   const pdf=await pdfExport(doc,doc.slides),pptx=await pptxExport(doc,doc.slides);
   return {pdf:Array.from(pdf.file),pptx:Array.from(pptx.file)};
  });
