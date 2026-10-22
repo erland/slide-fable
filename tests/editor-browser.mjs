@@ -702,6 +702,20 @@ try{
  const borderWidth=await page.locator('.stage [data-element-id="table-layout-040"] td').first().evaluate(el=>getComputedStyle(el).borderTopWidth);
  assert.equal(borderWidth,'5px','top edge renders its own width');
  pass('PPD-040:individual-table-cell-edge-borders');
+ const edgeExport=await page.evaluate(async()=>{
+  const {pptxExport}=await import('/src/export/office.ts');
+  const {editorStore}=await import('/src/core/editor.ts');
+  const doc=structuredClone(editorStore.getSnapshot().doc);
+  const cell=doc.slides[0].view.elements.find(e=>e.id==='table-layout-040').cells[0][0];
+  cell.borders={top:{width:5,paint:{color:'#FF0000'}},right:{width:3,paint:{color:'#00FF00'}},bottom:{width:4,paint:{color:'#0000FF'}},left:{width:2,paint:{color:'#AA00AA'}}};
+  return Array.from((await pptxExport(doc,doc.slides)).file);
+ });
+ const edgeZip=await JSZip.loadAsync(Uint8Array.from(edgeExport));
+ const edgeXml=await edgeZip.file('ppt/slides/slide1.xml').async('string');
+ for(const color of ['FF0000','00FF00','0000FF','AA00AA'])assert.ok(edgeXml.includes(color),'PPTX preserves cell edge '+color);
+ for(const edge of ['lnT','lnR','lnB','lnL'])assert.ok(edgeXml.includes('<a:'+edge),'PPTX has native editable border '+edge);
+ pass('PPD-040:pptx-individual-cell-edge-export');
+
 
  const tableExportCheck=await page.evaluate(async()=>{
   const {pdfExport,pptxExport}=await import('/src/export/office.ts');
