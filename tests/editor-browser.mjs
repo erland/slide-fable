@@ -662,5 +662,25 @@ try{
  assert.ok(richXml.includes('FFFF00'),'PPTX carries highlight color');
  assert.ok(/spc=/.test(richXml),'PPTX carries character spacing');
  pass('PPD-040:rich-run-real-pdf-pptx-export');
+ await page.evaluate(async()=>{
+  const {createDocument}=await import('/src/core/model.ts');
+  const {editorStore}=await import('/src/core/editor.ts');
+  const doc=createDocument();
+  doc.slides[0].view.elements=[{id:'table-layout-040',type:'table',geometry:{x:60,y:80,width:700,height:300},tableLayout:{columnWidths:[250,450],rowHeights:[130],cellPadding:[4,8,12,16],collapseBorders:false},cells:[[{id:'column-a',text:'A'},{id:'column-b',text:'B'}]]}];
+  editorStore.load(doc);
+ });
+ await page.locator('[data-element-id="table-layout-040"] table').waitFor({state:'visible'});
+ const layout040=await page.evaluate(()=>{
+  const table=document.querySelector('[data-element-id="table-layout-040"] table');
+  const cells=table.querySelectorAll('td');
+  const columns=table.querySelectorAll('col');
+  return {collapse:getComputedStyle(table).borderCollapse,padding:getComputedStyle(cells[0]).padding,
+   widths:[...columns].map(c=>c.style.width),height:getComputedStyle(table.querySelector('tr')).height};
+ });
+ assert.equal(layout040.collapse,'separate');
+ assert.equal(layout040.padding,'4px 8px 12px 16px');
+ assert.deepEqual(layout040.widths,['250px','450px']);
+ assert.ok(parseFloat(layout040.height)>=130);
+ pass('PPD-040:table-layout-rendering');
  assert.deepEqual(errors,[]);pass('browser:no-unhandled-errors');
 }finally{await writeFile(path.join(output,'editor-results.json'),JSON.stringify({checks,engine:browser.version()},null,2));await context.close();await browser.close();server.kill();}
