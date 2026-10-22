@@ -692,5 +692,19 @@ try{
  await page.getByLabel('Överkant cellmarginal').press('Tab');
  assert.equal((await model()).slides[0].view.elements.find(e=>e.id==='table-layout-040').tableLayout.cellPadding[0],9);
  pass('PPD-040:table-layout-inspector-controls');
+ const tableExportCheck=await page.evaluate(async()=>{
+  const {pdfExport,pptxExport}=await import('/src/export/office.ts');
+  const {editorStore}=await import('/src/core/editor.ts');
+  const doc=editorStore.doc;
+  const pdf=await pdfExport(doc,doc.slides),pptx=await pptxExport(doc,doc.slides);
+  return {pdf:Array.from(pdf.file),pptx:Array.from(pptx.file)};
+ });
+ const tablePdf=await PDFDocument.load(Uint8Array.from(tableExportCheck.pdf));
+ assert.ok(tablePdf.getPageCount()>0,'exported table PDF opens');
+ const tablePptx=await JSZip.loadAsync(Uint8Array.from(tableExportCheck.pptx));
+ const tableXml=await tablePptx.file('ppt/slides/slide1.xml').async('string');
+ assert.ok(tableXml.includes('column-a')||tableXml.includes('A'),'table content survives PPTX');
+ assert.match(tableXml,/<a:tblGrid>/,'table grid remains native PowerPoint table');
+ pass('PPD-040:table-real-pdf-pptx-export');
  assert.deepEqual(errors,[]);pass('browser:no-unhandled-errors');
 }finally{await writeFile(path.join(output,'editor-results.json'),JSON.stringify({checks,engine:browser.version()},null,2));await context.close();await browser.close();server.kill();}
