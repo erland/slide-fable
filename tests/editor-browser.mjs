@@ -640,5 +640,27 @@ try{
  assert.equal(convertedRuns[3].fontFamily,'Arial');
  assert.equal(convertedRuns[3].highlight,'#AABBCC');
  pass('PPD-040:rich-editor-run-attribute-roundtrip');
+ const richExports=await page.evaluate(async()=>{
+  const {createDocument}=await import('/src/core/model.ts');
+  const {pdfExport,pptxExport}=await import('/src/export/office.ts');
+  const doc=createDocument(),slide=doc.slides[0];
+  slide.view.elements=[{id:'rich-export',type:'text',geometry:{x:80,y:100,width:900,height:220},style:{fontSize:48},text:{paragraphs:[{id:'rich-export-p',runs:[
+   {text:'HIGHLIGHT',highlight:'#FFFF00',letterSpacing:2},
+   {text:'UP',baseline:'superscript'},
+   {text:'DOWN',baseline:'subscript'}
+  ]}]}}];
+  const pdf=await pdfExport(doc,doc.slides);
+  const pptx=await pptxExport(doc,doc.slides);
+  return {pdf:Array.from(pdf.file),pptx:Array.from(pptx.file)};
+ });
+ const richPdf=await PDFDocument.load(Uint8Array.from(richExports.pdf));
+ assert.equal(richPdf.getPageCount(),1,'rich PDF can be opened');
+ const richZip=await JSZip.loadAsync(Uint8Array.from(richExports.pptx));
+ const richXml=await richZip.file('ppt/slides/slide1.xml').async('string');
+ assert.ok(richXml.includes('HIGHLIGHT'),'editable highlighted text remains in PPTX');
+ assert.ok(richXml.includes('UP')&&richXml.includes('DOWN'),'superscript and subscript text remains in PPTX');
+ assert.ok(richXml.includes('FFFF00'),'PPTX carries highlight color');
+ assert.ok(/spc=/.test(richXml),'PPTX carries character spacing');
+ pass('PPD-040:rich-run-real-pdf-pptx-export');
  assert.deepEqual(errors,[]);pass('browser:no-unhandled-errors');
 }finally{await writeFile(path.join(output,'editor-results.json'),JSON.stringify({checks,engine:browser.version()},null,2));await context.close();await browser.close();server.kill();}
