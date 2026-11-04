@@ -265,3 +265,6 @@
 .stage .selection-scale-guide{display:none;position:absolute;background:#e54b72;z-index:999996;pointer-events:none;opacity:.9}
 .stage .selection-scale-guide.vertical{width:2px;top:0;bottom:0}
 .stage .selection-scale-guide.horizontal{height:2px;left:0;right:0}
+
+/* Editor-only marquee stays above slide objects and never intercepts pointer input. */
+.stage .selection-marquee{position:absolute;box-sizing:border-box;border:2px dashed #387f89;background:rgba(56,127,137,.16);pointer-events:none;z-index:999995}
