@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {arrangeSelection,matchSelectionSize,scaleSelection} from '../src/core/arrange.ts';
+import {arrangeSelection,matchSelectionSize,scaleSelection,selectionBounds,scaleSelectionFromCorner} from '../src/core/arrange.ts';
 import {EditorStore} from '../src/core/editor.ts';
 import {validateCore} from '../src/core/contract.ts';
 
@@ -182,4 +182,75 @@ test('no-op scaling does not create history and too-small scales are rejected at
  revision=store.getSnapshot().undo;
  assert.throws(()=>store.scaleSelected(.25),/SCALE_BELOW_MINIMUM/);
  assert.equal(store.getSnapshot().undo,revision);
+});
+
+test('selection bounds enclose all selected rectangles',()=>{
+ assert.deepEqual(selectionBounds(items),{x:60,y:70,width:450,height:260});
+});
+test('corner scale preserves opposite corner and relative positions',()=>{
+ const starting=selectionBounds(items);
+ const scaled=scaleSelectionFromCorner(items,'se',45,0);
+ assert.equal(scaled.factor,1.1);
+ assert.equal(scaled.bounds.x,starting.x);
+ assert.equal(scaled.bounds.y,starting.y);
+ assert.ok(Math.abs(scaled.bounds.width-starting.width*1.1)<1e-8);
+ assert.ok(Math.abs(scaled.bounds.height-starting.height*1.1)<1e-8);
+ for(let i=0;i<items.length;i++){
+  const a=items[i].geometry,b=scaled.items[i].geometry;
+  assert.ok(Math.abs(b.x-(starting.x+(a.x-starting.x)*1.1))<1e-8);
+  assert.ok(Math.abs(b.y-(starting.y+(a.y-starting.y)*1.1))<1e-8);
+  assert.ok(Math.abs(b.width-a.width*1.1)<1e-8);
+  assert.ok(Math.abs(b.height-a.height*1.1)<1e-8);
+ }
+});
+test('northwest corner anchors lower right and shrinks uniformly',()=>{
+ const before=selectionBounds(items);
+ const result=scaleSelectionFromCorner(items,'nw',45,0);
+ assert.equal(result.factor,.9);
+ assert.ok(Math.abs(result.bounds.x+result.bounds.width-(before.x+before.width))<1e-9);
+ assert.ok(Math.abs(result.bounds.y+result.bounds.height-(before.y+before.height))<1e-9);
+});
+test('north east corner anchors lower left and uses vertical drag when dominant',()=>{
+ const b=selectionBounds(items);
+ const result=scaleSelectionFromCorner(items,'ne',0,-26);
+ assert.equal(result.factor,1.1);
+ assert.equal(result.bounds.x,b.x);
+ assert.ok(Math.abs(result.bounds.y+result.bounds.height-(b.y+b.height))<1e-8);
+});
+test('corner scale clamps before any object falls below 10 logical units',()=>{
+ const peers=[{id:'a',geometry:{x:10,y:20,width:20,height:25}},{id:'b',geometry:{x:80,y:60,width:100,height:60}}];
+ const result=scaleSelectionFromCorner(peers,'se',-500,-500);
+ assert.equal(result.factor,.5);
+ assert.equal(result.items[0].geometry.width,10);
+ assert.ok(result.items.every(i=>i.geometry.width>=10&&i.geometry.height>=10));
+});
+test('corner scale rejects non-finite drag and invalid selection',()=>{
+ assert.throws(()=>scaleSelectionFromCorner(items,'se',Infinity,0),/INVALID_SCALE_DRAG/);
+ assert.throws(()=>scaleSelectionFromCorner(items,'not-corner',0,0),/INVALID_SCALE_DRAG/);
+ assert.throws(()=>selectionBounds([]),/EMPTY_SCALE_SELECTION/);
+});
+test('interactive corner scale persists as one undoable transaction and skips locked objects',()=>{
+ const store=new EditorStore();
+ const a=store.add('shape'),b=store.add('shape'),locked=store.add('shape');
+ store.setElementGeometry(a,{x:100,y:100,width:100,height:80});
+ store.setElementGeometry(b,{x:400,y:300,width:150,height:100});
+ store.setElementGeometry(locked,{x:600,y:200,width:80,height:60});
+ store.updateElement(locked,{locked:true});
+ store.select([a,b,locked]);
+ const before=[a,b,locked].map(id=>({id,geometry:{...store.slide.view.elements.find(e=>e.id===id).geometry}}));
+ const history=store.getSnapshot().undo;
+ store.scaleSelectedFromCorner('se',45,0);
+ const get=id=>store.slide.view.elements.find(e=>e.id===id).geometry;
+ assert.equal(store.getSnapshot().undo,history+1);
+ assert.deepEqual(get(a),{x:100,y:100,width:110.00000000000001,height:88});
+ assert.deepEqual(get(locked),before[2].geometry);
+ validateCore(store.getSnapshot().doc);
+ store.undo();
+ for(const item of before)assert.deepEqual(get(item.id),item.geometry);
+});
+test('zero-delta corner drag does not add an undo entry',()=>{
+ const store=new EditorStore(),a=store.add('shape'),b=store.add('shape');
+ store.select([a,b]);const history=store.getSnapshot().undo;
+ store.scaleSelectedFromCorner('se',0,0);
+ assert.equal(store.getSnapshot().undo,history);
 });
