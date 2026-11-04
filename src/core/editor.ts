@@ -3,6 +3,7 @@ import {toOutline,normalizePpd040Styles} from './ppd040Staging.ts';
 import {validateCore} from './contract.ts';
 import {blocks,box,copy,createDocument,effective,layoutOf,newSlide,plain,rich,setText,uid,isGeometry,isElementCommand,type Geometry,type D} from './model.ts';
 import {updateSafety} from '../pwa/safety.ts';
+import {arrangeSelection,type ArrangeMode} from './arrange.ts';
 export type EditorState={doc:D;slideId:string;selected:string[];dirty:boolean;exportedRevision:number|null;readOnly:boolean;original:string;warnings:string[];undo:number;redo:number};
 function validateEditorDocument(doc:D){
  if(doc.schemaVersion==='0.4.0'){
@@ -65,8 +66,24 @@ export class EditorStore{
  paste(payload:D){let selected:string[]=[];this.transaction((d,s)=>{const c=cloneObjects(payload.elements,payload.blocks);const assetMap=new Map<string,string>();for(const [id,a] of Object.entries(payload.assets) as [string,D][]){if(d.assets[id]&&JSON.stringify(d.assets[id])!==JSON.stringify(a)){const n=uid('asset');d.assets[n]=copy(a);assetMap.set(id,n);}else d.assets[id]=copy(a);}const rewrite=(o:D)=>{for(const [k,v] of Object.entries(o)){if(typeof v==='string'&&['assetRef','fallbackAssetRef','posterAssetRef','renderedAssetRef'].includes(k)&&assetMap.has(v))o[k]=assetMap.get(v);else if(Array.isArray(v))v.forEach(x=>{if(x&&typeof x==='object')rewrite(x);});else if(v&&typeof v==='object'&&k!=='extensions')rewrite(v);}};c.elements.forEach(e=>{rewrite(e);if(e.geometry&&(payload.roots??payload.elements.map((x:D)=>x.id)).some((id:string)=>c.ids.get(id)===e.id)){e.geometry.x+=24;e.geometry.y+=24;}});s.view.elements.push(...c.elements);s.content.blocks??=[];s.content.blocks.push(...c.blocks);selected=(payload.roots??payload.elements.map((e:D)=>e.id)).map((id:string)=>c.ids.get(id)!);});this.select(selected);}
  group(){if(this.state.selected.length<2)return;let id='';this.transaction((d,s)=>{const children=s.view.elements.filter((e:D)=>this.state.selected.includes(e.id));if(children.some((e:D)=>s.view.elements.some((p:D)=>p.children?.includes(e.id))))throw Error('Gruppera objekt på samma översta nivå.');const geometries=children.map((e:D)=>effective(d,s,e).geometry);const x=Math.min(...geometries.map((g:D)=>g.x)),y=Math.min(...geometries.map((g:D)=>g.y)),r=Math.max(...geometries.map((g:D)=>g.x+g.width)),b=Math.max(...geometries.map((g:D)=>g.y+g.height));for(const [i,e] of children.entries())e.geometry={...geometries[i],x:geometries[i].x-x,y:geometries[i].y-y};s.placeholderBindings=s.placeholderBindings?.filter((b:D)=>!children.some((e:D)=>e.id===b.elementId));id=uid('group');s.view.elements.push({id,type:'group',geometry:box(x,y,r-x,b-y),transform:box(0,0,r-x,b-y),children:children.map((e:D)=>e.id)});});this.select([id]);}
  ungroup(){const id=this.state.selected[0];this.transaction((_d,s)=>{const g=s.view.elements.find((e:D)=>e.id===id&&e.type==='group');if(!g)return;if(g.geometry.rotation)throw Error('Återställ gruppens rotation före avgruppering.');const b=g.geometry,t=g.transform??b;for(const cid of g.children){const e=s.view.elements.find((e:D)=>e.id===cid);e.geometry={...e.geometry,x:b.x+e.geometry.x*b.width/t.width,y:b.y+e.geometry.y*b.height/t.height,width:e.geometry.width*b.width/t.width,height:e.geometry.height*b.height/t.height};}s.view.elements=s.view.elements.filter((e:D)=>e.id!==id);});this.select([]);}
- align(mode:string){const ids=this.state.selected;this.transaction((d,s)=>{const els=s.view.elements.filter((e:D)=>ids.includes(e.id)&&!e.locked);const geos=els.map((e:D)=>effective(d,s,e).geometry);const width=d.document.canvas.width,height=d.document.canvas.height;if(mode==='distribute-x'||mode==='distribute-y'){const axis=mode==='distribute-x'?'x':'y',dim=axis==='x'?'width':'height';els.sort((a:D,b:D)=>a.geometry[axis]-b.geometry[axis]);if(els.length<3)return;const start=els[0].geometry[axis],last=els[els.length-1].geometry,end=last[axis]+last[dim],total=els.reduce((n:number,e:D)=>n+e.geometry[dim],0),gap=(end-start-total)/(els.length-1);let at=start;for(const e of els){e.geometry={...e.geometry,[axis]:at};at+=e.geometry[dim]+gap;}}
- else for(const [i,e] of els.entries()){const b=geos[i];e.geometry={...b,...(mode==='left'?{x:0}:mode==='right'?{x:width-b.width}:mode==='center'?{x:(width-b.width)/2}:mode==='top'?{y:0}:mode==='bottom'?{y:height-b.height}:{y:(height-b.height)/2})};}for(const e of els){const b=s.placeholderBindings?.find((b:D)=>b.elementId===e.id);if(b)b.overrides={...b.overrides,geometry:copy(e.geometry)};}});}
+ align(mode:string){
+  const ids=this.state.selected;
+  const editable=this.slide.view.elements.filter((e:D)=>ids.includes(e.id)&&!e.locked);
+  const count=editable.length;
+  if(count<2||mode.startsWith('distribute-')&&count<3)return;
+  const supported=['left','center','right','top','middle','bottom','distribute-x','distribute-y'];
+  if(!supported.includes(mode))throw Error('INVALID_ARRANGEMENT_MODE');
+  this.transaction((d,s)=>{
+   const elements=s.view.elements.filter((e:D)=>ids.includes(e.id)&&!e.locked);
+   const layout=arrangeSelection(elements.map((e:D)=>({id:e.id,geometry:effective(d,s,e).geometry})),mode as ArrangeMode);
+   for(const item of layout){
+    const element=elements.find((e:D)=>e.id===item.id);
+    element.geometry={...element.geometry,...item.geometry};
+    const binding=s.placeholderBindings?.find((b:D)=>b.elementId===element.id);
+    if(binding)binding.overrides={...binding.overrides,geometry:copy(item.geometry)};
+   }
+  });
+ }
  reorder(id:string,mode:string){this.transaction((_d,s)=>{const sorted=[...s.view.elements].sort((a:D,b:D)=>(a.zIndex??0)-(b.zIndex??0));const i=sorted.findIndex((e:D)=>e.id===id);const [e]=sorted.splice(i,1);sorted.splice(mode==='front'?sorted.length:mode==='back'?0:Math.max(0,Math.min(sorted.length,i+(mode==='up'?1:-1))),0,e);sorted.forEach((e:D,i:number)=>e.zIndex=i);});}
  applyLayout(layoutId:string){this.transaction((d,s)=>{const old=layoutOf(d,s),next=d.masters.find((m:D)=>m.id===(s.masterId??d.document.defaultMasterId))?.layouts.find((l:D)=>l.id===layoutId);if(!next)throw Error('Layouten saknas');const used=new Set();for(const binding of s.placeholderBindings??[]){const op=old?.placeholders?.find((p:D)=>p.id===binding.placeholderId);const np=next.placeholders?.find((p:D)=>p.role===op?.role&&!used.has(p.id));if(np){binding.placeholderId=np.id;used.add(np.id);}else{const e=s.view.elements.find((e:D)=>e.id===binding.elementId);if(e)e.geometry=effective(d,s,e).geometry;binding.detached=true;}}s.placeholderBindings=s.placeholderBindings?.filter((b:D)=>!b.detached);s.layoutId=layoutId;});}
  detachLayout(){this.transaction((d,s)=>{for(const e of s.view.elements){const v=effective(d,s,e);e.geometry=copy(v.geometry);e.style=copy(v.style);}delete s.layoutId;delete s.masterId;delete s.placeholderBindings;delete d.document.defaultMasterId;delete d.document.defaultLayoutId;});}
