@@ -1,4 +1,4 @@
-import {resizeRect,type Rect,type ResizeDirection} from './geometry';
+import {resizeRect,type Rect,type ResizeDirection} from './geometry.ts';
 
 /** Snap a dragged object's left/centre/right and top/middle/bottom to other objects.
  * The first dragged element is the reference, so grouped movement remains rigid.
