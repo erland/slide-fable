@@ -5,6 +5,9 @@ import path from 'node:path';
 import assert from 'node:assert/strict';
 import JSZip from 'jszip';
 import sharp from 'sharp';
+import {execFile} from 'node:child_process';
+import {promisify} from 'node:util';
+const execFileAsync=promisify(execFile);
 const output=path.resolve(process.env.EDITOR_OUTPUT??'../editor-evidence');await mkdir(output,{recursive:true});
 const server=spawn('node',['node_modules/vite/bin/vite.js','--host','127.0.0.1','--port','5178','--strictPort'],{stdio:'pipe'});await new Promise((resolve,reject)=>{server.stdout.on('data',d=>{if(String(d).includes('5178'))resolve();});server.on('exit',reject);});
 const browser=await chromium.launch({headless:true,...(process.env.CHROMIUM_EXECUTABLE?{executablePath:process.env.CHROMIUM_EXECUTABLE,args:['--no-sandbox','--disable-dev-shm-usage']}:{})});
@@ -969,6 +972,61 @@ try{
  await writeFile(path.join(output,'ppd040-transforms-roundtrip-metrics.json'),JSON.stringify({width:beforeRaster.info.width,height:beforeRaster.info.height,pixelCount,differentPixels:different,differentFraction:different/pixelCount,maxDelta,channelTolerance,maxDifferentFraction},null,2));
  assert.ok(different/pixelCount<=maxDifferentFraction,'PPD JSON roundtrip changes too many rendered pixels: '+different+'/'+pixelCount);
  pass('PPD-040:complex-transform-pixel-roundtrip-tolerance');
+
+
+ // Editor vs PDF visual export: rasterize PDF at 120 DPI (PDF page is 0.6x logical units).
+ await page.evaluate(async()=>{
+  const {createDocument}=await import('/src/core/model.ts');
+  const {editorStore}=await import('/src/core/editor.ts');
+  const doc=createDocument();
+  doc.slides[0].view.elements=[
+   {id:'pdf-visual-blue',type:'shape',shapeType:'triangle',geometry:{x:140,y:150,width:260,height:210,rotation:25},flipX:true,style:{fill:{color:'#387F89'}}},
+   {id:'pdf-visual-red',type:'shape',shapeType:'triangle',geometry:{x:560,y:270,width:220,height:170,rotation:-30},flipY:true,style:{fill:{color:'#CF694C'}}}
+  ];
+  editorStore.load(doc);
+ });
+ const pdfEditorTarget=page.locator('.stage .slide-render').first();
+ await pdfEditorTarget.locator('[data-element-id="pdf-visual-blue"]').waitFor({state:'visible'});
+ const pdfEditorPng=await pdfEditorTarget.screenshot({animations:'disabled',caret:'hide'});
+ await writeFile(path.join(output,'ppd040-pdf-visual-editor.png'),pdfEditorPng);
+ const visualPdfBytes=await page.evaluate(async()=>{
+  const {editorStore}=await import('/src/core/editor.ts');
+  const {pdfExport}=await import('/src/export/office.ts');
+  const doc=editorStore.getSnapshot().doc;
+  return Array.from((await pdfExport(doc,doc.slides)).file);
+ });
+ const pdfVisualPath=path.join(output,'ppd040-pdf-visual-export.pdf');
+ const pdfImagePrefix=path.join(output,'ppd040-pdf-visual-raster');
+ await writeFile(pdfVisualPath,Uint8Array.from(visualPdfBytes));
+ await execFileAsync('pdftoppm',['-f','1','-l','1','-singlefile','-png','-r','120',pdfVisualPath,pdfImagePrefix]);
+ const editorVisual=await sharp(pdfEditorPng).removeAlpha().raw().toBuffer({resolveWithObject:true});
+ const pdfVisual=await sharp(pdfImagePrefix+'.png').resize(editorVisual.info.width,editorVisual.info.height,{fit:'fill'}).removeAlpha().raw().toBuffer({resolveWithObject:true});
+ const rgbColors=[[56,127,137],[207,105,76]];
+ const width=editorVisual.info.width,height=editorVisual.info.height;
+ const diffPixels=Buffer.alloc(width*height*4);
+ const perColor=rgbColors.map(([r,g,b],index)=>{
+  let editorCount=0,pdfCount=0,intersection=0,union=0,editorX=0,editorY=0,pdfX=0,pdfY=0;
+  for(let y=0;y<height;y++)for(let x=0;x<width;x++){
+   const i=(y*width+x)*3;
+   const isColor=data=>Math.abs(data[i]-r)+Math.abs(data[i+1]-g)+Math.abs(data[i+2]-b)<100;
+   const a=isColor(editorVisual.data),z=isColor(pdfVisual.data);
+   if(a){editorCount++;editorX+=x;editorY+=y;}
+   if(z){pdfCount++;pdfX+=x;pdfY+=y;}
+   if(a&&z)intersection++;
+   if(a||z){union++;const k=(y*width+x)*4;diffPixels[k]=a&&!z?255:0;diffPixels[k+1]=z&&!a?255:0;diffPixels[k+2]=0;diffPixels[k+3]=255;}
+  }
+  const overlap=union?intersection/union:0;
+  const centerError=editorCount&&pdfCount?Math.hypot(editorX/editorCount-pdfX/pdfCount,editorY/editorCount-pdfY/pdfCount):Infinity;
+  return {color:index===0?'blue':'red',editorPixels:editorCount,pdfPixels:pdfCount,intersection,union,overlap,centerError};
+ });
+ await sharp(diffPixels,{raw:{width,height,channels:4}}).png().toFile(path.join(output,'ppd040-pdf-visual-diff.png'));
+ await writeFile(path.join(output,'ppd040-pdf-visual-metrics.json'),JSON.stringify({width,height,perColor,minOverlap:.75,maxCenterError:12},null,2));
+ for(const item of perColor){
+  assert.ok(item.editorPixels>100&&item.pdfPixels>100,item.color+' shape visible in both outputs');
+  assert.ok(item.overlap>=.75,item.color+' shape visual overlap: '+item.overlap.toFixed(3));
+  assert.ok(item.centerError<=12,item.color+' shape position mismatch: '+item.centerError.toFixed(2)+' px');
+ }
+ pass('PPD-040:editor-vs-rasterized-pdf-visual-parity');
 
  assert.deepEqual(errors,[]);pass('browser:no-unhandled-errors');
 }finally{await writeFile(path.join(output,'editor-results.json'),JSON.stringify({checks,engine:browser.version()},null,2));await context.close();await browser.close();server.kill();}
