@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {arrangeSelection,matchSelectionSize} from '../src/core/arrange.ts';
+import {arrangeSelection,matchSelectionSize,scaleSelection} from '../src/core/arrange.ts';
 import {EditorStore} from '../src/core/editor.ts';
 import {validateCore} from '../src/core/contract.ts';
 
@@ -118,5 +118,68 @@ test('matchSize with fewer than two eligible objects or already equal dimensions
  const geo={x:120,y:200,width:100,height:70};
  store.setElementGeometry(a,geo);store.setElementGeometry(b,{...geo,x:400});
  store.select([a,b]);revision=store.getSnapshot().undo;store.matchSize('both');
+ assert.equal(store.getSnapshot().undo,revision);
+});
+
+test('proportional scale preserves aspect ratios and relative center offsets',()=>{
+ const original=items.map(i=>({id:i.id,geometry:{...i.geometry}}));
+ const result=scaleSelection(items,1.5);
+ const left=Math.min(...items.map(i=>i.geometry.x)),right=Math.max(...items.map(i=>i.geometry.x+i.geometry.width));
+ const top=Math.min(...items.map(i=>i.geometry.y)),bottom=Math.max(...items.map(i=>i.geometry.y+i.geometry.height));
+ const cx=(left+right)/2,cy=(top+bottom)/2;
+ for(let i=0;i<result.length;i++){
+  const b=result[i].geometry,a=items[i].geometry;
+  assert.equal(b.x,cx+(a.x-cx)*1.5);
+  assert.equal(b.y,cy+(a.y-cy)*1.5);
+  assert.equal(b.width,a.width*1.5);
+  assert.equal(b.height,a.height*1.5);
+  assert.equal(b.width/b.height,a.width/a.height);
+ }
+ assert.deepEqual(items,original,'helper does not mutate input');
+});
+test('scaling the collection down keeps its center fixed',()=>{
+ const result=scaleSelection(items,.75);
+ const bounds=arr=>({left:Math.min(...arr.map(i=>i.geometry.x)),right:Math.max(...arr.map(i=>i.geometry.x+i.geometry.width)),top:Math.min(...arr.map(i=>i.geometry.y)),bottom:Math.max(...arr.map(i=>i.geometry.y+i.geometry.height))});
+ const before=bounds(items),after=bounds(result);
+ assert.ok(Math.abs((before.left+before.right)/2-(after.left+after.right)/2)<1e-9);
+ assert.ok(Math.abs((before.top+before.bottom)/2-(after.top+after.bottom)/2)<1e-9);
+});
+test('rejects invalid scale and geometry, and ignores fewer than two objects',()=>{
+ for(const factor of [0,.2,2.1,Infinity,NaN])assert.throws(()=>scaleSelection(items,factor),/INVALID_SCALE_FACTOR/);
+ assert.deepEqual(scaleSelection(items.slice(0,1),1.25),items.slice(0,1));
+ assert.throws(()=>scaleSelection([items[0],{id:'bad',geometry:{x:0,y:0,width:0,height:10}}],1.5),/INVALID_ARRANGEMENT_GEOMETRY/);
+});
+test('editor scales relative positions, excludes locked and line elements, validates and undoes',()=>{
+ const store=new EditorStore();
+ const a=store.add('shape'),b=store.add('shape'),locked=store.add('shape'),line=store.add('line');
+ store.setElementGeometry(a,{x:100,y:100,width:100,height:80});
+ store.setElementGeometry(b,{x:400,y:300,width:150,height:100});
+ store.setElementGeometry(locked,{x:700,y:200,width:70,height:60});
+ store.updateElement(locked,{locked:true});
+ store.select([a,b,locked,line]);
+ const original=store.slide.view.elements.filter(e=>[a,b,locked,line].includes(e.id)).map(e=>({id:e.id,geometry:{...e.geometry}}));
+ store.scaleSelected(1.25);
+ const get=id=>store.slide.view.elements.find(e=>e.id===id).geometry;
+ assert.deepEqual(get(locked),original.find(e=>e.id===locked).geometry);
+ assert.deepEqual(get(line),original.find(e=>e.id===line).geometry);
+ assert.equal(get(a).width,125);
+ assert.equal(get(b).width,187.5);
+ assert.equal(get(a).x,43.75);
+ assert.equal(get(b).x,418.75);
+ validateCore(store.getSnapshot().doc);
+ store.undo();
+ for(const item of original)assert.deepEqual(get(item.id),item.geometry);
+});
+test('no-op scaling does not create history and too-small scales are rejected atomically',()=>{
+ const store=new EditorStore();
+ const a=store.add('shape'),b=store.add('shape');
+ store.select([a,b]);
+ let revision=store.getSnapshot().undo;
+ store.scaleSelected(1);
+ assert.equal(store.getSnapshot().undo,revision);
+ store.setElementGeometry(a,{x:10,y:10,width:20,height:20});
+ store.setElementGeometry(b,{x:100,y:100,width:80,height:80});
+ revision=store.getSnapshot().undo;
+ assert.throws(()=>store.scaleSelected(.25),/SCALE_BELOW_MINIMUM/);
  assert.equal(store.getSnapshot().undo,revision);
 });

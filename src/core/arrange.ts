@@ -61,3 +61,28 @@ export function matchSelectionSize(items:readonly ArrangeItem[],referenceId:stri
  }
  return result;
 }
+
+/** Uniformly scales the selection as a whole around its bounding-box center.
+ * Relative positions, each object's aspect ratio and rotations remain unchanged.
+ */
+export function scaleSelection(items:readonly ArrangeItem[],factor:number):ArrangeItem[]{
+ if(!Number.isFinite(factor)||factor<0.25||factor>2)throw Error('INVALID_SCALE_FACTOR');
+ const result=items.map(item=>({id:item.id,geometry:{...item.geometry}}));
+ if(result.length<2)return result;
+ for(const {geometry:b} of result){
+  if(![b.x,b.y,b.width,b.height].every(Number.isFinite)||b.width<=0||b.height<=0)throw Error('INVALID_ARRANGEMENT_GEOMETRY');
+ }
+ const left=Math.min(...result.map(item=>item.geometry.x));
+ const right=Math.max(...result.map(item=>item.geometry.x+item.geometry.width));
+ const top=Math.min(...result.map(item=>item.geometry.y));
+ const bottom=Math.max(...result.map(item=>item.geometry.y+item.geometry.height));
+ const cx=(left+right)/2,cy=(top+bottom)/2;
+ for(const item of result){
+  const b=item.geometry;
+  b.x=cx+(b.x-cx)*factor;
+  b.y=cy+(b.y-cy)*factor;
+  b.width*=factor;
+  b.height*=factor;
+ }
+ return result;
+}
