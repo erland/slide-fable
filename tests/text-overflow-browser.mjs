@@ -59,6 +59,25 @@ try{
  assert.equal((await snapshot()).height,base.height,'shrink must preserve model geometry');
  console.log('PASS shrink-to-fit visual scale, unchanged model height');
 
+ const exportMetrics=await page.evaluate(async id=>{
+  const {editorStore:store}=await import('/src/core/editor.ts');
+  const {effective}=await import('/src/core/model.ts');
+  const {measure}=await import('/src/export/officeShared.ts');
+  const doc=store.getSnapshot().doc,slide=store.slide;
+  const element=effective(doc,slide,slide.view.elements.find(e=>e.id===id));
+  const fragments=await measure(doc,slide,element);
+  const inner=document.querySelector('.stage .render-element[data-element-id="'+id+'"] .text-fit-content');
+  const span=inner.querySelector('[data-run]'),transform=getComputedStyle(inner).transform;
+  const scale=new DOMMatrixReadOnly(transform).a;
+  return {scale,originalFont:parseFloat(getComputedStyle(span).fontSize),sizes:fragments.map(f=>f.size),text:fragments.map(f=>f.text).join('')};
+ },id);
+ assert.ok(exportMetrics.scale<.99,'The fixture must require real shrink-to-fit');
+ assert.ok(exportMetrics.sizes.length>0,'Office fragment measurement must produce native text');
+ assert.ok(exportMetrics.sizes.every(size=>Math.abs(size-exportMetrics.originalFont*exportMetrics.scale)<.25),'Office fragment font sizes must match rendered shrink scale');
+ assert.ok(exportMetrics.text.includes('ÅÄÖ'),'Export fragments must retain Swedish characters');
+ console.log('PASS PDF/PPTX shared text fragments match shrink-to-fit scale');
+
+
  await control.selectOption('expand-height');
  await page.waitForFunction(async id=>{
   const store=(await import('/src/core/editor.ts')).editorStore;
