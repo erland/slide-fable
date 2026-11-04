@@ -13,8 +13,8 @@ test('snaps centers along both axes and uses matching object coordinates',()=>{
  assert.equal(r.guides.x,350);assert.equal(r.guides.y,210);
 });
 test('grid snapping remains fallback and guides disappear when no object is close',()=>{
- const r=snapTranslation(moving,[neighbor],54,41,true,false,5);
- assert.equal(r.dx,50);assert.equal(r.dy,40);
+ const r=snapTranslation(moving,[neighbor],54,26,true,false,5);
+ assert.equal(r.dx,50);assert.equal(r.dy,30);
  assert.deepEqual(r.guides,{});
 });
 test('Alt bypasses guides and grid, and toggle disables both',()=>{
