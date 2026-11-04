@@ -731,5 +731,50 @@ try{
  assert.ok(tableXml.includes('column-a')||tableXml.includes('A'),'table content survives PPTX');
  assert.match(tableXml,/<a:tblGrid>/,'table grid remains native PowerPoint table');
  pass('PPD-040:table-real-pdf-pptx-export');
+
+ // Regression: edits -> strict PPD 0.4 JSON -> IndexedDB draft -> reopen -> render -> native exports.
+ const tableRoundTrip=await page.evaluate(async()=>{
+  const {editorStore}=await import('/src/core/editor.ts');
+  const {writePpd040Json,readPpd040Json}=await import('/src/core/ppd040Document.ts');
+  const {saveDraft,listDrafts,deleteDraft}=await import('/src/core/persistence.ts');
+  const {pdfExport,pptxExport}=await import('/src/export/office.ts');
+  const before=structuredClone(editorStore.getSnapshot().doc);
+  const table=before.slides[0].view.elements.find(e=>e.id==='table-layout-040');
+  const snapshot={widths:table.tableLayout.columnWidths,padding:table.tableLayout.cellPadding,border:table.cells[0][0].borders.top};
+  const opened=readPpd040Json(writePpd040Json(before));
+  const draftId=opened.document.id;
+  let saved;
+  try{
+   const version=await saveDraft(opened,null,'table-regression');
+   const draft=(await listDrafts()).find(d=>d.id===draftId);
+   if(!draft||draft.version!==version)throw Error('TABLE_DRAFT_NOT_SAVED');
+   saved=readPpd040Json(writePpd040Json(draft.model));
+  }finally{
+   await deleteDraft(draftId);
+  }
+  editorStore.load(saved);
+  const reopened=saved.slides[0].view.elements.find(e=>e.id==='table-layout-040');
+  const outputs=await Promise.all([pdfExport(saved,saved.slides),pptxExport(saved,saved.slides)]);
+  return {version:saved.schemaVersion,expected:snapshot,actual:{
+   widths:reopened.tableLayout.columnWidths,
+   padding:reopened.tableLayout.cellPadding,
+   border:reopened.cells[0][0].borders.top
+  },pdf:Array.from(outputs[0].file),pptx:Array.from(outputs[1].file)};
+ });
+ assert.equal(tableRoundTrip.version,'0.4.0');
+ assert.deepEqual(tableRoundTrip.actual,tableRoundTrip.expected,'table formatting survives JSON and IndexedDB');
+ const reopenedCell=page.locator('.stage [data-element-id="table-layout-040"] td').first();
+ await reopenedCell.waitFor({state:'visible'});
+ assert.equal(await reopenedCell.evaluate(el=>getComputedStyle(el).borderTopWidth),'5px','reopened table has native top border');
+ assert.equal(await reopenedCell.evaluate(el=>getComputedStyle(el).paddingTop),'9px','reopened table retains cell padding');
+ const reopenedPdf=await PDFDocument.load(Uint8Array.from(tableRoundTrip.pdf));
+ assert.ok(reopenedPdf.getPageCount()>0,'reopened table exports a valid PDF');
+ const reopenedZip=await JSZip.loadAsync(Uint8Array.from(tableRoundTrip.pptx));
+ const reopenedXml=await reopenedZip.file('ppt/slides/slide1.xml').async('string');
+ assert.match(reopenedXml,/<a:tblGrid>/,'reopened table exports as editable PPTX table');
+ assert.match(reopenedXml,/<a:lnT\b/,'edited top border survives PPTX export');
+ assert.match(reopenedXml,/<a:gridCol\b/,'column widths survive as native PPTX grid');
+ pass('PPD-040:table-edit-save-reopen-render-pdf-pptx');
+
  assert.deepEqual(errors,[]);pass('browser:no-unhandled-errors');
 }finally{await writeFile(path.join(output,'editor-results.json'),JSON.stringify({checks,engine:browser.version()},null,2));await context.close();await browser.close();server.kill();}
