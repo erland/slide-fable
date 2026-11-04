@@ -3,7 +3,7 @@ import {toOutline,normalizePpd040Styles} from './ppd040Staging.ts';
 import {validateCore} from './contract.ts';
 import {blocks,box,copy,createDocument,effective,layoutOf,newSlide,plain,rich,setText,uid,isGeometry,isElementCommand,type Geometry,type D} from './model.ts';
 import {updateSafety} from '../pwa/safety.ts';
-import {arrangeSelection,matchSelectionSize,scaleSelection,scaleSelectionFromCorner,snapSelectionScaleFromCorner,type ArrangeItem,type ArrangeMode,type MatchSizeMode,type ScaleCorner} from './arrange.ts';
+import {arrangeSelection,matchSelectionSize,scaleSelection,snapSelectionScaleFromCorner,type ArrangeItem,type ArrangeMode,type MatchSizeMode,type ScaleCorner} from './arrange.ts';
 export type EditorState={doc:D;slideId:string;selected:string[];dirty:boolean;exportedRevision:number|null;readOnly:boolean;original:string;warnings:string[];undo:number;redo:number};
 function validateEditorDocument(doc:D){
  if(doc.schemaVersion==='0.4.0'){
