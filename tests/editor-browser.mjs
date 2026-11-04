@@ -772,8 +772,8 @@ try{
  const reopenedZip=await JSZip.loadAsync(Uint8Array.from(tableRoundTrip.pptx));
  const reopenedXml=await reopenedZip.file('ppt/slides/slide1.xml').async('string');
  assert.match(reopenedXml,/<a:tblGrid>/,'reopened table exports as editable PPTX table');
- assert.match(reopenedXml,/<a:lnT\\b/,'edited top border survives PPTX export');
- assert.match(reopenedXml,/<a:gridCol\\b/,'column widths survive as native PPTX grid');
+ assert.match(reopenedXml,/<a:lnT\b/,'edited top border survives PPTX export');
+ assert.match(reopenedXml,/<a:gridCol\b/,'column widths survive as native PPTX grid');
  pass('PPD-040:table-edit-save-reopen-render-pdf-pptx');
 
  assert.deepEqual(errors,[]);pass('browser:no-unhandled-errors');
