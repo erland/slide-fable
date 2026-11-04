@@ -235,3 +235,8 @@
  }
  .editor-workspace[data-properties-open=false]>.properties{display:none}
 }
+
+/* Smart alignment guides are editor-only; never part of exported slide content. */
+.stage .alignment-guide{position:absolute;z-index:999998;pointer-events:none;background:#e54b72;opacity:.9}
+.stage .alignment-guide.vertical{top:0;bottom:0;width:1px}
+.stage .alignment-guide.horizontal{left:0;right:0;height:1px}
