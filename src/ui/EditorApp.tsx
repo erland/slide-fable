@@ -80,7 +80,7 @@ export function App(){
   const target=event.target;
   if(!(target instanceof Element)||target.closest('.render-element,.resize-handle,.selection-scale-frame,.canvas-inline-editor'))return;
   const area=viewport.current?.querySelector<HTMLElement>('.stage-space');
-  if(!area||!area.contains(target))return;
+  if(!area||!area.contains(target)){if(!event.shiftKey){store.select([]);setEditingTextId(null);}return;}
   // Touch gestures keep native canvas scrolling. Mouse and stylus support marquee.
   if(event.pointerType==='touch'){if(!event.shiftKey){store.select([]);setEditingTextId(null);}return;}
   const bounds=area.getBoundingClientRect();
