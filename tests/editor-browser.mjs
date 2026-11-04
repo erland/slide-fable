@@ -827,5 +827,29 @@ try{
  assert.match(flipXml,/<p:sp>/,'PPTX shape remains editable');
  pass('PPD-040:object-flip-real-pdf-pptx-export');
 
+
+ const groupExport=await page.evaluate(async()=>{
+  const {createDocument}=await import('/src/core/model.ts');
+  const {flatten}=await import('/src/export/officeShared.ts');
+  const {pdfExport,pptxExport}=await import('/src/export/office.ts');
+  const doc=createDocument();
+  const group={id:'group-flip',type:'group',geometry:{x:100,y:120,width:500,height:250,rotation:25},transform:{x:0,y:0,width:500,height:250},flipX:true,children:['group-shape-a','group-shape-b']};
+  const shape=(id,x)=>({id,type:'shape',shapeType:'triangle',geometry:{x,y:30,width:120,height:90},style:{fill:{color:'#387F89'}}});
+  doc.slides[0].view.elements=[group,shape('group-shape-a',25),shape('group-shape-b',215)];
+  const objects=flatten(doc,doc.slides[0]).filter(e=>e.type==='shape').map(e=>({id:e.id,flipX:e.flipX,flipY:e.flipY,rotation:e.geometry.rotation,x:e.geometry.x}));
+  const [pdf,pptx]=await Promise.all([pdfExport(doc,doc.slides),pptxExport(doc,doc.slides)]);
+  return {objects,pdf:Array.from(pdf.file),pptx:Array.from(pptx.file)};
+ });
+ assert.equal(groupExport.objects.length,2,'group children remain exportable objects');
+ assert.ok(groupExport.objects.every(e=>e.flipX===true),'group mirror propagates to children');
+ assert.ok(groupExport.objects.every(e=>Math.abs(e.rotation-25)<.01),'group rotation remains on children');
+ assert.ok(groupExport.objects[0].x>groupExport.objects[1].x,'group horizontal mirror reverses child positions');
+ const groupPdf=await PDFDocument.load(Uint8Array.from(groupExport.pdf));
+ assert.equal(groupPdf.getPageCount(),1,'mirrored group PDF opens');
+ const groupPptx=await JSZip.loadAsync(Uint8Array.from(groupExport.pptx));
+ const groupXml=await groupPptx.file('ppt/slides/slide1.xml').async('string');
+ assert.ok((groupXml.match(/flipH="1"/g)??[]).length>=2,'native PPTX child shapes keep group mirroring');
+ assert.ok((groupXml.match(/<p:sp>/g)??[]).length>=2,'group members remain editable PowerPoint shapes');
+ pass('PPD-040:group-mirror-rotation-native-pptx-and-pdf');
  assert.deepEqual(errors,[]);pass('browser:no-unhandled-errors');
 }finally{await writeFile(path.join(output,'editor-results.json'),JSON.stringify({checks,engine:browser.version()},null,2));await context.close();await browser.close();server.kill();}
