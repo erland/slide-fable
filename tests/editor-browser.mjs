@@ -822,8 +822,9 @@ try{
  assert.ok(flipArtifacts.pdfReport.objects.some(o=>o.elementId==='flipped-shape-export'&&o.status==='rasterized'),'PDF uses visual fallback for flipped shapes');
  const flipZip=await JSZip.loadAsync(Uint8Array.from(flipArtifacts.pptx));
  const flipXml=await flipZip.file('ppt/slides/slide1.xml').async('string');
- assert.match(flipXml,/flipH="1"/,'PPTX keeps horizontal flip flag on native shape');
- assert.match(flipXml,/flipV="1"/,'PPTX keeps vertical flip flag on native shape');
+ // Two perpendicular flips are equivalent to a 180-degree rotation.
+ // The exporter canonicalizes this transform rather than emitting both flags.
+ assert.match(flipXml,/<a:xfrm[^>]*rot="10800000"/,'PPTX preserves the equivalent 180-degree native shape orientation');
  assert.match(flipXml,/<p:sp>/,'PPTX shape remains editable');
  pass('PPD-040:object-flip-real-pdf-pptx-export');
 
@@ -851,5 +852,42 @@ try{
  assert.ok((groupXml.match(/flipH="1"/g)??[]).length>=2,'native PPTX child shapes keep group mirroring');
  assert.ok((groupXml.match(/<p:sp>/g)??[]).length>=2,'group members remain editable PowerPoint shapes');
  pass('PPD-040:group-mirror-rotation-native-pptx-and-pdf');
+
+ const nestedTransforms=await page.evaluate(async()=>{
+  const {createDocument}=await import('/src/core/model.ts');
+  const {flatten}=await import('/src/export/officeShared.ts');
+  const {pptxExport}=await import('/src/export/office.ts');
+  const doc=createDocument();
+  const frame=(id,x,flipX,flipY,children)=>({id,type:'group',geometry:{x,y:0,width:200,height:160,rotation:0},transform:{x:0,y:0,width:200,height:160},flipX,flipY,children});
+  const shape=(id)=>({id,type:'shape',shapeType:'triangle',geometry:{x:30,y:20,width:80,height:60,rotation:0},style:{fill:{color:'#387F89'}}});
+  doc.slides[0].view.elements=[
+   frame('outer-double',30,true,false,['inner-double']),
+   frame('inner-double',0,true,false,['shape-double']),shape('shape-double'),
+   frame('outer-vertical',280,false,true,['inner-vertical']),
+   frame('inner-vertical',0,false,false,['shape-vertical']),shape('shape-vertical'),
+   frame('outer-mixed',530,false,true,['inner-mixed']),
+   frame('inner-mixed',0,true,false,['shape-mixed']),shape('shape-mixed'),
+   frame('outer-rotated',780,true,false,['inner-rotated']),
+   {...frame('inner-rotated',0,false,true,['shape-rotated']),geometry:{x:0,y:0,width:200,height:160,rotation:30}},
+   shape('shape-rotated')
+  ];
+  const elements=flatten(doc,doc.slides[0]).filter(e=>e.type==='shape').map(e=>({id:e.id,flipX:e.flipX,flipY:e.flipY,rotation:e.geometry.rotation}));
+  const result=await pptxExport(doc,doc.slides);
+  return {elements,pptx:Array.from(result.file)};
+ });
+ const nestedById=Object.fromEntries(nestedTransforms.elements.map(e=>[e.id,e]));
+ assert.equal(nestedById['shape-double'].flipX,false,'two horizontal mirrors cancel');
+ assert.equal(nestedById['shape-double'].flipY,false);
+ assert.ok(Math.abs(nestedById['shape-double'].rotation)<.01,'canceled mirrors do not introduce rotation');
+ assert.equal(nestedById['shape-vertical'].flipX,true,'vertical mirror decomposes to mirrored X and half-turn');
+ assert.ok(Math.abs(Math.abs(nestedById['shape-vertical'].rotation)-180)<.01,'vertical mirror retains equivalent native orientation');
+ assert.equal(nestedById['shape-mixed'].flipX,false,'opposite-axis mirrors compose to a half-turn');
+ assert.ok(Math.abs(Math.abs(nestedById['shape-mixed'].rotation)-180)<.01);
+ assert.equal(nestedById['shape-rotated'].flipX,false,'nested rotation with two mirrors remains orientation-preserving');
+ const nestedPptx=await JSZip.loadAsync(Uint8Array.from(nestedTransforms.pptx));
+ const nestedXml=await nestedPptx.file('ppt/slides/slide1.xml').async('string');
+ assert.ok((nestedXml.match(/<p:sp>/g)??[]).length>=4,'nested group children export as editable native shapes');
+ pass('PPD-040:nested-groups-flip-composition-and-native-pptx');
+
  assert.deepEqual(errors,[]);pass('browser:no-unhandled-errors');
 }finally{await writeFile(path.join(output,'editor-results.json'),JSON.stringify({checks,engine:browser.version()},null,2));await context.close();await browser.close();server.kill();}
