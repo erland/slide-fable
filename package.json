@@ -15,6 +15,7 @@
     "test:pwa": "node tests/pwa.mjs",
     "test:editor": "node tests/editor-browser.mjs",
     "test:text-overflow": "node tests/text-overflow-browser.mjs",
+    "test:text-export": "node tests/text-export-parity-browser.mjs",
     "test:lifecycle": "node tests/lifecycle-browser.mjs",
     "profile:history": "node --experimental-strip-types scripts/profile-history.mjs"
   },
