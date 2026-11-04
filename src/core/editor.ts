@@ -3,7 +3,7 @@ import {toOutline,normalizePpd040Styles} from './ppd040Staging.ts';
 import {validateCore} from './contract.ts';
 import {blocks,box,copy,createDocument,effective,layoutOf,newSlide,plain,rich,setText,uid,isGeometry,isElementCommand,type Geometry,type D} from './model.ts';
 import {updateSafety} from '../pwa/safety.ts';
-import {arrangeSelection,matchSelectionSize,type ArrangeMode,type MatchSizeMode} from './arrange.ts';
+import {arrangeSelection,matchSelectionSize,scaleSelection,type ArrangeMode,type MatchSizeMode} from './arrange.ts';
 export type EditorState={doc:D;slideId:string;selected:string[];dirty:boolean;exportedRevision:number|null;readOnly:boolean;original:string;warnings:string[];undo:number;redo:number};
 function validateEditorDocument(doc:D){
  if(doc.schemaVersion==='0.4.0'){
@@ -99,6 +99,26 @@ export class EditorStore{
    for(const item of layout){
     if(item.id===reference)continue;
     const element=elements.find((e:D)=>e.id===item.id);
+    element.geometry={...element.geometry,...item.geometry};
+    const binding=s.placeholderBindings?.find((b:D)=>b.elementId===element.id);
+    if(binding)binding.overrides={...binding.overrides,geometry:copy(item.geometry)};
+   }
+  });
+ }
+
+ scaleSelected(factor:number){
+  if(!Number.isFinite(factor)||factor<0.25||factor>2)throw Error('INVALID_SCALE_FACTOR');
+  const ids=this.state.selected;
+  const eligible=this.slide.view.elements.filter((e:D)=>ids.includes(e.id)&&!e.locked&&!['line','arrow','connector'].includes(e.type));
+  if(eligible.length<2||factor===1)return;
+  const measured=eligible.map((e:D)=>({id:e.id,geometry:effective(this.state.doc,this.slide,e).geometry}));
+  // Reject scales that would make any selected element too small.
+  if(measured.some((item)=>item.geometry.width*factor<10||item.geometry.height*factor<10))throw Error('SCALE_BELOW_MINIMUM');
+  this.transaction((d,s)=>{
+   const objects=s.view.elements.filter((e:D)=>ids.includes(e.id)&&!e.locked&&!['line','arrow','connector'].includes(e.type));
+   const scaled=scaleSelection(objects.map((e:D)=>({id:e.id,geometry:effective(d,s,e).geometry})),factor);
+   for(const item of scaled){
+    const element=objects.find((e:D)=>e.id===item.id);
     element.geometry={...element.geometry,...item.geometry};
     const binding=s.placeholderBindings?.find((b:D)=>b.elementId===element.id);
     if(binding)binding.overrides={...binding.overrides,geometry:copy(item.geometry)};
