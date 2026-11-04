@@ -3,7 +3,7 @@ import {toOutline,normalizePpd040Styles} from './ppd040Staging.ts';
 import {validateCore} from './contract.ts';
 import {blocks,box,copy,createDocument,effective,layoutOf,newSlide,plain,rich,setText,uid,isGeometry,isElementCommand,type Geometry,type D} from './model.ts';
 import {updateSafety} from '../pwa/safety.ts';
-import {arrangeSelection,type ArrangeMode} from './arrange.ts';
+import {arrangeSelection,matchSelectionSize,type ArrangeMode,type MatchSizeMode} from './arrange.ts';
 export type EditorState={doc:D;slideId:string;selected:string[];dirty:boolean;exportedRevision:number|null;readOnly:boolean;original:string;warnings:string[];undo:number;redo:number};
 function validateEditorDocument(doc:D){
  if(doc.schemaVersion==='0.4.0'){
@@ -84,6 +84,28 @@ export class EditorStore{
    }
   });
  }
+ matchSize(mode:MatchSizeMode){
+  const ids=this.state.selected;
+  // The first selected, unlocked rectangular object is the size reference.
+  const eligible=this.slide.view.elements.filter((e:D)=>ids.includes(e.id)&&!e.locked&&!['line','arrow','connector'].includes(e.type));
+  if(eligible.length<2)return;
+  const reference=ids.find(id=>eligible.some((e:D)=>e.id===id))!;
+  const measured=eligible.map((e:D)=>({id:e.id,geometry:effective(this.state.doc,this.slide,e).geometry}));
+  const target=matchSelectionSize(measured,reference,mode);
+  if(target.every((item,i)=>item.geometry.width===measured[i].geometry.width&&item.geometry.height===measured[i].geometry.height))return;
+  this.transaction((d,s)=>{
+   const elements=s.view.elements.filter((e:D)=>ids.includes(e.id)&&!e.locked&&!['line','arrow','connector'].includes(e.type));
+   const layout=matchSelectionSize(elements.map((e:D)=>({id:e.id,geometry:effective(d,s,e).geometry})),reference,mode);
+   for(const item of layout){
+    if(item.id===reference)continue;
+    const element=elements.find((e:D)=>e.id===item.id);
+    element.geometry={...element.geometry,...item.geometry};
+    const binding=s.placeholderBindings?.find((b:D)=>b.elementId===element.id);
+    if(binding)binding.overrides={...binding.overrides,geometry:copy(item.geometry)};
+   }
+  });
+ }
+
  reorder(id:string,mode:string){this.transaction((_d,s)=>{const sorted=[...s.view.elements].sort((a:D,b:D)=>(a.zIndex??0)-(b.zIndex??0));const i=sorted.findIndex((e:D)=>e.id===id);const [e]=sorted.splice(i,1);sorted.splice(mode==='front'?sorted.length:mode==='back'?0:Math.max(0,Math.min(sorted.length,i+(mode==='up'?1:-1))),0,e);sorted.forEach((e:D,i:number)=>e.zIndex=i);});}
  applyLayout(layoutId:string){this.transaction((d,s)=>{const old=layoutOf(d,s),next=d.masters.find((m:D)=>m.id===(s.masterId??d.document.defaultMasterId))?.layouts.find((l:D)=>l.id===layoutId);if(!next)throw Error('Layouten saknas');const used=new Set();for(const binding of s.placeholderBindings??[]){const op=old?.placeholders?.find((p:D)=>p.id===binding.placeholderId);const np=next.placeholders?.find((p:D)=>p.role===op?.role&&!used.has(p.id));if(np){binding.placeholderId=np.id;used.add(np.id);}else{const e=s.view.elements.find((e:D)=>e.id===binding.elementId);if(e)e.geometry=effective(d,s,e).geometry;binding.detached=true;}}s.placeholderBindings=s.placeholderBindings?.filter((b:D)=>!b.detached);s.layoutId=layoutId;});}
  detachLayout(){this.transaction((d,s)=>{for(const e of s.view.elements){const v=effective(d,s,e);e.geometry=copy(v.geometry);e.style=copy(v.style);}delete s.layoutId;delete s.masterId;delete s.placeholderBindings;delete d.document.defaultMasterId;delete d.document.defaultLayoutId;});}
