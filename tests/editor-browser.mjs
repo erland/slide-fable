@@ -917,9 +917,13 @@ try{
  const parityZip=await JSZip.loadAsync(Uint8Array.from(parityData.pptx));
  const parityXml=await parityZip.file('ppt/slides/slide1.xml').async('string');
  const units=parityData.canvasWidth/13.3333333333;
- const nativeShapes=[...parityXml.matchAll(/<p:sp>[\\s\\S]*?<a:xfrm([^>]*)><a:off x="([0-9]+)" y="([0-9]+)"[^>]*><a:ext cx="([0-9]+)" cy="([0-9]+)"[^>]*>/g)]
-  .map(m=>({attrs:m[1],x:+m[2],y:+m[3],w:+m[4],h:+m[5]}));
- assert.equal(nativeShapes.length,3,'all transformed shapes remain native and editable in PPTX');
+ const nativeShapes=[...parityXml.matchAll(/<p:sp>([\s\S]*?)<\/p:sp>/g)].map(([,body])=>{
+  const transform=body.match(/<a:xfrm\b[^>]*>([\s\S]*?)<\/a:xfrm>/);
+  const offset=transform?.[1].match(/<a:off\b[^>]*\bx="(\d+)"[^>]*\by="(\d+)"/);
+  const extent=transform?.[1].match(/<a:ext\b[^>]*\bcx="(\d+)"[^>]*\bcy="(\d+)"/);
+  return offset&&extent?{x:+offset[1],y:+offset[2],w:+extent[1],h:+extent[2]}:null;
+ }).filter(Boolean);
+ assert.equal(nativeShapes.length,3,'all transformed shapes remain native and editable in PPTX (native <p:sp> count: '+[...parityXml.matchAll(/<p:sp>/g)].length+')');
  for(const element of parityData.objects){
   const {geometry:g}=element;
   const expected={x:g.x/units*914400,y:g.y/units*914400,w:g.width/units*914400,h:g.height/units*914400};
