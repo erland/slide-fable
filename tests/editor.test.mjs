@@ -45,3 +45,17 @@ test('typed command boundary validates geometry and known objects without changi
  assert.equal(s.setElementGeometry(title.id,{x:30,y:50,width:500,height:100}),true);
  s.setSlideTitle('Typad titel');assert.equal(s.slide.title,'Typad titel');validateCore(s.getSnapshot().doc);
 });
+
+test('text overflow policy survives editing, undo and document validation',()=>{
+ const s=new EditorStore();const id=s.add('text');
+ const first=s.slide.view.elements.find(e=>e.id===id);
+ const original=first.text;
+ s.editText(id,{...original,overflow:'warn'});
+ assert.equal(s.slide.view.elements.find(e=>e.id===id).text.overflow,'warn');
+ validateCore(s.getSnapshot().doc);
+ s.undo();
+ assert.equal(s.slide.view.elements.find(e=>e.id===id).text.overflow,undefined);
+ s.redo();
+ assert.equal(s.slide.view.elements.find(e=>e.id===id).text.overflow,'warn');
+ validateCore(s.getSnapshot().doc);
+});
