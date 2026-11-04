@@ -41,3 +41,10 @@ export function marqueeSelection(
  }
  return ids;
 }
+
+/** Touch should pan normally, unless the user explicitly enabled touch marquee mode.
+ * Mouse and pen marquee remain available in either mode.
+ */
+export function shouldStartMarquee(pointerType:string,touchMarqueeMode:boolean):boolean{
+ return pointerType!=='touch'||touchMarqueeMode;
+}
