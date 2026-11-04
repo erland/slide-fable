@@ -162,7 +162,7 @@ export function App(){
     oldMarkers:markers.map(m=>({m,points:m.getAttribute('points'),cx:m.getAttribute('cx'),cy:m.getAttribute('cy')}))};
   });
   const applied=(ev:globalThis.PointerEvent)=>snapSelectionScaleFromCorner(items,corner,(ev.clientX-originX)/scale,(ev.clientY-originY)/scale,others,snap,ev.altKey);
-  const showGuide=(node:HTMLElement|undefined,coordinate:number|undefined,axis:'x'|'y')=>{
+  const showGuide=(node:HTMLElement|null|undefined,coordinate:number|undefined,axis:'x'|'y')=>{
    if(!node)return;
    node.style.display=coordinate===undefined?'none':'block';
    if(coordinate!==undefined){if(axis==='x')node.style.left=coordinate+'px';else node.style.top=coordinate+'px';}
