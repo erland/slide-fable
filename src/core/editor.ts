@@ -3,7 +3,7 @@ import {toOutline,normalizePpd040Styles} from './ppd040Staging.ts';
 import {validateCore} from './contract.ts';
 import {blocks,box,copy,createDocument,effective,layoutOf,newSlide,plain,rich,setText,uid,isGeometry,isElementCommand,type Geometry,type D} from './model.ts';
 import {updateSafety} from '../pwa/safety.ts';
-import {arrangeSelection,matchSelectionSize,scaleSelection,scaleSelectionFromCorner,type ArrangeItem,type ArrangeMode,type MatchSizeMode,type ScaleCorner} from './arrange.ts';
+import {arrangeSelection,matchSelectionSize,scaleSelection,scaleSelectionFromCorner,snapSelectionScaleFromCorner,type ArrangeItem,type ArrangeMode,type MatchSizeMode,type ScaleCorner} from './arrange.ts';
 export type EditorState={doc:D;slideId:string;selected:string[];dirty:boolean;exportedRevision:number|null;readOnly:boolean;original:string;warnings:string[];undo:number;redo:number};
 function validateEditorDocument(doc:D){
  if(doc.schemaVersion==='0.4.0'){
@@ -126,16 +126,17 @@ export class EditorStore{
   });
  }
 
- scaleSelectedFromCorner(corner:ScaleCorner,dx:number,dy:number){
+ scaleSelectedFromCorner(corner:ScaleCorner,dx:number,dy:number,snapToObjects=false){
   const ids=this.state.selected;
   const elements=this.slide.view.elements.filter((e:D)=>ids.includes(e.id)&&!e.locked&&!['line','arrow','connector'].includes(e.type));
   if(elements.length<2)return;
   const source=elements.map((e:D)=>({id:e.id,geometry:effective(this.state.doc,this.slide,e).geometry}));
-  const result=scaleSelectionFromCorner(source,corner,dx,dy);
+  const neighbors=this.slide.view.elements.filter((e:D)=>!ids.includes(e.id)&&e.visible!==false).map((e:D)=>effective(this.state.doc,this.slide,e).geometry);
+  const result=snapSelectionScaleFromCorner(source,corner,dx,dy,neighbors,snapToObjects);
   if(result.factor===1)return;
   this.transaction((d,s)=>{
    const editable=s.view.elements.filter((e:D)=>ids.includes(e.id)&&!e.locked&&!['line','arrow','connector'].includes(e.type));
-   const scaled=scaleSelectionFromCorner(editable.map((e:D)=>({id:e.id,geometry:effective(d,s,e).geometry})),corner,dx,dy);
+   const scaled=snapSelectionScaleFromCorner(editable.map((e:D)=>({id:e.id,geometry:effective(d,s,e).geometry})),corner,dx,dy,neighbors,snapToObjects);
    for(const item of scaled.items){
     const element=editable.find((e:D)=>e.id===item.id);
     element.geometry={...element.geometry,...item.geometry};
