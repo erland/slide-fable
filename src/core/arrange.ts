@@ -86,3 +86,33 @@ export function scaleSelection(items:readonly ArrangeItem[],factor:number):Arran
  }
  return result;
 }
+
+export type ScaleCorner='nw'|'ne'|'sw'|'se';
+export function selectionBounds(items:readonly ArrangeItem[]):Rect{
+ if(!items.length)throw Error('EMPTY_SCALE_SELECTION');
+ for(const {geometry:b} of items)if(![b.x,b.y,b.width,b.height].every(Number.isFinite)||b.width<=0||b.height<=0)throw Error('INVALID_ARRANGEMENT_GEOMETRY');
+ const left=Math.min(...items.map(i=>i.geometry.x)),top=Math.min(...items.map(i=>i.geometry.y));
+ const right=Math.max(...items.map(i=>i.geometry.x+i.geometry.width)),bottom=Math.max(...items.map(i=>i.geometry.y+i.geometry.height));
+ return {x:left,y:top,width:right-left,height:bottom-top};
+}
+/** Resize the full multi-object bounding box from a corner, anchoring the opposite corner.
+ * The dominant normalized pointer movement controls uniform scaling in both dimensions.
+ * Preserve each object's aspect ratio, and clamp scale before any object gets under 10 units.
+ */
+export function scaleSelectionFromCorner(items:readonly ArrangeItem[],corner:ScaleCorner,dx:number,dy:number):{items:ArrangeItem[];bounds:Rect;factor:number}{
+ if(!['nw','ne','sw','se'].includes(corner)||![dx,dy].every(Number.isFinite))throw Error('INVALID_SCALE_DRAG');
+ const bounds=selectionBounds(items);
+ if(items.length<2)return {items:items.map(i=>({id:i.id,geometry:{...i.geometry}})),bounds,factor:1};
+ const signX=corner.includes('w')?-1:1,signY=corner.includes('n')?-1:1;
+ const deltaX=signX*dx/bounds.width,deltaY=signY*dy/bounds.height;
+ const delta=Math.abs(deltaX)>=Math.abs(deltaY)?deltaX:deltaY;
+ const minFactor=Math.max(.25,...items.map(i=>Math.max(10/i.geometry.width,10/i.geometry.height)));
+ const factor=Math.max(minFactor,Math.min(2,1+delta));
+ const anchorX=corner.includes('w')?bounds.x+bounds.width:bounds.x;
+ const anchorY=corner.includes('n')?bounds.y+bounds.height:bounds.y;
+ const scaled=items.map(({id,geometry:b})=>({id,geometry:{
+  ...b,x:anchorX+(b.x-anchorX)*factor,y:anchorY+(b.y-anchorY)*factor,
+  width:b.width*factor,height:b.height*factor
+ }}));
+ return {items:scaled,bounds:selectionBounds(scaled),factor};
+}

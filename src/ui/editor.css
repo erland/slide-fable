@@ -251,3 +251,11 @@
 .stage .spacing-guide[data-gap]::after{content:attr(data-gap);color:#862241;background:#fff8fa;border:1px solid #e54b72;border-radius:3px;padding:0 3px;font:11px/15px sans-serif}
 .stage .spacing-guide.horizontal[data-gap]::after{left:50%;top:-20px;transform:translateX(-50%)}
 .stage .spacing-guide.vertical[data-gap]::after{top:50%;left:7px;transform:translateY(-50%)}
+
+/* Common multi-selection frame: editor-only; excluded from export and PPD. */
+.stage .selection-scale-frame{position:absolute;border:2px dashed #387f89;box-sizing:border-box;z-index:999997;pointer-events:none}
+.stage .selection-scale-handle{position:absolute;width:28px!important;height:28px!important;min-height:28px!important;padding:0!important;border:2px solid #fff!important;border-radius:5px!important;background:#387f89!important;touch-action:none;pointer-events:auto;z-index:999999}
+.stage .selection-scale-handle.corner-nw{left:-15px;top:-15px;cursor:nwse-resize!important}
+.stage .selection-scale-handle.corner-ne{right:-15px;top:-15px;cursor:nesw-resize!important}
+.stage .selection-scale-handle.corner-sw{left:-15px;bottom:-15px;cursor:nesw-resize!important}
+.stage .selection-scale-handle.corner-se{right:-15px;bottom:-15px;cursor:nwse-resize!important}
