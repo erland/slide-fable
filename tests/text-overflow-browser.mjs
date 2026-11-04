@@ -51,11 +51,11 @@ try{
  await page.waitForFunction(id=>{
   const el=document.querySelector('.stage .render-element[data-element-id="'+id+'"] .text-fit-content');
   if(!el)return false;
-  const m=getComputedStyle(el).transform.match(/^matrix\\(([^,]+)/);
-  return m&&Number(m[1])<.99;
+  const transform=getComputedStyle(el).transform;const scale=transform.startsWith('matrix(')?Number(transform.slice(7).split(',')[0]):1;
+  return scale<.99;
  },id);
  const transform=await content.evaluate(el=>getComputedStyle(el).transform);
- assert.match(transform,/matrix\\(/);
+ assert.ok(transform.startsWith('matrix('));
  assert.equal((await snapshot()).height,base.height,'shrink must preserve model geometry');
  console.log('PASS shrink-to-fit visual scale, unchanged model height');
 
