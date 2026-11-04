@@ -917,7 +917,7 @@ try{
  const parityZip=await JSZip.loadAsync(Uint8Array.from(parityData.pptx));
  const parityXml=await parityZip.file('ppt/slides/slide1.xml').async('string');
  const units=parityData.canvasWidth/13.3333333333;
- const nativeShapes=[...parityXml.matchAll(/<p:sp>.*?<a:xfrm([^>]*)><a:off x="(\\d+)" y="(\\d+)"\\/><a:ext cx="(\\d+)" cy="(\\d+)"\\/>/gs)]
+ const nativeShapes=[...parityXml.matchAll(/<p:sp>[\\s\\S]*?<a:xfrm([^>]*)><a:off x="([0-9]+)" y="([0-9]+)"[^>]*><a:ext cx="([0-9]+)" cy="([0-9]+)"[^>]*>/g)]
   .map(m=>({attrs:m[1],x:+m[2],y:+m[3],w:+m[4],h:+m[5]}));
  assert.equal(nativeShapes.length,3,'all transformed shapes remain native and editable in PPTX');
  for(const element of parityData.objects){
