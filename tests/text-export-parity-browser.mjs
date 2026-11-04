@@ -89,7 +89,7 @@ try{
  const xml=await zip.file('ppt/slides/slide1.xml').async('string');
  assert.ok(xml.includes('ÅÄÖ')||xml.includes('&#'),'PPTX must contain editable Swedish text runs');
  assert.ok(xml.includes('Lång rubrik')&&xml.includes('Andra raden'),'PPTX must preserve text as native runs');
- const sizeAttributes=[...xml.matchAll(/\\bsz="(\\d+)"/g)].map(m=>Number(m[1])/100);
+ const sizeAttributes=[...xml.matchAll(/\bsz="(\d+)"/g)].map(m=>Number(m[1])/100);
  const units=1600/13.3333333333,factor=72/units;
  assert.ok(data.fragments.some(f=>sizeAttributes.some(n=>Math.abs(n-f.size*factor)<.6)),'PPTX native font size must match measured scaled text');
  console.log('PASS native-PPTX: rich text runs and scaled font sizes');
