@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {snapTranslation} from '../src/core/smartGuides.ts';
+import {snapTranslation,snapResize} from '../src/core/smartGuides.ts';
 const moving={x:100,y:100,width:80,height:40};
 const neighbor={x:300,y:180,width:100,height:60};
 test('snaps left edge to a neighboring right edge with a visible vertical guide',()=>{
@@ -31,3 +31,39 @@ test('no cross-axis snap and multiple selection preserves rigid spacing through 
  assert.equal(second.x+r.dx-moving.x-r.dx,second.x-moving.x);
 });
 test('rejects nonfinite geometry',()=>assert.throws(()=>snapTranslation(moving,[],NaN,0),/INVALID_ALIGNMENT_GEOMETRY/));
+
+test('resizing east and south snaps active edges to other objects without moving opposite edges',()=>{
+ const r=snapResize(moving,'se',[neighbor],117,38);
+ assert.deepEqual(r.rect,{x:100,y:100,width:200,height:80});
+ assert.deepEqual(r.guides,{x:300,y:180});
+});
+test('northwest resizing keeps right and bottom fixed and snaps only the dragged edges',()=>{
+ const moving={x:250,y:250,width:120,height:100};
+ const peer={x:200,y:180,width:100,height:60};
+ const r=snapResize(moving,'nw',[peer],-48,-8);
+ assert.deepEqual(r.rect,{x:200,y:240,width:170,height:110});
+ assert.deepEqual(r.guides,{x:200,y:240});
+});
+test('resize uses the existing delta grid when no object guide is close',()=>{
+ const r=snapResize(moving,'e',[neighbor],53,21);
+ assert.deepEqual(r.rect,{x:100,y:100,width:130,height:40});
+ assert.deepEqual(r.guides,{});
+});
+test('resize Alt and disabled grid leave freehand sizes',()=>{
+ for(const [enabled,bypass] of [[false,false],[true,true]]){
+  const r=snapResize(moving,'se',[neighbor],117,38,enabled,bypass);
+  assert.deepEqual(r.rect,{x:100,y:100,width:197,height:78});
+  assert.deepEqual(r.guides,{});
+ }
+});
+test('resize respects minimum size and does not show a guide when the edge is clamped',()=>{
+ const peer={x:180,y:100,width:10,height:40};
+ const r=snapResize(moving,'w',[peer],78,0);
+ assert.deepEqual(r.rect,{x:170,y:100,width:10,height:40});
+ assert.deepEqual(r.guides,{});
+});
+test('resize preserves inactive dimension and rejects invalid measurements',()=>{
+ const r=snapResize(moving,'n',[neighbor],51,29);
+ assert.equal(r.rect.width,moving.width);assert.equal(r.rect.x,moving.x);
+ assert.throws(()=>snapResize(moving,'e',[neighbor],Infinity,0),/INVALID_ALIGNMENT_GEOMETRY/);
+});

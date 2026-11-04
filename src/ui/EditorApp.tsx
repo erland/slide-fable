@@ -2,7 +2,7 @@ import {currentStrokeStyle,currentEndMarkers,editStrokeStyle,editEndMarker} from
 import {useEffect,useRef,useState,useSyncExternalStore,type PointerEvent} from 'react';
 import {editorStore as store} from '../core/editor';
 import {resizeRect,resizeDirections,lineBounds,moveEndpoint,type ResizeDirection} from '../core/geometry';
-import {snapTranslation,type AlignmentGuides} from '../core/smartGuides';
+import {snapTranslation,snapResize,type AlignmentGuides} from '../core/smartGuides';
 import {markerGeometry,markerSvgPoints,endMarkers} from '../core/endMarkers';
 import {resolveLinePoints,nearestPort} from '../core/connectors';
 import {box,copy,createDocument,effective,layoutOf,masterOf,plain,textOf,uid,type D} from '../core/model';
@@ -89,11 +89,16 @@ export function App(){
   });
   const otherBounds=slide.view.elements.filter((e:D)=>!chosen.includes(e.id)&&e.visible!==false).map((e:D)=>effective(doc,slide,e).geometry);
   const translated=(dx:number,dy:number,alt:boolean)=>snapTranslation(initial[0].geometry,otherBounds,dx,dy,Boolean(snap)&&!resize,alt);
+  const resized=(dx:number,dy:number,alt:boolean)=>{
+   const reference=(initial.find(item=>item.id===id)??initial[0]).geometry;
+   const result=snapResize(reference,resize as ResizeDirection,otherBounds,dx,dy,snap,alt);
+   return {guides:result.guides,dx:resize&&resize.includes('w')?result.rect.x-reference.x:result.rect.width-reference.width,
+    dy:resize&&resize.includes('n')?result.rect.y-reference.y:result.rect.height-reference.height};
+  };
   const preview=(dx:number,dy:number,alt=false)=>{
-   const q=(n:number)=>snap&&!alt?Math.round(n/10)*10:n;
-   const guideResult=resize?null:translated(dx,dy,alt);
-   setAlignmentGuides(guideResult?.guides??{});
-   const geometries=slide.view.elements.map((e:D)=>{const changed=initial.find(t=>t.id===e.id);if(!changed)return {id:e.id,geometry:effective(doc,slide,e).geometry};const b=changed.geometry;return {id:e.id,geometry:resize?{...b,...resizeRect(b,resize,q(dx),q(dy))}:{...b,x:b.x+guideResult!.dx,y:b.y+guideResult!.dy}};});
+   const result=resize?resized(dx,dy,alt):translated(dx,dy,alt);
+   setAlignmentGuides(result.guides);
+   const geometries=slide.view.elements.map((e:D)=>{const changed=initial.find(t=>t.id===e.id);if(!changed)return {id:e.id,geometry:effective(doc,slide,e).geometry};const b=changed.geometry;return {id:e.id,geometry:resize?{...b,...resizeRect(b,resize,result.dx,result.dy)}:{...b,x:b.x+result.dx,y:b.y+result.dy}};});
    initial.forEach((item,i)=>{const node=nodes[i];if(!node)return;const next=geometries.find((g:{id:string;geometry:D})=>g.id===item.id)!.geometry;Object.assign(node.style,{left:next.x+'px',top:next.y+'px',width:next.width+'px',height:next.height+'px'});});
    for(const record of connected){
     if(!record.line)continue;
@@ -123,9 +128,9 @@ export function App(){
    cleanup();const dx=(ev.clientX-x)/scale,dy=(ev.clientY-y)/scale;
    if(Math.abs(dx)+Math.abs(dy)<2){restore();return;}
    run(()=>store.transaction((_d,s)=>{for(const item of initial){
-    const el=s.view.elements.find((e:D)=>e.id===item.id),b=item.geometry,q=(n:number)=>snap&&!ev.altKey?Math.round(n/10)*10:n;
-    const guideResult=resize?null:translated(dx,dy,ev.altKey);
-    el.geometry=resize?{...b,...resizeRect(b,resize,q(dx),q(dy))}:{...b,x:b.x+guideResult!.dx,y:b.y+guideResult!.dy};
+    const el=s.view.elements.find((e:D)=>e.id===item.id),b=item.geometry;
+    const result=resize?resized(dx,dy,ev.altKey):translated(dx,dy,ev.altKey);
+    el.geometry=resize?{...b,...resizeRect(b,resize,result.dx,result.dy)}:{...b,x:b.x+result.dx,y:b.y+result.dy};
     const binding=s.placeholderBindings?.find((p:D)=>p.elementId===el.id);
     if(binding)binding.overrides={...binding.overrides,geometry:copy(el.geometry)};
    }}));
