@@ -1,4 +1,5 @@
 import {readOutline} from '../core/outline';
+import {findTextFitScale} from './textFit';
 import {memo,useLayoutEffect,useRef,useState,type CSSProperties,type PointerEvent as ReactPointerEvent} from 'react';
 import DOMPurify from 'dompurify';
 import katex from 'katex';
@@ -16,17 +17,42 @@ function textRuns(p:D,interactive:boolean){return p.runs.map((r:D,i:number)=>{co
 export function RichText({value,interactive=false}:{value:D|string;interactive?:boolean}){if(typeof value==='string')return <p><span data-run>{value}</span></p>;return <>{(value.paragraphs??[]).map((p:D,i:number)=>{const ps=p.paragraphStyle??{},level=ps.listLevel??0;return <p key={p.id??i} data-paragraph={p.id} style={{textAlign:ps.align,marginTop:ps.marginBefore??0,marginBottom:ps.marginAfter??0,paddingLeft:ps.listType&&ps.listType!=='none'?32*(level+1)+(ps.indent??0):ps.indent??0,textIndent:ps.listType&&ps.listType!=='none'?-28:undefined,lineHeight:ps.lineSpacing??1.3,tabSize:ps.tabStops?.[0]?String(ps.tabStops[0]):undefined}} >{ps.listType&&ps.listType!=='none'&&<span aria-hidden="true" className="list-marker">{ps.listType==='number'?(ps.listStart??i+1)+'.':'•'} </span>}{textRuns(p,interactive)}{!p.runs?.length&&<br/>}</p>;})}</>;}
 /** Only the editing surface displays overflow warnings; exports retain the original text. */
 function TextBox({value,className,style,interactive=false,showWarning=false,textId}:{value:D|string;className:string;style:CSSProperties;interactive?:boolean;showWarning?:boolean;textId:string}){
- const ref=useRef<HTMLDivElement>(null),[overflowed,setOverflowed]=useState(false);
+ const ref=useRef<HTMLDivElement>(null),innerRef=useRef<HTMLDivElement>(null),[overflowed,setOverflowed]=useState(false);
  const policy=typeof value==='string'?'clip':value.overflow??'clip';
  useLayoutEffect(()=>{
-  if(!showWarning||policy!=='warn'){setOverflowed(false);return;}
-  const node=ref.current;if(!node)return;
-  const measure=()=>setOverflowed(node.scrollHeight>node.clientHeight+1||node.scrollWidth>node.clientWidth+1);
+  const outer=ref.current,inner=innerRef.current;
+  if(!outer||!inner)return;
+  const measure=()=>{
+   const computed=getComputedStyle(outer);
+   const left=parseFloat(computed.paddingLeft)||0,top=parseFloat(computed.paddingTop)||0;
+   const right=parseFloat(computed.paddingRight)||0,bottom=parseFloat(computed.paddingBottom)||0;
+   const width=Math.max(1,outer.clientWidth-left-right),height=Math.max(1,outer.clientHeight-top-bottom);
+   // The child is measured at an unscaled width, then uniformly scaled.
+   // Text runs with explicit font sizes must shrink together with the box.
+   const fits=(scale:number)=>{
+    inner.style.width=`${width/scale}px`;
+    inner.style.transform=`scale(${scale})`;
+    return inner.scrollHeight*scale<=height+1&&inner.scrollWidth*scale<=width+1;
+   };
+   const scale=policy==='shrink-to-fit'?findTextFitScale(fits):1;
+   fits(scale);
+   const renderedHeight=inner.scrollHeight*scale;
+   const place=computed.justifyContent;
+   const offset=place==='center'?Math.max(0,(height-renderedHeight)/2):place==='flex-end'?Math.max(0,height-renderedHeight):0;
+   inner.style.top=`${top+offset}px`;
+   inner.style.left=`${left}px`;
+   setOverflowed(policy==='warn'&&!fits(1));
+   if(policy==='shrink-to-fit')fits(scale);
+  };
   measure();
   const observer=typeof ResizeObserver!=='undefined'?new ResizeObserver(measure):null;
-  observer?.observe(node);return ()=>observer?.disconnect();
- },[value,policy,showWarning]);
- return <><div ref={ref} data-text-id={textId} className={className} style={style}><RichText value={value} interactive={interactive}/></div>{showWarning&&policy==='warn'&&overflowed&&<span className="text-overflow-warning" role="status" aria-label="Texten ryms inte i textrutan" title="Texten ryms inte i textrutan">!</span>}</>;
+  observer?.observe(outer);
+  // Font availability may change glyph metrics without resizing the object.
+  let active=true;
+  if(typeof document!=='undefined'&&document.fonts)void document.fonts.ready.then(()=>{if(active)measure();});
+  return ()=>{active=false;observer?.disconnect();};
+ },[value,policy]);
+ return <><div ref={ref} data-text-id={textId} className={className} style={style}><div ref={innerRef} className="text-fit-content"><RichText value={value} interactive={interactive}/></div></div>{showWarning&&policy==='warn'&&overflowed&&<span className="text-overflow-warning" role="status" aria-label="Texten ryms inte i textrutan" title="Texten ryms inte i textrutan">!</span>}</>;
 }
 export function chartGeometry(el:D){const d=el.dataset,values=d.series??[],cats=d.categories??[],w=el.geometry.width,h=el.geometry.height,pad=65,rows=values.flatMap((s:D)=>s.values.filter((n:unknown)=>typeof n==='number')),max=Math.max(0,...rows),min=Math.min(0,...rows),range=max-min||1;return {cats,values,w,h,pad,min,max,range,x:(i:number)=>pad+(i+.5)*(w-2*pad)/Math.max(1,cats.length),y:(n:number)=>h-pad-(n-min)/range*(h-2*pad)};}
 function Chart({el}:{el:D}){const {cats,values,w,h,pad,x,y}=chartGeometry(el);if(el.chartType==='pie'){const data=values[0]?.values??[],total=data.reduce((n:number,v:number)=>n+Math.max(0,v??0),0)||1;let angle=-Math.PI/2;return <svg viewBox={`0 0 ${w} ${h}`} role="img" aria-label="Cirkeldiagram">{data.map((v:number,i:number)=>{const a=angle;angle+=Math.max(0,v??0)/total*Math.PI*2;const r=Math.min(w,h)/2-50,cx=w/2,cy=h/2,xx=cx+r*Math.cos(a),yy=cy+r*Math.sin(a);if(angle-a>=Math.PI*2-.001)return <circle key={i} cx={cx} cy={cy} r={r} fill={PALETTE[i%PALETTE.length]}/>;return <g key={i}><path d={`M${cx},${cy} L${xx},${yy} A${r},${r} 0 ${angle-a>Math.PI?1:0},1 ${cx+r*Math.cos(angle)},${cy+r*Math.sin(angle)} Z`} fill={PALETTE[i%PALETTE.length]}/><text x={20} y={30+i*30} fontSize={24} fill={PALETTE[i%PALETTE.length]}>{cats[i]}: {v}</text></g>;})}</svg>;}
