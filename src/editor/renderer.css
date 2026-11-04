@@ -5,3 +5,7 @@
 
 /* Only the editing canvas shows overflow; presentation and exported slides remain unchanged. */
 .text-overflow-warning{position:absolute;top:4px;right:4px;z-index:2;display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:#a53a2b;color:white;font:700 18px/1 sans-serif;pointer-events:none}
+
+/* Uniformly scale rich text without changing the stored PPD font sizes or geometry. */
+.render-text{position:relative}
+.text-fit-content{position:absolute;transform-origin:top left;white-space:inherit;overflow-wrap:anywhere;min-width:0}
