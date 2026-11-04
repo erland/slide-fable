@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {arrangeSelection,matchSelectionSize,scaleSelection,selectionBounds,scaleSelectionFromCorner} from '../src/core/arrange.ts';
+import {arrangeSelection,matchSelectionSize,scaleSelection,selectionBounds,scaleSelectionFromCorner,snapSelectionScaleFromCorner} from '../src/core/arrange.ts';
 import {EditorStore} from '../src/core/editor.ts';
 import {validateCore} from '../src/core/contract.ts';
 
@@ -253,4 +253,51 @@ test('zero-delta corner drag does not add an undo entry',()=>{
  store.select([a,b]);const history=store.getSnapshot().undo;
  store.scaleSelectedFromCorner('se',0,0);
  assert.equal(store.getSnapshot().undo,history);
+});
+
+test('corner scaling snaps active edge to a nearby object line and keeps anchor fixed',()=>{
+ const a=[{id:'left',geometry:{x:100,y:100,width:100,height:80}},{id:'right',geometry:{x:250,y:130,width:150,height:120}}];
+ const target={x:440,y:10,width:100,height:100};
+ const snapped=snapSelectionScaleFromCorner(a,'se',[37][0],0,[target],true,false,7);
+ assert.equal(snapped.guides.x,440);
+ assert.deepEqual(snapped.guides,{x:440});
+ assert.equal(snapped.bounds.x,100);
+ assert.equal(snapped.bounds.y,100);
+ assert.ok(Math.abs(snapped.bounds.x+snapped.bounds.width-440)<1e-8);
+ const originalAspect=a[0].geometry.width/a[0].geometry.height;
+ assert.equal(snapped.items[0].geometry.width/snapped.items[0].geometry.height,originalAspect);
+});
+test('Alt bypass and disabled snapping preserve raw corner scale',()=>{
+ const a=[{id:'a',geometry:{x:100,y:100,width:100,height:80}},{id:'b',geometry:{x:250,y:130,width:150,height:120}}];
+ const other=[{x:440,y:10,width:100,height:100}];
+ const raw=scaleSelectionFromCorner(a,'se',37,0);
+ for(const [enabled,bypass] of [[false,false],[true,true]]){
+  const actual=snapSelectionScaleFromCorner(a,'se',37,0,other,enabled,bypass);
+  assert.equal(actual.factor,raw.factor);
+  assert.deepEqual(actual.guides,{});
+ }
+});
+test('corner snap rejects impossible scaling and ignores invalid neighbor bounds',()=>{
+ const small=[{id:'a',geometry:{x:100,y:100,width:20,height:20}},{id:'b',geometry:{x:160,y:140,width:80,height:80}}];
+ const result=snapSelectionScaleFromCorner(small,'se',-400,-400,[{x:190,y:0,width:NaN,height:100}],true,false);
+ assert.equal(result.factor,.5);
+ assert.deepEqual(result.guides,{});
+});
+test('persisted guided corner scaling matches calculated preview and can be undone',()=>{
+ const store=new EditorStore();
+ const a=store.add('shape'),b=store.add('shape'),other=store.add('shape');
+ store.setElementGeometry(a,{x:100,y:100,width:100,height:80});
+ store.setElementGeometry(b,{x:250,y:130,width:150,height:120});
+ store.setElementGeometry(other,{x:440,y:10,width:100,height:100});
+ store.select([a,b]);
+ const source=[a,b].map(id=>({id,geometry:{...store.slide.view.elements.find(e=>e.id===id).geometry}}));
+ const guide=snapSelectionScaleFromCorner(source,'se',37,0,[store.slide.view.elements.find(e=>e.id===other).geometry]);
+ assert.equal(guide.guides.x,440);
+ const before=store.getSnapshot().undo;
+ store.scaleSelectedFromCorner('se',37,0,true);
+ assert.equal(store.getSnapshot().undo,before+1);
+ for(const item of guide.items)assert.deepEqual(store.slide.view.elements.find(e=>e.id===item.id).geometry,item.geometry);
+ validateCore(store.getSnapshot().doc);
+ store.undo();
+ for(const item of source)assert.deepEqual(store.slide.view.elements.find(e=>e.id===item.id).geometry,item.geometry);
 });
