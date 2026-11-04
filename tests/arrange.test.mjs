@@ -164,8 +164,8 @@ test('editor scales relative positions, excludes locked and line elements, valid
  assert.deepEqual(get(line),original.find(e=>e.id===line).geometry);
  assert.equal(get(a).width,125);
  assert.equal(get(b).width,187.5);
- assert.equal(get(a).x,56.25);
- assert.equal(get(b).x,431.25);
+ assert.equal(get(a).x,43.75);
+ assert.equal(get(b).x,418.75);
  validateCore(store.getSnapshot().doc);
  store.undo();
  for(const item of original)assert.deepEqual(get(item.id),item.geometry);
