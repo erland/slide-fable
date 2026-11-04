@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {snapTranslation,snapResize} from '../src/core/smartGuides.ts';
+import {snapTranslation,snapResize,equalSpacingGuide} from '../src/core/smartGuides.ts';
 const moving={x:100,y:100,width:80,height:40};
 const neighbor={x:300,y:180,width:100,height:60};
 test('snaps left edge to a neighboring right edge with a visible vertical guide',()=>{
@@ -66,4 +66,45 @@ test('resize preserves inactive dimension and rejects invalid measurements',()=>
  const r=snapResize(moving,'n',[neighbor],51,29);
  assert.equal(r.rect.width,moving.width);assert.equal(r.rect.x,moving.x);
  assert.throws(()=>snapResize(moving,'e',[neighbor],Infinity,0),/INVALID_ALIGNMENT_GEOMETRY/);
+});
+
+test('snaps between left and right peers with equal horizontal gaps',()=>{
+ const left={x:20,y:90,width:50,height:70},right={x:260,y:95,width:50,height:80};
+ const result=snapTranslation(moving,[left,right],22,0);
+ assert.equal(result.dx,25);
+ assert.equal(result.guides.spacingX?.gap,55);
+ assert.deepEqual(result.guides.spacingX?.first,{from:70,to:125});
+ assert.deepEqual(result.guides.spacingX?.second,{from:205,to:260});
+});
+test('snaps to equal vertical gaps while retaining original object size',()=>{
+ const above={x:90,y:20,width:110,height:60},below={x:95,y:240,width:120,height:40};
+ const result=snapTranslation(moving,[above,below],0,38);
+ assert.equal(result.dy,40);
+ assert.equal(result.guides.spacingY?.gap,60);
+ assert.deepEqual(result.guides.spacingY?.first,{from:80,to:140});
+ assert.deepEqual(result.guides.spacingY?.second,{from:180,to:240});
+});
+test('does not use non-overlapping neighbors or one-sided gaps',()=>{
+ const left={x:20,y:500,width:50,height:70},right={x:260,y:90,width:50,height:70};
+ const onlyOne=snapTranslation(moving,[left,right],22,0);
+ assert.equal(onlyOne.guides.spacingX,undefined);
+ assert.equal(onlyOne.dx,20);
+ assert.equal(equalSpacingGuide(moving,[right],'x',22,0),null);
+});
+test('existing edge alignment takes priority over equal-distance snapping',()=>{
+ const left={x:20,y:90,width:50,height:70},right={x:260,y:95,width:50,height:80};
+ const result=snapTranslation(moving,[left,right,{x:122,y:90,width:20,height:70}],22,0);
+ assert.equal(result.dx,22);
+ assert.equal(result.guides.x,122);
+ assert.equal(result.guides.spacingX,undefined);
+});
+test('spacing is bypassed by Alt or disabling snapping, and does not affect resize',()=>{
+ const left={x:20,y:90,width:50,height:70},right={x:260,y:95,width:50,height:80};
+ for(const [enabled,bypass] of [[false,false],[true,true]]){
+  const result=snapTranslation(moving,[left,right],22,0,enabled,bypass);
+  assert.equal(result.dx,22);
+  assert.deepEqual(result.guides,{});
+ }
+ const resized=snapResize(moving,'e',[left,right],22,0);
+ assert.equal(resized.guides.spacingX,undefined);
 });
