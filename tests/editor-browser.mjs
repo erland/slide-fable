@@ -805,5 +805,27 @@ try{
  await page.getByLabel('Spegla horisontellt').uncheck();
  assert.equal((await model()).slides[0].view.elements.find(e=>e.id==='flip-shape-040').flipX,false);
  pass('PPD-040:object-flip-inspector-render-and-json-roundtrip');
+
+ const flipArtifacts=await page.evaluate(async()=>{
+  const {createDocument}=await import('/src/core/model.ts');
+  const {pdfExport,pptxExport}=await import('/src/export/office.ts');
+  const doc=createDocument();
+  doc.slides[0].view.elements=[
+   {id:'flipped-shape-export',type:'shape',shapeType:'triangle',geometry:{x:80,y:110,width:300,height:180},style:{fill:{color:'#387F89'}},flipX:true,flipY:true},
+   {id:'flipped-text-export',type:'text',geometry:{x:420,y:120,width:360,height:100},text:'Mirrored',flipX:true}
+  ];
+  const [pdf,pptx]=await Promise.all([pdfExport(doc,doc.slides),pptxExport(doc,doc.slides)]);
+  return {pdf:Array.from(pdf.file),pptx:Array.from(pptx.file),pdfReport:pdf.report};
+ });
+ const flipPdf=await PDFDocument.load(Uint8Array.from(flipArtifacts.pdf));
+ assert.equal(flipPdf.getPageCount(),1,'flipped objects are exportable to a valid PDF');
+ assert.ok(flipArtifacts.pdfReport.objects.some(o=>o.elementId==='flipped-shape-export'&&o.status==='rasterized'),'PDF uses visual fallback for flipped shapes');
+ const flipZip=await JSZip.loadAsync(Uint8Array.from(flipArtifacts.pptx));
+ const flipXml=await flipZip.file('ppt/slides/slide1.xml').async('string');
+ assert.match(flipXml,/flipH="1"/,'PPTX keeps horizontal flip flag on native shape');
+ assert.match(flipXml,/flipV="1"/,'PPTX keeps vertical flip flag on native shape');
+ assert.match(flipXml,/<p:sp>/,'PPTX shape remains editable');
+ pass('PPD-040:object-flip-real-pdf-pptx-export');
+
  assert.deepEqual(errors,[]);pass('browser:no-unhandled-errors');
 }finally{await writeFile(path.join(output,'editor-results.json'),JSON.stringify({checks,engine:browser.version()},null,2));await context.close();await browser.close();server.kill();}
