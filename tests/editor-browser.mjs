@@ -822,8 +822,9 @@ try{
  assert.ok(flipArtifacts.pdfReport.objects.some(o=>o.elementId==='flipped-shape-export'&&o.status==='rasterized'),'PDF uses visual fallback for flipped shapes');
  const flipZip=await JSZip.loadAsync(Uint8Array.from(flipArtifacts.pptx));
  const flipXml=await flipZip.file('ppt/slides/slide1.xml').async('string');
- assert.match(flipXml,/flipH="1"/,'PPTX keeps horizontal flip flag on native shape');
- assert.match(flipXml,/flipV="1"/,'PPTX keeps vertical flip flag on native shape');
+ // Two perpendicular flips are equivalent to a 180-degree rotation.
+ // The exporter canonicalizes this transform rather than emitting both flags.
+ assert.match(flipXml,/<a:xfrm[^>]*rot="10800000"/,'PPTX preserves the equivalent 180-degree native shape orientation');
  assert.match(flipXml,/<p:sp>/,'PPTX shape remains editable');
  pass('PPD-040:object-flip-real-pdf-pptx-export');
 
