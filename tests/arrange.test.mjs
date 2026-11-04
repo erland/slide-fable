@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {arrangeSelection} from '../src/core/arrange.ts';
+import {arrangeSelection,matchSelectionSize} from '../src/core/arrange.ts';
 import {EditorStore} from '../src/core/editor.ts';
 import {validateCore} from '../src/core/contract.ts';
 
@@ -71,4 +71,52 @@ test('too few editable objects do not create undo history',()=>{
  store.select([a,b]);const before=store.getSnapshot().undo;
  store.align('distribute-x');
  assert.equal(store.getSnapshot().undo,before);
+});
+
+test('match width, height and both to primary selection while preserving positions',()=>{
+ for(const mode of ['width','height','both']){
+  const actual=matchSelectionSize(items,'b',mode);
+  for(const [index,item] of actual.entries()){
+   assert.equal(item.geometry.x,items[index].geometry.x);
+   assert.equal(item.geometry.y,items[index].geometry.y);
+   assert.equal(item.geometry.width,mode==='height'?items[index].geometry.width:80);
+   assert.equal(item.geometry.height,mode==='width'?items[index].geometry.height:50);
+  }
+ }
+ assert.deepEqual(items[0].geometry,{x:60,y:70,width:60,height:40},'pure helper does not mutate source');
+});
+test('match dimensions rejects missing reference and invalid geometry',()=>{
+ assert.throws(()=>matchSelectionSize(items,'not-selected','width'),/INVALID_SIZE_REFERENCE/);
+ assert.throws(()=>matchSelectionSize(items,'b','invalid'),/INVALID_SIZE_MODE/);
+ const broken=[items[0],{id:'bad',geometry:{x:0,y:0,width:0,height:10}}];
+ assert.throws(()=>matchSelectionSize(broken,'a','both'),/INVALID_ARRANGEMENT_GEOMETRY/);
+});
+test('editor matchSize ignores locked and connector objects and supports undo',()=>{
+ const store=new EditorStore();
+ const primary=store.add('shape'),target=store.add('shape'),locked=store.add('shape'),line=store.add('line');
+ store.setElementGeometry(primary,{x:130,y:100,width:230,height:125});
+ store.setElementGeometry(target,{x:430,y:260,width:75,height:40});
+ store.setElementGeometry(locked,{x:610,y:210,width:65,height:60});
+ store.updateElement(locked,{locked:true});
+ const before=store.slide.view.elements.filter(e=>[primary,target,locked,line].includes(e.id)).map(e=>({id:e.id,geometry:{...e.geometry}}));
+ store.select([primary,target,locked,line]);
+ store.matchSize('both');
+ const find=id=>store.slide.view.elements.find(e=>e.id===id).geometry;
+ assert.deepEqual(find(primary),before.find(e=>e.id===primary).geometry);
+ assert.deepEqual(find(target),{x:430,y:260,width:230,height:125});
+ assert.deepEqual(find(locked),before.find(e=>e.id===locked).geometry);
+ assert.deepEqual(find(line),before.find(e=>e.id===line).geometry);
+ validateCore(store.getSnapshot().doc);
+ store.undo();
+ for(const item of before)assert.deepEqual(find(item.id),item.geometry);
+});
+test('matchSize with fewer than two eligible objects or already equal dimensions does not add history',()=>{
+ const store=new EditorStore();
+ const a=store.add('shape'),b=store.add('shape');
+ store.select([a]);let revision=store.getSnapshot().undo;store.matchSize('width');
+ assert.equal(store.getSnapshot().undo,revision);
+ const geo={x:120,y:200,width:100,height:70};
+ store.setElementGeometry(a,geo);store.setElementGeometry(b,{...geo,x:400});
+ store.select([a,b]);revision=store.getSnapshot().undo;store.matchSize('both');
+ assert.equal(store.getSnapshot().undo,revision);
 });

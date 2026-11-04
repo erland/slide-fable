@@ -38,3 +38,26 @@ export function arrangeSelection(items:readonly ArrangeItem[],mode:ArrangeMode):
  }
  return result;
 }
+
+/** Match dimensions to the primary selected editable object.
+ * The objects retain their own positions and the unrequested dimension.
+ */
+export type MatchSizeMode='width'|'height'|'both';
+export function matchSelectionSize(items:readonly ArrangeItem[],referenceId:string,mode:MatchSizeMode):ArrangeItem[]{
+ const result=items.map(item=>({id:item.id,geometry:{...item.geometry}}));
+ if(!['width','height','both'].includes(mode))throw Error('INVALID_SIZE_MODE');
+ if(result.length<2)return result;
+ for(const item of result){
+  const b=item.geometry;
+  if(![b.x,b.y,b.width,b.height].every(Number.isFinite)||b.width<=0||b.height<=0)throw Error('INVALID_ARRANGEMENT_GEOMETRY');
+ }
+ const reference=result.find(item=>item.id===referenceId);
+ if(!reference)throw Error('INVALID_SIZE_REFERENCE');
+ const {width,height}=reference.geometry;
+ for(const item of result){
+  if(item.id===referenceId)continue;
+  if(mode!=='height')item.geometry.width=width;
+  if(mode!=='width')item.geometry.height=height;
+ }
+ return result;
+}
