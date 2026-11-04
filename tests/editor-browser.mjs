@@ -4,6 +4,7 @@ import {mkdir,writeFile,readFile} from 'node:fs/promises';
 import path from 'node:path';
 import assert from 'node:assert/strict';
 import JSZip from 'jszip';
+import sharp from 'sharp';
 const output=path.resolve(process.env.EDITOR_OUTPUT??'../editor-evidence');await mkdir(output,{recursive:true});
 const server=spawn('node',['node_modules/vite/bin/vite.js','--host','127.0.0.1','--port','5178','--strictPort'],{stdio:'pipe'});await new Promise((resolve,reject)=>{server.stdout.on('data',d=>{if(String(d).includes('5178'))resolve();});server.on('exit',reject);});
 const browser=await chromium.launch({headless:true,...(process.env.CHROMIUM_EXECUTABLE?{executablePath:process.env.CHROMIUM_EXECUTABLE,args:['--no-sandbox','--disable-dev-shm-usage']}:{})});
@@ -938,5 +939,36 @@ try{
  assert.ok(browserTransforms.find(e=>e.id==='parity-outer').transform.includes('scale(-1, 1)'),'editor displays parent horizontal flip');
  assert.ok(browserTransforms.find(e=>e.id==='parity-inner').transform.includes('scale(1, -1)'),'editor displays nested vertical flip');
  pass('PPD-040:complex-transform-editor-evidence-pdf-pptx-geometry-parity');
+
+ // Pixel regression on the same complex transform fixture, before/after strict JSON persistence.
+ // Allow minor antialiasing noise, but fail on changed pixels or changed dimensions.
+ const visualTarget=page.locator('.stage .slide-render').first();
+ await visualTarget.waitFor({state:'visible'});
+ const beforeVisual=await visualTarget.screenshot({animations:'disabled',caret:'hide'});
+ await page.evaluate(async()=>{
+  const {editorStore}=await import('/src/core/editor.ts');
+  const {writePpd040Json,readPpd040Json}=await import('/src/core/ppd040Document.ts');
+  editorStore.load(readPpd040Json(writePpd040Json(editorStore.getSnapshot().doc)));
+ });
+ await visualTarget.waitFor({state:'visible'});
+ const afterVisual=await visualTarget.screenshot({animations:'disabled',caret:'hide'});
+ const beforeRaster=await sharp(beforeVisual).ensureAlpha().raw().toBuffer({resolveWithObject:true});
+ const afterRaster=await sharp(afterVisual).ensureAlpha().raw().toBuffer({resolveWithObject:true});
+ assert.equal(afterRaster.info.width,beforeRaster.info.width,'canvas width preserved after PPD JSON roundtrip');
+ assert.equal(afterRaster.info.height,beforeRaster.info.height,'canvas height preserved after PPD JSON roundtrip');
+ const channelTolerance=12,maxDifferentFraction=.002;
+ let different=0,maxDelta=0;const diff=Buffer.alloc(beforeRaster.data.length);
+ for(let i=0;i<beforeRaster.data.length;i+=4){
+  const delta=Math.max(Math.abs(beforeRaster.data[i]-afterRaster.data[i]),Math.abs(beforeRaster.data[i+1]-afterRaster.data[i+1]),Math.abs(beforeRaster.data[i+2]-afterRaster.data[i+2]));
+  maxDelta=Math.max(maxDelta,delta);
+  if(delta>channelTolerance)different++;
+  diff[i]=diff[i+1]=diff[i+2]=Math.min(255,delta*4);diff[i+3]=255;
+ }
+ const pixelCount=beforeRaster.info.width*beforeRaster.info.height;
+ await sharp(diff,{raw:{width:beforeRaster.info.width,height:beforeRaster.info.height,channels:4}}).png().toFile(path.join(output,'ppd040-transforms-roundtrip-diff.png'));
+ await writeFile(path.join(output,'ppd040-transforms-roundtrip-metrics.json'),JSON.stringify({width:beforeRaster.info.width,height:beforeRaster.info.height,pixelCount,differentPixels:different,differentFraction:different/pixelCount,maxDelta,channelTolerance,maxDifferentFraction},null,2));
+ assert.ok(different/pixelCount<=maxDifferentFraction,'PPD JSON roundtrip changes too many rendered pixels: '+different+'/'+pixelCount);
+ pass('PPD-040:complex-transform-pixel-roundtrip-tolerance');
+
  assert.deepEqual(errors,[]);pass('browser:no-unhandled-errors');
 }finally{await writeFile(path.join(output,'editor-results.json'),JSON.stringify({checks,engine:browser.version()},null,2));await context.close();await browser.close();server.kill();}
