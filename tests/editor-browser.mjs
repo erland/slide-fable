@@ -889,5 +889,50 @@ try{
  assert.ok((nestedXml.match(/<p:sp>/g)??[]).length>=4,'nested group children export as editable native shapes');
  pass('PPD-040:nested-groups-flip-composition-and-native-pptx');
 
+
+ // Transformation parity: visible editor evidence + exported native PPTX placement and PDF validity.
+ const parityData=await page.evaluate(async()=>{
+  const {createDocument}=await import('/src/core/model.ts');
+  const {editorStore}=await import('/src/core/editor.ts');
+  const {flatten}=await import('/src/export/officeShared.ts');
+  const {pdfExport,pptxExport}=await import('/src/export/office.ts');
+  const doc=createDocument();
+  const shape=(id,x,y)=>({id,type:'shape',shapeType:'triangle',geometry:{x,y,width:110,height:75},style:{fill:{color:'#387F89'}}});
+  doc.slides[0].view.elements=[
+   {id:'parity-outer',type:'group',geometry:{x:80,y:100,width:420,height:300,rotation:25},transform:{x:0,y:0,width:420,height:300},flipX:true,children:['parity-inner','parity-direct']},
+   {id:'parity-inner',type:'group',geometry:{x:15,y:20,width:210,height:150,rotation:-15},transform:{x:0,y:0,width:210,height:150},flipY:true,children:['parity-nested']},
+   shape('parity-nested',30,25),
+   shape('parity-direct',260,100),
+   {id:'parity-single',type:'shape',shapeType:'triangle',geometry:{x:580,y:160,width:170,height:100,rotation:40},flipY:true,style:{fill:{color:'#CF694C'}}}
+  ];
+  editorStore.load(doc);
+  const objects=flatten(doc,doc.slides[0]).filter(e=>e.type==='shape').map(e=>({id:e.id,geometry:e.geometry,flipX:e.flipX,flipY:e.flipY}));
+  const [pdf,pptx]=await Promise.all([pdfExport(doc,doc.slides),pptxExport(doc,doc.slides)]);
+  return {objects,pdf:Array.from(pdf.file),pptx:Array.from(pptx.file),canvasWidth:doc.document.canvas.width};
+ });
+ for(const id of ['parity-nested','parity-direct','parity-single'])await page.locator(`.stage [data-element-id="${id}"]`).first().waitFor({state:'visible'});
+ await page.screenshot({path:path.join(output,'ppd040-nested-transforms-editor.png'),fullPage:true});
+ const parityPdf=await PDFDocument.load(Uint8Array.from(parityData.pdf));
+ assert.equal(parityPdf.getPageCount(),1,'complex transform PDF is readable');
+ const parityZip=await JSZip.loadAsync(Uint8Array.from(parityData.pptx));
+ const parityXml=await parityZip.file('ppt/slides/slide1.xml').async('string');
+ const units=parityData.canvasWidth/13.3333333333;
+ const nativeShapes=[...parityXml.matchAll(/<p:sp>.*?<a:xfrm([^>]*)><a:off x="(\\d+)" y="(\\d+)"\\/><a:ext cx="(\\d+)" cy="(\\d+)"\\/>/gs)]
+  .map(m=>({attrs:m[1],x:+m[2],y:+m[3],w:+m[4],h:+m[5]}));
+ assert.equal(nativeShapes.length,3,'all transformed shapes remain native and editable in PPTX');
+ for(const element of parityData.objects){
+  const {geometry:g}=element;
+  const expected={x:g.x/units*914400,y:g.y/units*914400,w:g.width/units*914400,h:g.height/units*914400};
+  assert.ok(nativeShapes.some(shape=>Object.keys(expected).every(key=>Math.abs(shape[key]-expected[key])<4)),
+   'native PPTX geometry matches flattened editor transform for '+element.id);
+ }
+ const browserTransforms=await page.evaluate(()=>['parity-outer','parity-inner','parity-nested','parity-direct','parity-single'].map(id=>{
+  const el=document.querySelector(`.stage [data-element-id="${id}"]`);
+  return {id,transform:el?.style.transform,visible:!!el&&el.getBoundingClientRect().width>0};
+ }));
+ assert.ok(browserTransforms.every(e=>e.visible),'all nested objects are visible in the editor');
+ assert.ok(browserTransforms.find(e=>e.id==='parity-outer').transform.includes('scale(-1, 1)'),'editor displays parent horizontal flip');
+ assert.ok(browserTransforms.find(e=>e.id==='parity-inner').transform.includes('scale(1, -1)'),'editor displays nested vertical flip');
+ pass('PPD-040:complex-transform-editor-evidence-pdf-pptx-geometry-parity');
  assert.deepEqual(errors,[]);pass('browser:no-unhandled-errors');
 }finally{await writeFile(path.join(output,'editor-results.json'),JSON.stringify({checks,engine:browser.version()},null,2));await context.close();await browser.close();server.kill();}
