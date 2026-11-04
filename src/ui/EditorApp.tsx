@@ -82,7 +82,7 @@ export function App(){
   const area=viewport.current?.querySelector<HTMLElement>('.stage-space');
   if(!area||!area.contains(target))return;
   // Touch gestures keep native canvas scrolling. Mouse and stylus support marquee.
-  if(event.pointerType==='touch')return;
+  if(event.pointerType==='touch'){if(!event.shiftKey){store.select([]);setEditingTextId(null);}return;}
   const bounds=area.getBoundingClientRect();
   const position=(ev:{clientX:number;clientY:number})=>({
    x:Math.max(0,Math.min(doc.document.canvas.width,(ev.clientX-bounds.left)/scale)),
@@ -97,7 +97,7 @@ export function App(){
    cleanup();
    const rect=marqueeBounds(start,position(ev));
    setSelectionMarquee(null);
-   if(rect.width<4&&rect.height<4){if(!extend)store.select([]);return;}
+   if(rect.width<4||rect.height<4){if(!extend)store.select([]);return;}
    const objects=slide.view.elements.map((e:D)=>({id:e.id,geometry:effective(doc,slide,e).geometry,visible:e.visible!==false}));
    store.select(marqueeSelection(initialSelection,objects,rect,extend));
    setEditingTextId(null);
