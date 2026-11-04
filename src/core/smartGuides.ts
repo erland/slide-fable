@@ -3,7 +3,36 @@ import {resizeRect,type Rect,type ResizeDirection} from './geometry.ts';
 /** Snap a dragged object's left/centre/right and top/middle/bottom to other objects.
  * The first dragged element is the reference, so grouped movement remains rigid.
  */
-export type AlignmentGuides={x?:number;y?:number};
+export type SpacingGuide={axis:'x'|'y';first:{from:number;to:number};second:{from:number;to:number};cross:number;gap:number};
+export type AlignmentGuides={x?:number;y?:number;spacingX?:SpacingGuide;spacingY?:SpacingGuide};
+
+/** Equal gaps between the nearest non-overlapping neighbors on a given axis.
+ * Neighbors must overlap the dragged object in the perpendicular axis.
+ */
+export function equalSpacingGuide(
+ moving:Rect,others:readonly Rect[],axis:'x'|'y',dx:number,dy:number,tolerance=7
+):{delta:number;guide:SpacingGuide}|null{
+ const horizontal=axis==='x',start=horizontal?moving.x+dx:moving.y+dy;
+ const end=start+(horizontal?moving.width:moving.height);
+ const crossStart=horizontal?moving.y+dy:moving.x+dx;
+ const crossEnd=crossStart+(horizontal?moving.height:moving.width);
+ const bounds=others.filter(r=>{
+  const lo=horizontal?r.y:r.x,hi=lo+(horizontal?r.height:r.width);
+  return Math.min(crossEnd,hi)>Math.max(crossStart,lo);
+ });
+ const left=bounds.map(r=>horizontal?r.x+r.width:r.y+r.height).filter(v=>v<=start).sort((a,b)=>b-a)[0];
+ const right=bounds.map(r=>horizontal?r.x:r.y).filter(v=>v>=end).sort((a,b)=>a-b)[0];
+ if(left===undefined||right===undefined)return null;
+ const size=horizontal?moving.width:moving.height;
+ const gap=(right-left-size)/2;
+ if(gap<=0)return null;
+ const desired=left+gap;
+ if(Math.abs(desired-start)>tolerance)return null;
+ const cross=(crossStart+crossEnd)/2;
+ return {delta:(horizontal?dx:dy)+desired-start,guide:{
+  axis,first:{from:left,to:desired},second:{from:desired+size,to:right},cross,gap
+ }};
+}
 export function snapTranslation(
  moving:Rect,
  others:readonly Rect[],
@@ -33,7 +62,11 @@ export function snapTranslation(
  const yTargets=others.flatMap(r=>[r.y,r.y+r.height/2,r.y+r.height]);
  const x=axis(moving.x,moving.width,dx,xTargets);
  const y=axis(moving.y,moving.height,dy,yTargets);
- return {dx:x.delta,dy:y.delta,guides:{...(x.guide!==undefined?{x:x.guide}:{}),...(y.guide!==undefined?{y:y.guide}:{})}};
+ const spacingX=x.guide===undefined?equalSpacingGuide(moving,others,'x',dx,dy,tolerance):null;
+ const spacingY=y.guide===undefined?equalSpacingGuide(moving,others,'y',dx,dy,tolerance):null;
+ return {dx:spacingX?.delta??x.delta,dy:spacingY?.delta??y.delta,
+  guides:{...(x.guide!==undefined?{x:x.guide}:{}),...(y.guide!==undefined?{y:y.guide}:{}),
+   ...(spacingX?{spacingX:spacingX.guide}:{}),...(spacingY?{spacingY:spacingY.guide}:{})}};
 }
 
 /** Resize with a fixed opposite edge. Only the dragged edges are snapping targets.
