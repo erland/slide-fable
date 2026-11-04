@@ -259,3 +259,9 @@
 .stage .selection-scale-handle.corner-ne{right:-15px;top:-15px;cursor:nesw-resize!important}
 .stage .selection-scale-handle.corner-sw{left:-15px;bottom:-15px;cursor:nesw-resize!important}
 .stage .selection-scale-handle.corner-se{right:-15px;bottom:-15px;cursor:nwse-resize!important}
+
+/* Live feedback for multi-object scale; these overlays are never exported. */
+.stage .selection-scale-percent{display:none;position:absolute;left:50%;top:-35px;transform:translateX(-50%);padding:4px 8px;border-radius:5px;background:#183641;color:white;font:600 13px/18px sans-serif;white-space:nowrap;pointer-events:none}
+.stage .selection-scale-guide{display:none;position:absolute;background:#e54b72;z-index:999996;pointer-events:none;opacity:.9}
+.stage .selection-scale-guide.vertical{width:2px;top:0;bottom:0}
+.stage .selection-scale-guide.horizontal{height:2px;left:0;right:0}
