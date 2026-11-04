@@ -776,5 +776,34 @@ try{
  assert.match(reopenedXml,/<a:gridCol\b/,'column widths survive as native PPTX grid');
  pass('PPD-040:table-edit-save-reopen-render-pdf-pptx');
 
+
+ // PPD 0.4 object flip: inspector edits, presentation rendering and strict JSON roundtrip.
+ await page.evaluate(async()=>{
+  const {createDocument}=await import('/src/core/model.ts');
+  const {editorStore}=await import('/src/core/editor.ts');
+  const doc=createDocument();
+  doc.slides[0].view.elements=[{id:'flip-shape-040',type:'shape',shapeType:'rect',geometry:{x:100,y:100,width:200,height:120,rotation:30},style:{fill:{color:'#387F89'}}}];
+  editorStore.load(doc);
+ });
+ await page.locator('.stage [data-element-id="flip-shape-040"]').first().click();
+ await page.getByLabel('Spegla horisontellt').check();
+ await page.getByLabel('Spegla vertikalt').check();
+ const flippedModel=(await model()).slides[0].view.elements.find(e=>e.id==='flip-shape-040');
+ assert.equal(flippedModel.flipX,true);
+ assert.equal(flippedModel.flipY,true);
+ const flipTransform=await page.locator('.stage [data-element-id="flip-shape-040"]').first().evaluate(el=>el.style.transform);
+ assert.match(flipTransform,/rotate\(30deg\)/,'rotation is retained while flipping');
+ assert.match(flipTransform,/scale\(-1, -1\)/,'both flips render around the object center');
+ const flipRoundtrip=await page.evaluate(async()=>{
+  const {writePpd040Json,readPpd040Json}=await import('/src/core/ppd040Document.ts');
+  const {editorStore}=await import('/src/core/editor.ts');
+  const reopened=readPpd040Json(writePpd040Json(editorStore.getSnapshot().doc));
+  return reopened.slides[0].view.elements.find(e=>e.id==='flip-shape-040');
+ });
+ assert.equal(flipRoundtrip.flipX,true);
+ assert.equal(flipRoundtrip.flipY,true);
+ await page.getByLabel('Spegla horisontellt').uncheck();
+ assert.equal((await model()).slides[0].view.elements.find(e=>e.id==='flip-shape-040').flipX,false);
+ pass('PPD-040:object-flip-inspector-render-and-json-roundtrip');
  assert.deepEqual(errors,[]);pass('browser:no-unhandled-errors');
 }finally{await writeFile(path.join(output,'editor-results.json'),JSON.stringify({checks,engine:browser.version()},null,2));await context.close();await browser.close();server.kill();}
