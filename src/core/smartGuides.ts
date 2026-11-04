@@ -33,5 +33,5 @@ export function snapTranslation(
  const yTargets=others.flatMap(r=>[r.y,r.y+r.height/2,r.y+r.height]);
  const x=axis(moving.x,moving.width,dx,xTargets);
  const y=axis(moving.y,moving.height,dy,yTargets);
- return {dx:x.delta,dy:y.delta,guides:{x:x.guide,y:y.guide}};
+ return {dx:x.delta,dy:y.delta,guides:{...(x.guide!==undefined?{x:x.guide}:{}),...(y.guide!==undefined?{y:y.guide}:{})}};
 }
