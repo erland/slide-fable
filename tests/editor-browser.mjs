@@ -792,8 +792,8 @@ try{
  assert.equal(flippedModel.flipX,true);
  assert.equal(flippedModel.flipY,true);
  const flipTransform=await page.locator('.stage [data-element-id="flip-shape-040"]').first().evaluate(el=>el.style.transform);
- assert.match(flipTransform,/rotate\\(30deg\\)/,'rotation is retained while flipping');
- assert.match(flipTransform,/scale\\(-1, -1\\)/,'both flips render around the object center');
+ assert.match(flipTransform,/rotate\(30deg\)/,'rotation is retained while flipping');
+ assert.match(flipTransform,/scale\(-1, -1\)/,'both flips render around the object center');
  const flipRoundtrip=await page.evaluate(async()=>{
   const {writePpd040Json,readPpd040Json}=await import('/src/core/ppd040Document.ts');
   const {editorStore}=await import('/src/core/editor.ts');
