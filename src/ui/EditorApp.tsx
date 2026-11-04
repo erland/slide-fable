@@ -2,7 +2,7 @@ import {currentStrokeStyle,currentEndMarkers,editStrokeStyle,editEndMarker} from
 import {useEffect,useRef,useState,useSyncExternalStore,type PointerEvent} from 'react';
 import {editorStore as store} from '../core/editor';
 import {resizeRect,resizeDirections,lineBounds,moveEndpoint,type ResizeDirection} from '../core/geometry';
-import {selectionBounds,scaleSelectionFromCorner,type ScaleCorner} from '../core/arrange';
+import {selectionBounds,scaleSelectionFromCorner,type ArrangeItem,type ScaleCorner} from '../core/arrange';
 import {snapTranslation,snapResize,type AlignmentGuides} from '../core/smartGuides';
 import {markerGeometry,markerSvgPoints,endMarkers} from '../core/endMarkers';
 import {resolveLinePoints,nearestPort} from '../core/connectors';
@@ -143,7 +143,7 @@ export function App(){
   if(!event.isPrimary||event.button!==0||state.readOnly||safety.locked||safety.busy)return;
   const eligible=slide.view.elements.filter((e:D)=>state.selected.includes(e.id)&&!e.locked&&!['line','arrow','connector'].includes(e.type));
   if(eligible.length<2)return;
-  const items=eligible.map((e:D)=>({id:e.id,geometry:copy(effective(doc,slide,e).geometry)}));
+  const items:ArrangeItem[]=eligible.map((e:D)=>({id:e.id,geometry:copy(effective(doc,slide,e).geometry)}));
   const bounds=selectionBounds(items);
   const target=event.currentTarget as HTMLElement,originX=event.clientX,originY=event.clientY;
   const nodeMap=items.map(item=>viewport.current?.querySelector<HTMLElement>(`.stage [data-element-id="${CSS.escape(item.id)}"]`));
