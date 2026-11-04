@@ -116,3 +116,38 @@ export function scaleSelectionFromCorner(items:readonly ArrangeItem[],corner:Sca
  }}));
  return {items:scaled,bounds:selectionBounds(scaled),factor};
 }
+
+/** Corner resize with alignment to a nearby unselected object's edges or center.
+ * Only the dragged corner moves; the diagonally opposite corner remains fixed.
+ * A single shared scale factor preserves all relative geometry.
+ */
+export function snapSelectionScaleFromCorner(
+ items:readonly ArrangeItem[],corner:ScaleCorner,dx:number,dy:number,
+ others:readonly Rect[],enabled=true,bypass=false,tolerance=7
+):ReturnType<typeof scaleSelectionFromCorner>&{guides:{x?:number;y?:number}}{
+ const raw=scaleSelectionFromCorner(items,corner,dx,dy);
+ if(!enabled||bypass||items.length<2)return {...raw,guides:{}};
+ const base=selectionBounds(items),signX=corner.includes('w')?-1:1,signY=corner.includes('n')?-1:1;
+ const activeX=corner.includes('w')?raw.bounds.x:raw.bounds.x+raw.bounds.width;
+ const activeY=corner.includes('n')?raw.bounds.y:raw.bounds.y+raw.bounds.height;
+ const startX=corner.includes('w')?base.x:base.x+base.width;
+ const startY=corner.includes('n')?base.y:base.y+base.height;
+ const minFactor=Math.max(.25,...items.map(i=>Math.max(10/i.geometry.width,10/i.geometry.height)));
+ let best:{distance:number;factor:number;axis:'x'|'y';guide:number}|undefined;
+ for(const other of others){
+  if(![other.x,other.y,other.width,other.height].every(Number.isFinite)||other.width<=0||other.height<=0)continue;
+  for(const [axis,targets,active,start,size,sign] of [
+   ['x',[other.x,other.x+other.width/2,other.x+other.width],activeX,startX,base.width,signX],
+   ['y',[other.y,other.y+other.height/2,other.y+other.height],activeY,startY,base.height,signY]
+  ] as const){
+   for(const guide of targets){
+    const distance=Math.abs(guide-active),factor=1+(guide-start)/(sign*size);
+    if(distance<=tolerance&&factor>=minFactor&&factor<=2&&(!best||distance<best.distance))best={distance,factor,axis,guide};
+   }
+  }
+ }
+ if(!best)return {...raw,guides:{}};
+ // The uniform factor can be reconstructed from the horizontal movement alone.
+ const snapped=scaleSelectionFromCorner(items,corner,signX*(best.factor-1)*base.width,0);
+ return {...snapped,guides:best.axis==='x'?{x:best.guide}:{y:best.guide}};
+}
