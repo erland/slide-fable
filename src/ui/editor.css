@@ -276,3 +276,12 @@
 /* Live, non-interactive candidate outlines while drawing a marquee. */
 .stage .selection-marquee-candidate{position:absolute;box-sizing:border-box;border:3px solid #387f89;background:rgba(56,127,137,.13);z-index:999994;pointer-events:none}
 .stage .selection-marquee-count{position:absolute;left:0;bottom:100%;margin-bottom:6px;padding:3px 7px;border-radius:4px;background:#183641;color:white;font:600 12px/18px system-ui,sans-serif;white-space:nowrap;pointer-events:none}
+
+/* Common formatting and crop controls stay usable on narrow inspectors. */
+.multi-selection-formatting{min-width:0}
+.multi-selection-formatting label span{font-size:12px;color:var(--muted)}
+.crop-preview{position:relative;overflow:hidden;width:100%;max-height:260px;background:#ddd;touch-action:none;cursor:grab;border:2px solid #387f89;box-sizing:border-box}
+.crop-preview:focus-visible{outline:3px solid #cf694c;outline-offset:2px}
+.crop-preview img{user-select:none}
+.crop-grid{position:absolute;inset:0;pointer-events:none;background:linear-gradient(to right,transparent 33%,#fff9 33%,#fff9 33.5%,transparent 33.5%,transparent 66%,#fff9 66%,#fff9 66.5%,transparent 66.5%),linear-gradient(to bottom,transparent 33%,#fff9 33%,#fff9 33.5%,transparent 33.5%,transparent 66%,#fff9 66%,#fff9 66.5%,transparent 66.5%);box-shadow:inset 0 0 0 1px #0004}
+.image-crop-editor input[type=range]{width:100%;min-width:0}

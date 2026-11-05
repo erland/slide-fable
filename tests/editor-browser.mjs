@@ -252,6 +252,70 @@ try{
  await page.evaluate(async doc=>(await import('/src/core/editor.ts')).editorStore.load(doc),multiFormatBefore);
  pass('SF-COMMON-01:multi-format-inspector-mixed-locked-and-undo');
 
+ // Text tools operate on the selected paragraphs and preserve run formatting.
+ const commonToolsBefore=await model();
+ const commonTextId=await api("const id=store.add('text');store.editText(id,{paragraphs:[{id:'common-p1',runs:[{text:'Första stycket',marks:{bold:true}}]},{id:'common-p2',runs:[{text:'Andra stycket'}]}]});return id;");
+ const textEditor=page.locator('#slide-properties .rich-editor');
+ const commonEditable=textEditor.locator('.ProseMirror');
+ await commonEditable.click();await page.keyboard.press('ControlOrMeta+A');
+ await textEditor.getByLabel('Typsnitt för markering',{exact:true}).selectOption('Georgia');
+ await textEditor.getByLabel('Radavstånd',{exact:true}).fill('1.8');
+ await textEditor.getByLabel('Radavstånd',{exact:true}).press('Enter');
+ await textEditor.getByLabel('Avstånd efter stycke',{exact:true}).fill('12');
+ await textEditor.getByLabel('Avstånd efter stycke',{exact:true}).press('Enter');
+ const commonText=await api("return store.slide.view.elements.find(e=>e.id===arg).text;",commonTextId);
+ assert.ok(commonText.paragraphs.every(p=>p.paragraphStyle.lineSpacing===1.8&&p.paragraphStyle.marginAfter===12));
+ assert.ok(commonText.paragraphs.every(p=>p.runs.every(r=>r.fontFamily==='Georgia')));
+ assert.equal(commonText.paragraphs[0].runs[0].marks.bold,true);
+ const renderedText=page.locator('.stage [data-text-id="'+commonTextId+'"] [data-paragraph]').first();
+ assert.equal(await renderedText.evaluate(el=>el.style.lineHeight),'1.8');
+ assert.equal(await renderedText.evaluate(el=>el.style.marginBottom),'12px');
+ const commonRoundtrip=await page.evaluate(async value=>{const {toEditor,fromEditor}=await import('/src/editor/RichEditor.tsx');return fromEditor(toEditor(value),value);},commonText);
+ assert.deepEqual(commonRoundtrip,commonText);
+ pass('SF-COMMON-02:text-font-paragraph-controls-render-and-roundtrip');
+
+ // Crop editing is a local preview; commit is a single undoable document update.
+ const cropId=await page.evaluate(async()=>{
+  const {editorStore:store}=await import('/src/core/editor.ts');
+  const {bytesHash}=await import('/src/core/contract.ts');
+  const canvas=document.createElement('canvas');canvas.width=800;canvas.height=400;const context=canvas.getContext('2d');context.fillStyle='#ff0000';context.fillRect(0,0,400,400);context.fillStyle='#0000ff';context.fillRect(400,0,400,400);
+  const uri=canvas.toDataURL(),bytes=new Uint8Array(await (await fetch(uri)).arrayBuffer()),hash=await bytesHash(bytes);
+  store.transaction(d=>{d.assets['common-crop-image']={storage:'embedded',mimeType:'image/png',uri,sha256:hash};});
+  store.insert({id:'common-crop-element',type:'image',assetRef:'common-crop-image',geometry:{x:100,y:200,width:400,height:400},fit:'cover'});
+  return 'common-crop-element';
+ });
+ await page.getByRole('button',{name:'Beskär bild visuellt',exact:true}).click();
+ const cropZoom=page.getByLabel('Zooma bildbeskärning',{exact:true});
+ await cropZoom.fill('2');
+ const cropPreview=page.getByRole('group',{name:'Flytta motivet i beskärningen'});
+ await cropPreview.focus();await page.keyboard.press('ArrowLeft');
+ assert.equal((await model()).slides[0].view.elements.find(e=>e.id===cropId).crop,undefined,'Preview must not change document');
+ await page.getByRole('button',{name:'Avbryt beskärning',exact:true}).click();
+ assert.equal((await model()).slides[0].view.elements.find(e=>e.id===cropId).crop,undefined);
+ await page.getByRole('button',{name:'Beskär bild visuellt',exact:true}).click();
+ await cropZoom.fill('2');
+ const cropBounds=await cropPreview.boundingBox();
+ await page.mouse.move(cropBounds.x+cropBounds.width/2,cropBounds.y+cropBounds.height/2);
+ await page.mouse.down();await page.mouse.move(cropBounds.x+cropBounds.width/2+15,cropBounds.y+cropBounds.height/2+10);await page.mouse.up();
+ const cropUndoBefore=await api("return store.getSnapshot().undo;");
+ await page.getByRole('button',{name:'Tillämpa beskärning',exact:true}).click();
+ const savedCrop=await api("return store.slide.view.elements.find(e=>e.id===arg).crop;",cropId);
+ assert.ok(savedCrop.width<.5&&savedCrop.height<1);
+ assert.ok(savedCrop.x>=0&&savedCrop.y>=0&&savedCrop.x+savedCrop.width<=1&&savedCrop.y+savedCrop.height<=1);
+ assert.equal(await api("return store.getSnapshot().undo;"),cropUndoBefore+1);
+ const imageStyle=await page.locator('.stage [data-element-id="'+cropId+'"] .image-mask img').evaluate(el=>({width:el.style.width,left:el.style.left}));
+ assert.equal(imageStyle.width,100/savedCrop.width+'%');
+ const cropPersisted=await model();
+ await api("store.undo();return true;");
+ assert.equal((await model()).slides[0].view.elements.find(e=>e.id===cropId).crop,undefined);
+ await api("store.redo();return true;");
+ assert.deepEqual((await model()).slides[0].view.elements.find(e=>e.id===cropId).crop,savedCrop);
+ await page.evaluate(async doc=>(await import('/src/core/editor.ts')).editorStore.load(JSON.parse(JSON.stringify(doc))),cropPersisted);
+ assert.deepEqual((await model()).slides[0].view.elements.find(e=>e.id===cropId).crop,savedCrop);
+ await page.evaluate(async doc=>(await import('/src/core/editor.ts')).editorStore.load(doc),commonToolsBefore);
+ pass('SF-COMMON-02:visual-crop-cancel-pan-commit-undo-and-persistence');
+
+
 
 
 

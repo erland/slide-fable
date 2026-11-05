@@ -7,17 +7,23 @@
     {
       "id": "COMMON-01",
       "title": "Gemensam formatering",
-      "status": "implemented_verification_pending"
+      "status": "completed",
+      "verification": {
+        "sha": "ad674b0bcfdd80abf561871f782e6277339ecf1b",
+        "run": 42067308727,
+        "result": "PASS"
+      }
     },
     {
       "id": "COMMON-02",
       "title": "Textverktyg och visuell bildbeskärning",
-      "status": "planned"
+      "status": "in_progress"
     }
   ],
   "verification": {
     "required": "Full Verify Slide Fable candidate CI",
-    "result": "repairing"
+    "result": "pending_step_2"
   },
-  "repair_attempts": 2
+  "repair_attempts": 0,
+  "repair_attempts_step_1": 2
 }

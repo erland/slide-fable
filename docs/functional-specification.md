@@ -62,3 +62,12 @@ En åtgärd är en atomisk transaktion som kan ångras och göras om.
 Godkänt fortsatt arbete: förbättrade textverktyg och visuell bildbeskärning,
 därefter visuella teman/layouter, inklistring/tabeller/diagram, bildöversikt,
 animering/media och en separat avgränsad PPTX-importetapp.
+
+SF-COMMON-02: Textredigeraren erbjuder typsnitt för markerad text och
+radavstånd, avstånd före/efter samt indrag för berörda stycken. Befintlig
+run-formatering och listsemantik ska bevaras.
+Bilder beskärs via lokal visuell förhandsvisning med zoom, mus/fingerdrag och
+tangentbord. Avbryt lämnar dokumentet oförändrat; tillämpning är en ångringsbar
+transaktion. Utsnitt ligger alltid inom bildresursen och sparas i befintlig crop-modell.
+Typsnittsval laddar inte ned externa typsnitt; tillgänglighet och Office-/PDF-ersättning
+följer fortsatt exportens dokumenterade begränsningar.
