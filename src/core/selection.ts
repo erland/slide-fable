@@ -48,3 +48,15 @@ export function marqueeSelection(
 export function shouldStartMarquee(pointerType:string,touchMarqueeMode:boolean):boolean{
  return pointerType!=='touch'||touchMarqueeMode;
 }
+
+/** Same result for live marquee preview and pointer-up commit.
+ * Below the drag threshold the gesture behaves as a click.
+ */
+export function marqueeCandidates(
+ original:readonly string[],elements:readonly {id:string;geometry:SelectionRect;visible?:boolean}[],
+ rectangle:SelectionRect,extend=false,minExtent=4
+):string[]{
+ if(!Number.isFinite(minExtent)||minExtent<0)throw Error('INVALID_MARQUEE_THRESHOLD');
+ if(rectangle.width<minExtent||rectangle.height<minExtent)return extend?[...original]:[];
+ return marqueeSelection(original,elements,rectangle,extend);
+}
