@@ -268,3 +268,7 @@
 
 /* Editor-only marquee stays above slide objects and never intercepts pointer input. */
 .stage .selection-marquee{position:absolute;box-sizing:border-box;border:2px dashed #387f89;background:rgba(56,127,137,.16);pointer-events:none;z-index:999995}
+
+/* Touch marquee is opt-in; default touch behavior remains canvas panning. */
+.stage-space.touch-marquee-mode{touch-action:none}
+.canvas-controls button[aria-pressed=true]{background:#d9e9e3;color:#183641;border-color:#387f89}

@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {resolveSelection,movableSelection,marqueeBounds,marqueeSelection} from '../src/core/selection.ts';
+import {resolveSelection,movableSelection,marqueeBounds,marqueeSelection,shouldStartMarquee} from '../src/core/selection.ts';
 
 test('clicking a new object replaces selection and starts a drag',()=>{
  assert.deepEqual(resolveSelection(['first','second'],'third'),{ids:['third'],beginDrag:true});
@@ -60,4 +60,13 @@ test('marquee ignores invalid element geometry and rejects non-finite coordinate
  assert.throws(()=>marqueeBounds({x:NaN,y:0},{x:10,y:10}),/INVALID_MARQUEE_COORDINATES/);
  assert.throws(()=>marqueeSelection([],objects,{x:0,y:0,width:-1,height:10}),/INVALID_MARQUEE_RECT/);
  assert.deepEqual(marqueeSelection([],[{id:'bad',geometry:{x:0,y:0,width:Infinity,height:10}}],{x:0,y:0,width:100,height:100}),[]);
+});
+
+test('touch marquee is opt-in while mouse and pen still work',()=>{
+ assert.equal(shouldStartMarquee('touch',false),false);
+ assert.equal(shouldStartMarquee('touch',true),true);
+ for(const type of ['mouse','pen'])for(const mode of [true,false])assert.equal(shouldStartMarquee(type,mode),true);
+});
+test('touch marquee uses the same rectangle containment logic as mouse',()=>{
+ assert.deepEqual(marqueeSelection([],objects,marqueeBounds({x:0,y:0},{x:150,y:150})),['left','middle','locked']);
 });
