@@ -66,7 +66,7 @@ test('invalid values and read-only changes are atomic',()=>{
 test('formatting shared content does not alter a locked instance',()=>{
  const store=new EditorStore(),[a,b]=store.slide.view.elements;
  store.updateElement(b.id,{contentRef:a.contentRef,locked:true});
- const before=structuredClone(textOf(store.slide,b));
+ const before=structuredClone(textOf(store.slide,store.slide.view.elements.find(e=>e.id===b.id)));
  store.select([a.id,b.id]);store.formatSelected({key:'color',value:'#aabbcc'});
  const after=store.slide.view.elements;
  assert.deepEqual(textOf(store.slide,after.find(e=>e.id===b.id)),before);
