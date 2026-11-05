@@ -286,14 +286,15 @@ try{
  });
  await page.getByRole('button',{name:'Beskär bild visuellt',exact:true}).click();
  const cropZoom=page.getByLabel('Zooma bildbeskärning',{exact:true});
- await cropZoom.fill('2');
+ await cropZoom.focus();await cropZoom.press('Home');for(let i=0;i<20;i++)await cropZoom.press('ArrowRight');
  const cropPreview=page.getByRole('group',{name:'Flytta motivet i beskärningen'});
  await cropPreview.focus();await page.keyboard.press('ArrowLeft');
  assert.equal((await model()).slides[0].view.elements.find(e=>e.id===cropId).crop,undefined,'Preview must not change document');
  await page.getByRole('button',{name:'Avbryt beskärning',exact:true}).click();
  assert.equal((await model()).slides[0].view.elements.find(e=>e.id===cropId).crop,undefined);
  await page.getByRole('button',{name:'Beskär bild visuellt',exact:true}).click();
- await cropZoom.fill('2');
+ await cropZoom.focus();await cropZoom.press('Home');for(let i=0;i<20;i++)await cropZoom.press('ArrowRight');
+ await cropPreview.scrollIntoViewIfNeeded();
  const cropBounds=await cropPreview.boundingBox();
  await page.mouse.move(cropBounds.x+cropBounds.width/2,cropBounds.y+cropBounds.height/2);
  await page.mouse.down();await page.mouse.move(cropBounds.x+cropBounds.width/2+15,cropBounds.y+cropBounds.height/2+10);await page.mouse.up();

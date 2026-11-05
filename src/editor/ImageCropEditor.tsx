@@ -11,7 +11,7 @@ export function ImageCropEditor({element,source,onApply}:{element:D;source:strin
   image.onerror=()=>{if(active)setError('Bilden kunde inte läsas för beskärning.');};image.src=source;
   return ()=>{active=false;};
  },[source,element.geometry.width,element.geometry.height]);
- const begin=()=>{if(!base)return;setCrop(element.crop?normalizeCrop(element.crop):base);setOpen(true);};
+ const begin=()=>{if(!base)return;try{setCrop(element.crop?normalizeCrop(element.crop):base);setError('');setOpen(true);}catch{setError('Det befintliga utsnittet är ogiltigt. Ta bort beskärningen och försök igen.');}};
  const start=(event:PointerEvent<HTMLDivElement>)=>{
   if(!event.isPrimary||event.button!==0)return;
   const bounds=event.currentTarget.getBoundingClientRect();
