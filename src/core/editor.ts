@@ -181,8 +181,8 @@ export class EditorStore{
  reorder(id:string,mode:string){this.transaction((_d,s)=>{const sorted=[...s.view.elements].sort((a:D,b:D)=>(a.zIndex??0)-(b.zIndex??0));const i=sorted.findIndex((e:D)=>e.id===id);const [e]=sorted.splice(i,1);sorted.splice(mode==='front'?sorted.length:mode==='back'?0:Math.max(0,Math.min(sorted.length,i+(mode==='up'?1:-1))),0,e);sorted.forEach((e:D,i:number)=>e.zIndex=i);});}
  applyTheme(choice:ThemeChoice){this.transaction(d=>applyThemeChoice(d,choice));}
  applyLayout(layoutId:string){if(layoutOf(this.state.doc,this.slide)?.id!==layoutId)this.transaction((d,s)=>applySlideLayout(d,s,layoutId));}
- applyLayouts(ids:string[],layoutId:string){const selected=selectedSlideIds(this.state.doc,ids);if(!selected.length)return;this.transaction(d=>{for(const s of d.slides)if(selected.includes(s.id)&&layoutOf(d,s)?.id!==layoutId)applySlideLayout(d,s,layoutId);});}
- duplicateSlides(ids:string[]){if(!ids.length)return [];let created:string[]=[];this.transaction(d=>{created=duplicateSlides(d,ids);});this.selectSlide(created[0]);return created;}
+ applyLayouts(ids:string[],layoutId:string){const selected=selectedSlideIds(this.state.doc,ids);if(!selected.length)return;this.transaction(d=>{for(const s of d.slides)if(selected.includes(s.id)&&layoutOf(d,s)?.id!==layoutId)applySlideLayout(d,s,layoutId);validateCore(d);});}
+ duplicateSlides(ids:string[]){if(!ids.length)return [];let created:string[]=[];this.transaction(d=>{created=duplicateSlides(d,ids);validateCore(d);});this.selectSlide(created[0]);return created;}
  setSlidesHidden(ids:string[],hidden:boolean){const selected=selectedSlideIds(this.state.doc,ids);if(!selected.some(id=>Boolean(this.state.doc.slides.find((s:D)=>s.id===id).hidden)!==hidden))return;this.transaction(d=>{for(const s of d.slides)if(selected.includes(s.id))s.hidden=hidden;});}
  reorderSlides(ids:string[],target:string|null){this.applySlideOrder(moveSlidesBefore(this.state.doc.slides.map((s:D)=>s.id),ids,target));}
  moveSlides(ids:string[],direction:-1|1){this.applySlideOrder(moveSlidesBy(this.state.doc.slides.map((s:D)=>s.id),ids,direction));}

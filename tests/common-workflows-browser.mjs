@@ -51,9 +51,10 @@ try{
  pass('COMMON-03:layout-theme-customization-template-download-and-tablet');
 
  // Overview actions, native drag ordering and the phone layout.
- const overviewIds=await page.evaluate(async()=>{const store=(await import('/src/core/editor.ts')).editorStore;store.addSlide('content');store.addSlide('content');const ids=store.getSnapshot().doc.slides.map(s=>s.id);store.selectSlide(ids[0]);return ids;});
+ const overviewIds=await page.evaluate(async()=>{const store=(await import('/src/core/editor.ts')).editorStore;store.addSlide('content');store.addSlide('content');const ids=store.getSnapshot().doc.slides.map(s=>s.id);store.selectSlide(ids[0]);store.select([store.slide.view.elements[0].id]);return ids;});
  await page.getByRole('button',{name:'Bildöversikt',exact:true}).click();
  const overview=page.getByRole('region',{name:'Bildöversikt',exact:true});
+ const modalBeforeKeys=await model();await overview.getByRole('button',{name:'Markera bild 1',exact:true}).focus();await page.keyboard.press('ArrowRight');assert.deepEqual(await model(),modalBeforeKeys,'Overview navigation must not move a canvas object');
  await overview.getByRole('button',{name:'Avmarkera bilder',exact:true}).click();
  await overview.getByLabel('Välj bild 1',{exact:true}).check();await overview.getByLabel('Välj bild 2',{exact:true}).check();
  await overview.getByRole('button',{name:'Dölj valda bilder',exact:true}).click();
@@ -92,6 +93,9 @@ try{
  });
  await page.evaluate(async asset=>{const store=(await import('/src/core/editor.ts')).editorStore;store.transaction(d=>d.assets.shared={...asset,altText:'Target stays'});},sourceDoc.assets.shared);
  const beforeReuse=await model();
+ const invalidChoosing=page.waitForEvent('filechooser');await overview.getByRole('button',{name:'Infoga bilder från fil',exact:true}).click();
+ await (await invalidChoosing).setFiles({name:'invalid.json',mimeType:'application/json',buffer:Buffer.from('{invalid')});
+ await overview.getByRole('alert').waitFor();assert.deepEqual(await model(),beforeReuse);
  const choosing=page.waitForEvent('filechooser');await overview.getByRole('button',{name:'Infoga bilder från fil',exact:true}).click();
  await (await choosing).setFiles({name:'kallpresentation.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(sourceDoc))});
  const reuse=page.getByRole('region',{name:'Återanvänd bilder',exact:true});await reuse.waitFor();

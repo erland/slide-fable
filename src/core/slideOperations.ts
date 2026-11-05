@@ -48,7 +48,8 @@ function rewrite(value:D,ctx:RewriteContext):D{
  return result;
 }
 export function duplicateSlides(doc:D,requested:readonly string[]):string[]{
- const ids=selectedSlideIds(doc,requested),slideMap=new Map(ids.map(id=>[id,uid('slide')]));
+ const ids=selectedSlideIds(doc,requested);if(doc.slides.length+ids.length>200)throw Error('Presentationens gräns på 200 bilder överskrids.');
+ const slideMap=new Map(ids.map(id=>[id,uid('slide')]));
  const contexts=new Map<string,Map<string,string>>(),globalElements=new Map<string,string>();
  for(const s of doc.slides.filter((s:D)=>slideMap.has(s.id))){const map=identities(s);map.set(s.id,slideMap.get(s.id)!);contexts.set(s.id,map);for(const e of s.view.elements)globalElements.set(e.id,map.get(e.id)!);}
  doc.slides=doc.slides.flatMap((s:D)=>{
