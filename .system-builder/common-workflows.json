@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "authorization": "2026-11-05: user authorized priorities 3 then 5, progress updates, and up to five repair attempts per problem",
+  "authorization": "2026-11-05: user authorized a first version of priority 6, with the same implementation, verification, progress and repair workflow",
   "baseline": "4f86077e513ae484fee3a2df5c4f9a0042744484",
   "release_readiness": "NOT_READY",
   "steps": [
@@ -43,11 +43,21 @@
         "run": 42083688800,
         "result": "PASS"
       }
+    },
+    {
+      "id": "COMMON-06",
+      "title": "Enkla bildövergångar och objektanimeringar",
+      "status": "completed",
+      "verification": {
+        "sha": "3bcebc3b10acdde12f70546c92a5c264c08cc1ef",
+        "run": 42090095080,
+        "result": "PASS"
+      }
     }
   ],
   "verification": {
-    "sha": "c4cbe2cf629f1e1454823387ff98cdbbf9301811",
-    "run": 42083688800,
+    "sha": "3bcebc3b10acdde12f70546c92a5c264c08cc1ef",
+    "run": 42090095080,
     "result": "PASS"
   },
   "repair_attempts": 3,
@@ -63,5 +73,6 @@
     "PowerPoint Mac/Windows"
   ],
   "repair_attempts_step_3": 1,
-  "repair_attempts_step_5": 3
+  "repair_attempts_step_5": 3,
+  "repair_attempts_step_6": 4
 }

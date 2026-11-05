@@ -91,3 +91,18 @@ frikopplas från källans masters/layouter. Hela kandidaten valideras och en än
 målrevision avbryter införandet. PPTX-import ingår inte. Nya 0.4-bilder kan inte
 infogas i en äldre 0.3-presentation; komponenter med bildberoende contentRef avvisas
 uttryckligen tills deras kontextberoende kan bevaras fullständigt.
+
+
+SF-COMMON-06 (första version): Bildens leveranspanel erbjuder Ingen/Toning och
+varaktighet för bildövergång. Objekt i PPD 0.4 kan få Visa, Tona in och Försvinn,
+med ordnad lista, Vid klick/Med föregående/Efter föregående, varaktighet och
+fördröjning (0–60 000 ms). Med föregående räknas från föregående start,
+Efter föregående från föregående slut. Första automatiska effekten spelas vid
+bildstart. Varje klickgrupp och befintliga fragment använder gemensamma steg.
+Bakåt rekonstruerar föregående steg utan rörelse; ny bild återställer uppspelningen.
+Presentation i app och fristående HTML använder samma planering och DOM-spelare.
+Minskad rörelse tillämpar slutläget direkt men behåller klickstegen. Uppspelning
+ändrar inte dokumentet; redigeringsåtgärder är ångringsbara. Borttagna mål städas.
+Importerade andra effekter bevaras men spelas inte. PDF/PPTX/bildexport är statiska
+med samtliga synliga objekt och exportvarning. Ingen avancerad tidslinje,
+ljud-/videohantering eller nya schemafält ingår i denna första version.
