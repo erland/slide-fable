@@ -17,7 +17,8 @@
     "test:text-overflow": "node tests/text-overflow-browser.mjs",
     "test:text-export": "node tests/text-export-parity-browser.mjs",
     "test:lifecycle": "node tests/lifecycle-browser.mjs",
-    "profile:history": "node --experimental-strip-types scripts/profile-history.mjs"
+    "profile:history": "node --experimental-strip-types scripts/profile-history.mjs",
+    "test:common-workflows": "node tests/common-workflows-browser.mjs"
   },
   "dependencies": {
     "@pdf-lib/fontkit": "1.1.1",

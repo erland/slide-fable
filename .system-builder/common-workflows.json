@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "authorization": "2026-11-05: user authorized sequential steps with progress updates and up to five repair attempts per failure",
+  "authorization": "2026-11-05: user authorized priorities 3 then 5, progress updates, and up to five repair attempts per problem",
   "baseline": "4f86077e513ae484fee3a2df5c4f9a0042744484",
   "release_readiness": "NOT_READY",
   "steps": [
@@ -23,22 +23,29 @@
         "run": 42071784207,
         "result": "PASS"
       }
+    },
+    {
+      "id": "COMMON-03",
+      "title": "Visuellt layout- och temagalleri",
+      "status": "implemented_verification_pending"
+    },
+    {
+      "id": "COMMON-05",
+      "title": "Bildöversikt och återanvändning mellan presentationer",
+      "status": "planned"
     }
   ],
   "verification": {
-    "required": "Full Verify Slide Fable candidate CI",
-    "result": "PASS",
-    "implementation_sha": "e15946519275d7a84ba96286ec45d0df9d713c4a",
-    "run": 42071784207,
-    "unit_tests": 147
+    "result": "pending",
+    "required": "Full candidate verification for each implementation step"
   },
-  "repair_attempts": 3,
+  "repair_attempts": 0,
   "repair_attempts_step_1": 2,
   "repair_attempts_step_2": 3,
   "next_action": {
     "id": "COMMON-03",
-    "title": "Visuellt layout- och temagalleri",
-    "status": "planned"
+    "title": "Verifiera galleri innan bildöversikt",
+    "status": "in_progress"
   },
   "manual_acceptance": [
     "Fysisk iPad/Safari",

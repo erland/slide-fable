@@ -99,3 +99,15 @@ Välj en bild och Beskär bild visuellt. Dra motivet i förhandsvisningen eller 
 piltangenterna (Skift ger större steg), och justera Zooma motiv. Tillämpa beskärning
 sparar utsnittet; Avbryt beskärning lämnar bilden oförändrad. Ta bort beskärning
 återgår till bildens passning cover. Beskärning ersätter inte själva bildresursen.
+
+## Layout- och temagalleri
+
+Välj Design → Layout och tema. Layoutkorten ändrar aktuell bild och bevarar texten.
+Saknade textplatshållare tillkommer; objekt utan motsvarighet i den nya layouten
+behåller sin placering. Temakorten gäller hela presentationen. Anpassa färger och
+typsnitt i samma panel; manuella objektformat behålls. Ändringar kan ångras.
+
+Spara designmall skapar en JSON-fil med temat, masters och deras nödvändiga resurser.
+Presentationens egna bilder och talaranteckningar följer inte med. Öppna mallfilen
+via Öppna för att börja en ny presentation från dess design. Masterobjekt och
+komponenter som ingår i designen följer med i mallen.

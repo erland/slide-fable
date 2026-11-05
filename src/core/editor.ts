@@ -1,3 +1,4 @@
+import {applyThemeChoice,type ThemeChoice} from './designGallery.ts';
 import {supportsFormat,validateFormatChange,selectionFormatPatch,type SelectionFormatChange} from './selectionFormatting.ts';
 import {inspectPpd040} from './ppd040Preflight.ts';
 import {toOutline,normalizePpd040Styles} from './ppd040Staging.ts';
@@ -177,7 +178,30 @@ export class EditorStore{
  }
 
  reorder(id:string,mode:string){this.transaction((_d,s)=>{const sorted=[...s.view.elements].sort((a:D,b:D)=>(a.zIndex??0)-(b.zIndex??0));const i=sorted.findIndex((e:D)=>e.id===id);const [e]=sorted.splice(i,1);sorted.splice(mode==='front'?sorted.length:mode==='back'?0:Math.max(0,Math.min(sorted.length,i+(mode==='up'?1:-1))),0,e);sorted.forEach((e:D,i:number)=>e.zIndex=i);});}
- applyLayout(layoutId:string){this.transaction((d,s)=>{const old=layoutOf(d,s),next=d.masters.find((m:D)=>m.id===(s.masterId??d.document.defaultMasterId))?.layouts.find((l:D)=>l.id===layoutId);if(!next)throw Error('Layouten saknas');const used=new Set();for(const binding of s.placeholderBindings??[]){const op=old?.placeholders?.find((p:D)=>p.id===binding.placeholderId);const np=next.placeholders?.find((p:D)=>p.role===op?.role&&!used.has(p.id));if(np){binding.placeholderId=np.id;used.add(np.id);}else{const e=s.view.elements.find((e:D)=>e.id===binding.elementId);if(e)e.geometry=effective(d,s,e).geometry;binding.detached=true;}}s.placeholderBindings=s.placeholderBindings?.filter((b:D)=>!b.detached);s.layoutId=layoutId;});}
+ applyTheme(choice:ThemeChoice){this.transaction(d=>applyThemeChoice(d,choice));}
+ applyLayout(layoutId:string){
+  if(layoutOf(this.state.doc,this.slide)?.id===layoutId)return;
+  this.transaction((d,s)=>{
+   const master=d.masters.find((m:D)=>m.id===(s.masterId??d.document.defaultMasterId))??d.masters[0];
+   const old=layoutOf(d,s),next=master?.layouts.find((l:D)=>l.id===layoutId);
+   if(!next)throw Error('Layouten saknas');
+   const used=new Set<string>(),bindings:D[]=[];
+   for(const binding of s.placeholderBindings??[]){
+    const e=s.view.elements.find((e:D)=>e.id===binding.elementId);if(!e)continue;
+    const rendered=effective(d,s,e),previous=old?.placeholders?.find((p:D)=>p.id===binding.placeholderId);
+    const target=next.placeholders?.find((p:D)=>p.role===previous?.role&&!used.has(p.id));
+    if(target){const b=copy(binding);b.placeholderId=target.id;if(b.overrides)delete b.overrides.geometry;bindings.push(b);used.add(target.id);}
+    else{e.geometry=copy(rendered.geometry);e.style=copy(rendered.style);}
+   }
+   for(const placeholder of next.placeholders??[]){
+    if(used.has(placeholder.id)||placeholder.role==='image')continue;
+    const blockId=uid('block'),id=uid('text');s.content.blocks.push({id:blockId,kind:'text',text:rich(placeholder.role==='title'?'Din rubrik':'Ditt innehåll')});
+    s.view.elements.push({id,type:'text',geometry:copy(placeholder.geometry),contentRef:blockId+'#text'});
+    bindings.push({placeholderId:placeholder.id,elementId:id});
+   }
+   s.masterId=master.id;s.layoutId=layoutId;s.placeholderBindings=bindings;
+  });
+ }
  detachLayout(){this.transaction((d,s)=>{for(const e of s.view.elements){const v=effective(d,s,e);e.geometry=copy(v.geometry);e.style=copy(v.style);}delete s.layoutId;delete s.masterId;delete s.placeholderBindings;delete d.document.defaultMasterId;delete d.document.defaultLayoutId;});}
  resetLayout(){this.transaction((_d,s)=>{for(const b of s.placeholderBindings??[])delete b.overrides;});}
  makeComponent(){const payload=this.copySelected();let cid='';this.transaction((d,s)=>{const selected=s.view.elements.filter((e:D)=>this.state.selected.includes(e.id));if(!selected.length)return;const minx=Math.min(...selected.map((e:D)=>e.geometry.x)),miny=Math.min(...selected.map((e:D)=>e.geometry.y));const clone=cloneObjects(payload.elements,[]);for(const e of clone.elements){if(e.contentRef){e.text=rich(plain(blocks(s).find((b:D)=>b.id===e.contentRef.split('#')[0])?.text));delete e.contentRef;}e.geometry.x-=minx;e.geometry.y-=miny;}cid=uid('component');d.components??=[];d.components.push({id:cid,name:'Komponent '+(d.components.length+1),elements:clone.elements,slots:[]});});return cid;}

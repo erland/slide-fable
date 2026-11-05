@@ -18,6 +18,7 @@ with tempfile.TemporaryDirectory(prefix='slide-fable-final-') as temporary:
     run('document lifecycle browser regression',['npm','run','test:lifecycle'])
     run('text overflow browser flows',['npm','run','test:text-overflow'])
     run('editor / native PDF-PPTX text fidelity',['npm','run','test:text-export'])
+    run('common presentation workflows',['npm','run','test:common-workflows'])
     run('editor browser flows',['npm','run','test:editor'])
     editor=json.loads((Path(env['EDITOR_OUTPUT'])/'editor-results.json').read_text())
     run('production build / typecheck / offline / updates',['npm','run','test:pwa'])
