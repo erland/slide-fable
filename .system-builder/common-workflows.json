@@ -39,7 +39,7 @@
     "result": "pending",
     "required": "Full candidate verification for each implementation step"
   },
-  "repair_attempts": 0,
+  "repair_attempts": 1,
   "repair_attempts_step_1": 2,
   "repair_attempts_step_2": 3,
   "next_action": {
@@ -50,5 +50,6 @@
   "manual_acceptance": [
     "Fysisk iPad/Safari",
     "PowerPoint Mac/Windows"
-  ]
+  ],
+  "repair_attempts_step_3": 1
 }

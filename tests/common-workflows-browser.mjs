@@ -31,6 +31,7 @@ try{
  await gallery.getByLabel('Accentfärg i temat',{exact:true}).fill('#4499aa');
  await gallery.getByLabel('Rubriktypsnitt',{exact:true}).selectOption('Verdana');
  assert.equal((await model()).theme.styles.heading.fontFamily,'Verdana');
+ await gallery.getByRole('heading',{name:'Välj layout',exact:true}).scrollIntoViewIfNeeded();
  await page.screenshot({path:path.join(output,'design-gallery-desktop.png'),fullPage:true});
  const source=await model();
  const pendingDownload=page.waitForEvent('download');
