@@ -81,3 +81,21 @@ speakerNotes. Funktionen är ingen generell sekretessgranskning av innehållet.
 
 Detta är en verifieringsversion, inte en godkänd MVP-release. Läs
 `docs/release-review.md` för gränser, kvarvarande krav och miljöprov som saknas.
+
+## Gemensam formatering och visuella verktyg
+
+Markera flera objekt och välj Gemensam formatering i egenskapspanelen.
+Blandade värden visas när markeringen innehåller olika format. Fyllning, ramfärg,
+ramtjocklek, textfärg och textstorlek påverkar olåsta objekt som stöder egenskapen.
+Textformat gäller hela objektets text. Grupper genomsöks inte automatiskt.
+Varje gemensam ändring kan ångras i ett steg.
+
+Textverktygen erbjuder typsnitt för markerad text. Radavstånd, avstånd före/efter
+stycke och indrag gäller styckena som textmarkeringen berör. Fetstil, kursiv och
+understrykning visar aktivt läge. Typsnitt måste finnas på enheten; export kan
+ersätta dem enligt exportprofilens begränsningar.
+
+Välj en bild och Beskär bild visuellt. Dra motivet i förhandsvisningen eller använd
+piltangenterna (Skift ger större steg), och justera Zooma motiv. Tillämpa beskärning
+sparar utsnittet; Avbryt beskärning lämnar bilden oförändrad. Ta bort beskärning
+återgår till bildens passning cover. Beskärning ersätter inte själva bildresursen.
