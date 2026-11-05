@@ -17,14 +17,31 @@
     {
       "id": "COMMON-02",
       "title": "Textverktyg och visuell bildbeskärning",
-      "status": "in_progress"
+      "status": "completed",
+      "verification": {
+        "sha": "e15946519275d7a84ba96286ec45d0df9d713c4a",
+        "run": 42071784207,
+        "result": "PASS"
+      }
     }
   ],
   "verification": {
     "required": "Full Verify Slide Fable candidate CI",
-    "result": "pending_step_2",
-    "environment_repair": "Bound browser download and use existing CHROMIUM_EXECUTABLE support as fallback; all gates preserved"
+    "result": "PASS",
+    "implementation_sha": "e15946519275d7a84ba96286ec45d0df9d713c4a",
+    "run": 42071784207,
+    "unit_tests": 147
   },
   "repair_attempts": 3,
-  "repair_attempts_step_1": 2
+  "repair_attempts_step_1": 2,
+  "repair_attempts_step_2": 3,
+  "next_action": {
+    "id": "COMMON-03",
+    "title": "Visuellt layout- och temagalleri",
+    "status": "planned"
+  },
+  "manual_acceptance": [
+    "Fysisk iPad/Safari",
+    "PowerPoint Mac/Windows"
+  ]
 }
