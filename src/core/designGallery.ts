@@ -1,4 +1,4 @@
-import {copy,newSlide,createDocument,uid,type D} from './model.ts';
+import {copy,newSlide,createDocument,effective,layoutOf,rich,uid,type D} from './model.ts';
 
 export type ThemeChoice={id:string;name:string;ink:string;surface:string;accent:string;headingFont:string;bodyFont:string};
 export const themeChoices:ThemeChoice[]=[
@@ -34,4 +34,25 @@ export function designTemplate(source:D):D{
  for(const key of ['assetRef','fallbackAssetRef','posterAssetRef','renderedAssetRef','captionsAssetRef'])scan([doc.masters,doc.components,doc.theme],key,id=>{if(source.assets[id])doc.assets[id]=copy(source.assets[id]);});
  doc.slides=[newSlide(doc,doc.masters[0]?.layouts?.[0]?.id??'blank')];
  return doc;
+}
+
+export function applySlideLayout(d:D,s:D,layoutId:string){
+   const master=d.masters.find((m:D)=>m.id===(s.masterId??d.document.defaultMasterId))??d.masters[0];
+   const old=layoutOf(d,s),next=master?.layouts.find((l:D)=>l.id===layoutId);
+   if(!next)throw Error('Layouten saknas');
+   const used=new Set<string>(),bindings:D[]=[];
+   for(const binding of s.placeholderBindings??[]){
+    const e=s.view.elements.find((e:D)=>e.id===binding.elementId);if(!e)continue;
+    const rendered=effective(d,s,e),previous=old?.placeholders?.find((p:D)=>p.id===binding.placeholderId);
+    const target=next.placeholders?.find((p:D)=>p.role===previous?.role&&!used.has(p.id));
+    if(target){const b=copy(binding);b.placeholderId=target.id;if(b.overrides)delete b.overrides.geometry;bindings.push(b);used.add(target.id);}
+    else{e.geometry=copy(rendered.geometry);e.style=copy(rendered.style);}
+   }
+   for(const placeholder of next.placeholders??[]){
+    if(used.has(placeholder.id)||placeholder.role==='image')continue;
+    const blockId=uid('block'),id=uid('text');s.content.blocks.push({id:blockId,kind:'text',text:rich(placeholder.role==='title'?'Din rubrik':'Ditt innehåll')});
+    s.view.elements.push({id,type:'text',geometry:copy(placeholder.geometry),contentRef:blockId+'#text'});
+    bindings.push({placeholderId:placeholder.id,elementId:id});
+   }
+   s.masterId=master.id;s.layoutId=layoutId;s.placeholderBindings=bindings;
 }

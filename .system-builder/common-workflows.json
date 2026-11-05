@@ -27,29 +27,35 @@
     {
       "id": "COMMON-03",
       "title": "Visuellt layout- och temagalleri",
-      "status": "implemented_verification_pending"
+      "status": "completed",
+      "verification": {
+        "sha": "a212193a967e1e0025940544432c344ce6326085",
+        "run": 42079576503,
+        "result": "PASS"
+      }
     },
     {
       "id": "COMMON-05",
       "title": "Bildöversikt och återanvändning mellan presentationer",
-      "status": "planned"
+      "status": "implemented_verification_pending"
     }
   ],
   "verification": {
     "result": "pending",
-    "required": "Full candidate verification for each implementation step"
+    "required": "Full candidate CI for COMMON-05"
   },
   "repair_attempts": 1,
   "repair_attempts_step_1": 2,
   "repair_attempts_step_2": 3,
   "next_action": {
-    "id": "COMMON-03",
-    "title": "Verifiera galleri innan bildöversikt",
+    "id": "COMMON-05",
+    "title": "Verifiera bildöversikt och återanvändning",
     "status": "in_progress"
   },
   "manual_acceptance": [
     "Fysisk iPad/Safari",
     "PowerPoint Mac/Windows"
   ],
-  "repair_attempts_step_3": 1
+  "repair_attempts_step_3": 1,
+  "repair_attempts_step_5": 1
 }

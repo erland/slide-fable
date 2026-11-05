@@ -49,6 +49,66 @@ try{
  await page.setViewportSize({width:1440,height:1000});
  await page.evaluate(async before=>(await import('/src/core/editor.ts')).editorStore.load(before),before);
  pass('COMMON-03:layout-theme-customization-template-download-and-tablet');
+
+ // Overview actions, native drag ordering and the phone layout.
+ const overviewIds=await page.evaluate(async()=>{const store=(await import('/src/core/editor.ts')).editorStore;store.addSlide('content');store.addSlide('content');const ids=store.getSnapshot().doc.slides.map(s=>s.id);store.selectSlide(ids[0]);return ids;});
+ await page.getByRole('button',{name:'Bildöversikt',exact:true}).click();
+ const overview=page.getByRole('region',{name:'Bildöversikt',exact:true});
+ await overview.getByRole('button',{name:'Avmarkera bilder',exact:true}).click();
+ await overview.getByLabel('Välj bild 1',{exact:true}).check();await overview.getByLabel('Välj bild 2',{exact:true}).check();
+ await overview.getByRole('button',{name:'Dölj valda bilder',exact:true}).click();
+ assert.ok((await model()).slides.slice(0,2).every(s=>s.hidden));
+ await overview.getByRole('button',{name:'Visa valda bilder',exact:true}).click();
+ await overview.getByLabel('Layout för valda bilder',{exact:true}).selectOption('columns');
+ await overview.getByRole('button',{name:'Använd layout på valda bilder',exact:true}).click();
+ assert.ok((await model()).slides.slice(0,2).every(s=>s.placeholderBindings.length===3));
+ await overview.getByRole('button',{name:'Duplicera valda bilder',exact:true}).click();
+ let overviewDoc=await model();assert.equal(overviewDoc.slides.length,5);
+ const duplicates=overviewDoc.slides.filter(s=>!overviewIds.includes(s.id)).map(s=>s.id);
+ await overview.getByRole('button',{name:'Flytta valda sist',exact:true}).click();
+ assert.deepEqual((await model()).slides.slice(-2).map(s=>s.id),duplicates);
+ await overview.getByRole('button',{name:'Ta bort valda bilder',exact:true}).click();assert.equal((await model()).slides.length,3);
+ await overview.locator('[data-slide-id="'+overviewIds[2]+'"]').dragTo(overview.locator('[data-slide-id="'+overviewIds[0]+'"]'));
+ assert.deepEqual((await model()).slides.map(s=>s.id),[overviewIds[2],overviewIds[0],overviewIds[1]]);
+ await overview.getByRole('button',{name:'Flytta valda senare',exact:true}).click();
+ assert.deepEqual((await model()).slides.map(s=>s.id),[overviewIds[0],overviewIds[2],overviewIds[1]]);
+ await page.screenshot({path:path.join(output,'slide-overview-desktop.png'),fullPage:true});
+ await page.setViewportSize({width:390,height:844});
+ assert.equal(await overview.isVisible(),true);assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2));
+ await page.screenshot({path:path.join(output,'slide-overview-phone.png'),fullPage:true});
+ await page.setViewportSize({width:1440,height:1000});
+ pass('COMMON-05:overview-multi-select-bulk-actions-drag-and-phone');
+
+ // Import through the real file picker, preserving target identity and source appearance.
+ const sourceDoc=await page.evaluate(async()=>{
+  const {createDocument,newSlide}=await import('/src/core/model.ts');const {applyThemeChoice,themeChoices}=await import('/src/core/designGallery.ts');
+  const doc=createDocument();doc.document.title='Källpresentation';doc.slides.push(newSlide(doc,'content'),newSlide(doc,'content'));applyThemeChoice(doc,themeChoices[1]);
+  doc.slides[0].delivery.speakerNotes='Anteckning som ska följa med';
+  doc.slides[0].view.elements[0].actions=[{event:'click',kind:'navigate-slide',targetId:doc.slides[1].id},{event:'click',kind:'navigate-slide',targetId:doc.slides[2].id}];
+  const canvas=document.createElement('canvas');canvas.width=200;canvas.height=100;const ctx=canvas.getContext('2d');ctx.fillStyle='#cf694c';ctx.fillRect(0,0,200,100);
+  doc.assets.shared={kind:'image',storage:'embedded',mimeType:'image/png',uri:canvas.toDataURL(),altText:'Source photo'};
+  doc.slides[0].view.elements.push({id:'reuse-photo',type:'image',assetRef:'shared',geometry:{x:800,y:200,width:400,height:200}});
+  await (await import('/src/core/contract.ts')).validateFull(doc);return doc;
+ });
+ await page.evaluate(async asset=>{const store=(await import('/src/core/editor.ts')).editorStore;store.transaction(d=>d.assets.shared={...asset,altText:'Target stays'});},sourceDoc.assets.shared);
+ const beforeReuse=await model();
+ const choosing=page.waitForEvent('filechooser');await overview.getByRole('button',{name:'Infoga bilder från fil',exact:true}).click();
+ await (await choosing).setFiles({name:'kallpresentation.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(sourceDoc))});
+ const reuse=page.getByRole('region',{name:'Återanvänd bilder',exact:true});await reuse.waitFor();
+ assert.deepEqual(await model(),beforeReuse,'Staging a source file must not replace or change the current document');
+ await reuse.getByLabel('Återanvänd bild 1',{exact:true}).check();await reuse.getByLabel('Återanvänd bild 2',{exact:true}).check();
+ await reuse.getByRole('button',{name:'Infoga valda bilder (2)',exact:true}).click();await reuse.waitFor({state:'hidden'});
+ const reused=await model(),imported=reused.slides.filter(s=>!beforeReuse.slides.some(old=>old.id===s.id));
+ assert.equal(imported.length,2);assert.equal(reused.document.id,beforeReuse.document.id);assert.deepEqual(reused.theme,beforeReuse.theme);
+ assert.equal(imported[0].delivery.speakerNotes,'Anteckning som ska följa med');assert.equal(imported[0].view.background.color,'#173944');
+ assert.equal(reused.assets.shared.altText,'Target stays');assert.notEqual(imported[0].view.elements.find(e=>e.type==='image').assetRef,'shared');
+ assert.equal(imported[0].view.elements.find(e=>e.actions?.length).actions[0].targetId,imported[1].id);
+ assert.equal(imported[0].view.elements.find(e=>e.actions?.length).actions.length,1);
+ await page.locator('.editor-header').getByRole('button',{name:'Ångra',exact:true}).first().click();assert.deepEqual(await model(),beforeReuse);
+ await page.locator('.editor-header').getByRole('button',{name:'Gör om',exact:true}).first().click();assert.deepEqual(await model(),reused);
+ await page.evaluate(async doc=>{await (await import('/src/core/contract.ts')).validateFull(doc);(await import('/src/core/editor.ts')).editorStore.load(JSON.parse(JSON.stringify(doc)));},reused);
+ assert.deepEqual(await model(),reused);
+ pass('COMMON-05:file-reuse-preview-resources-navigation-undo-and-roundtrip');
  assert.deepEqual(errors,[]);
 }finally{
  await writeFile(path.join(output,'common-workflows-results.json'),JSON.stringify({checks,engine:browser?.version()},null,2));

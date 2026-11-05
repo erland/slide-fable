@@ -1,9 +1,10 @@
-import {applyThemeChoice,type ThemeChoice} from './designGallery.ts';
+import {duplicateSlides,moveSlidesBefore,moveSlidesBy,selectedSlideIds,reuseSlides} from './slideOperations.ts';
+import {applySlideLayout,applyThemeChoice,type ThemeChoice} from './designGallery.ts';
 import {supportsFormat,validateFormatChange,selectionFormatPatch,type SelectionFormatChange} from './selectionFormatting.ts';
 import {inspectPpd040} from './ppd040Preflight.ts';
 import {toOutline,normalizePpd040Styles} from './ppd040Staging.ts';
-import {validateCore} from './contract.ts';
-import {blocks,box,copy,createDocument,effective,layoutOf,newSlide,plain,rich,setText,textOf,uid,isGeometry,isElementCommand,type Geometry,type D} from './model.ts';
+import {validateCore,validateFull} from './contract.ts';
+import {allElements,blocks,box,copy,createDocument,effective,layoutOf,newSlide,plain,rich,setText,textOf,uid,isGeometry,isElementCommand,type Geometry,type D} from './model.ts';
 import {updateSafety} from '../pwa/safety.ts';
 import {arrangeSelection,matchSelectionSize,scaleSelection,snapSelectionScaleFromCorner,type ArrangeItem,type ArrangeMode,type MatchSizeMode,type ScaleCorner} from './arrange.ts';
 export type EditorState={doc:D;slideId:string;selected:string[];dirty:boolean;exportedRevision:number|null;readOnly:boolean;original:string;warnings:string[];undo:number;redo:number};
@@ -89,7 +90,7 @@ export class EditorStore{
  if(this.state.doc.schemaVersion==='0.4.0')base.style=toOutline(base.style);
  this.insert(base);return base.id;}
  addSlide(layout='title'){let id='';this.transaction(d=>{const s=newSlide(d,layout);d.slides.push(s);id=s.id;});this.selectSlide(id);}
- removeSlides(ids:string[]){let next='';this.transaction(d=>{d.slides=d.slides.filter((s:D)=>!ids.includes(s.id));if(!d.slides.length)d.slides.push(newSlide(d,'blank'));if(ids.includes(d.presentation.initialSlideId))delete d.presentation.initialSlideId;for(const s of d.slides)for(const e of s.view.elements)e.actions=e.actions?.filter((a:D)=>a.kind!=='navigate-slide'||!ids.includes(a.targetId));next=d.slides[0].id;});this.selectSlide(next);}
+ removeSlides(ids:string[]){let next='';this.transaction(d=>{d.slides=d.slides.filter((s:D)=>!ids.includes(s.id));if(!d.slides.length)d.slides.push(newSlide(d,'blank'));if(ids.includes(d.presentation.initialSlideId))delete d.presentation.initialSlideId;for(const e of allElements(d))e.actions=e.actions?.filter((a:D)=>a.kind!=='navigate-slide'||!ids.includes(a.targetId));next=d.slides[0].id;});this.selectSlide(next);}
  moveSlide(id:string,direction:number){const slides=this.state.doc.slides;const i=slides.findIndex((s:D)=>s.id===id);if(i<0||!Number.isFinite(direction)||direction===0)return;const j=Math.max(0,Math.min(slides.length-1,i+direction));if(i===j)return;this.transaction(d=>{[d.slides[i],d.slides[j]]=[d.slides[j],d.slides[i]];d.slides.forEach((s:D,index:number)=>s.order=index);});}
  duplicateSlide(){let id='';this.transaction((d,s)=>{const c=copy(s);c.id=uid('slide');id=c.id;const result=cloneObjects(s.view.elements,s.content.blocks??[]);c.view.elements=result.elements;c.content.blocks=result.blocks;c.placeholderBindings=c.placeholderBindings?.map((b:D)=>({...b,elementId:result.ids.get(b.elementId)??b.elementId,contentRef:b.contentRef?remapRef(b.contentRef,result.blockIds):undefined}));c.view.accessibilityOrder=c.view.accessibilityOrder?.map((x:string)=>result.ids.get(x)??x);c.delivery??={};c.delivery.fragments=c.delivery.fragments?.map((f:D)=>({...f,id:f.id?uid('fragment'):undefined,elementId:result.ids.get(f.elementId)??f.elementId}));d.slides.splice(d.slides.indexOf(s)+1,0,c);});this.selectSlide(id);}
  removeSelected(){const selected=new Set(this.state.selected);this.transaction((_d,s)=>{const collect=(id:string)=>{const e=s.view.elements.find((e:D)=>e.id===id);for(const child of e?.children??[]){selected.add(child);collect(child);}};for(const id of [...selected])collect(id);s.view.elements=s.view.elements.filter((e:D)=>!selected.has(e.id));for(const e of s.view.elements){if(e.children)e.children=e.children.filter((id:string)=>!selected.has(id));for(const a of ['startAnchor','endAnchor'])if(selected.has(e[a]?.elementId))delete e[a];e.actions=e.actions?.filter((a:D)=>!selected.has(a.targetId));}s.placeholderBindings=s.placeholderBindings?.filter((b:D)=>!selected.has(b.elementId));s.view.accessibilityOrder=s.view.accessibilityOrder?.filter((id:string)=>!selected.has(id));if(s.delivery?.fragments)s.delivery.fragments=s.delivery.fragments.filter((f:D)=>!selected.has(f.elementId));});this.select([]);}
@@ -179,28 +180,18 @@ export class EditorStore{
 
  reorder(id:string,mode:string){this.transaction((_d,s)=>{const sorted=[...s.view.elements].sort((a:D,b:D)=>(a.zIndex??0)-(b.zIndex??0));const i=sorted.findIndex((e:D)=>e.id===id);const [e]=sorted.splice(i,1);sorted.splice(mode==='front'?sorted.length:mode==='back'?0:Math.max(0,Math.min(sorted.length,i+(mode==='up'?1:-1))),0,e);sorted.forEach((e:D,i:number)=>e.zIndex=i);});}
  applyTheme(choice:ThemeChoice){this.transaction(d=>applyThemeChoice(d,choice));}
- applyLayout(layoutId:string){
-  if(layoutOf(this.state.doc,this.slide)?.id===layoutId)return;
-  this.transaction((d,s)=>{
-   const master=d.masters.find((m:D)=>m.id===(s.masterId??d.document.defaultMasterId))??d.masters[0];
-   const old=layoutOf(d,s),next=master?.layouts.find((l:D)=>l.id===layoutId);
-   if(!next)throw Error('Layouten saknas');
-   const used=new Set<string>(),bindings:D[]=[];
-   for(const binding of s.placeholderBindings??[]){
-    const e=s.view.elements.find((e:D)=>e.id===binding.elementId);if(!e)continue;
-    const rendered=effective(d,s,e),previous=old?.placeholders?.find((p:D)=>p.id===binding.placeholderId);
-    const target=next.placeholders?.find((p:D)=>p.role===previous?.role&&!used.has(p.id));
-    if(target){const b=copy(binding);b.placeholderId=target.id;if(b.overrides)delete b.overrides.geometry;bindings.push(b);used.add(target.id);}
-    else{e.geometry=copy(rendered.geometry);e.style=copy(rendered.style);}
-   }
-   for(const placeholder of next.placeholders??[]){
-    if(used.has(placeholder.id)||placeholder.role==='image')continue;
-    const blockId=uid('block'),id=uid('text');s.content.blocks.push({id:blockId,kind:'text',text:rich(placeholder.role==='title'?'Din rubrik':'Ditt innehåll')});
-    s.view.elements.push({id,type:'text',geometry:copy(placeholder.geometry),contentRef:blockId+'#text'});
-    bindings.push({placeholderId:placeholder.id,elementId:id});
-   }
-   s.masterId=master.id;s.layoutId=layoutId;s.placeholderBindings=bindings;
-  });
+ applyLayout(layoutId:string){if(layoutOf(this.state.doc,this.slide)?.id!==layoutId)this.transaction((d,s)=>applySlideLayout(d,s,layoutId));}
+ applyLayouts(ids:string[],layoutId:string){const selected=selectedSlideIds(this.state.doc,ids);if(!selected.length)return;this.transaction(d=>{for(const s of d.slides)if(selected.includes(s.id)&&layoutOf(d,s)?.id!==layoutId)applySlideLayout(d,s,layoutId);});}
+ duplicateSlides(ids:string[]){if(!ids.length)return [];let created:string[]=[];this.transaction(d=>{created=duplicateSlides(d,ids);});this.selectSlide(created[0]);return created;}
+ setSlidesHidden(ids:string[],hidden:boolean){const selected=selectedSlideIds(this.state.doc,ids);if(!selected.some(id=>Boolean(this.state.doc.slides.find((s:D)=>s.id===id).hidden)!==hidden))return;this.transaction(d=>{for(const s of d.slides)if(selected.includes(s.id))s.hidden=hidden;});}
+ reorderSlides(ids:string[],target:string|null){this.applySlideOrder(moveSlidesBefore(this.state.doc.slides.map((s:D)=>s.id),ids,target));}
+ moveSlides(ids:string[],direction:-1|1){this.applySlideOrder(moveSlidesBy(this.state.doc.slides.map((s:D)=>s.id),ids,direction));}
+ private applySlideOrder(order:string[]){if(order.every((id,i)=>id===this.state.doc.slides[i]?.id))return;this.transaction(d=>{const map=new Map<string,D>(d.slides.map((s:D)=>[s.id,s]));d.slides=order.map(id=>map.get(id)!);d.slides.forEach((s:D,i:number)=>s.order=i);});}
+ async reuseSlides(source:D,ids:string[]){
+  if(this.state.readOnly)throw Error('READ_ONLY');const base=this.state.doc,after=this.state.slideId;
+  await validateFull(source);const candidate=reuseSlides(base,source,ids,after);await validateFull(candidate.doc);
+  if(this.state.doc!==base||this.state.slideId!==after)throw Error('Presentationens innehåll ändrades. Försök infoga bilderna igen.');
+  this.transaction(d=>Object.assign(d,candidate.doc));this.selectSlide(candidate.ids[0]);return candidate;
  }
  detachLayout(){this.transaction((d,s)=>{for(const e of s.view.elements){const v=effective(d,s,e);e.geometry=copy(v.geometry);e.style=copy(v.style);}delete s.layoutId;delete s.masterId;delete s.placeholderBindings;delete d.document.defaultMasterId;delete d.document.defaultLayoutId;});}
  resetLayout(){this.transaction((_d,s)=>{for(const b of s.placeholderBindings??[])delete b.overrides;});}

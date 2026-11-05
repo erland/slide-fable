@@ -79,3 +79,15 @@ Teman kan väljas och anpassas med färger och rubrik-/brödtexttypsnitt; lokala
 objektformat bevaras. Varje ändring kan ångras. En designmall är ett nytt PPD-dokument
 med masters, nödvändiga resurser och exempelplatshållare, utan källans bilder och
 anteckningar. Exporten ändrar inte aktuell presentation.
+
+SF-COMMON-05: Bildöversikten visar alla bilder med flerval, intervallmarkering,
+gemensam duplicering, borttagning, dölj/visa och layoutbyte. Bildordning ändras via
+dragning eller tillgängliga flyttknappar. Varje gemensam åtgärd är ångringsbar.
+Återanvändning från validerad HTML/JSON förhandsvisas separat; aktuell presentation
+ersätts inte. Valda bilder infogas efter aktiv bild. ID:n och resursreferenser
+isoleras, valda interna bildlänkar mappas och länkar till ej införda mål tas bort
+med återkoppling. Utseende, innehåll och anteckningar bevaras; importerade bilder
+frikopplas från källans masters/layouter. Hela kandidaten valideras och en ändrad
+målrevision avbryter införandet. PPTX-import ingår inte. Nya 0.4-bilder kan inte
+infogas i en äldre 0.3-presentation; komponenter med bildberoende contentRef avvisas
+uttryckligen tills deras kontextberoende kan bevaras fullständigt.
