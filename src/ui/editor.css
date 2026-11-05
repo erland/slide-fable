@@ -272,3 +272,7 @@
 /* Touch marquee is opt-in; default touch behavior remains canvas panning. */
 .stage-space.touch-marquee-mode{touch-action:none}
 .canvas-controls button[aria-pressed=true]{background:#d9e9e3;color:#183641;border-color:#387f89}
+
+/* Live, non-interactive candidate outlines while drawing a marquee. */
+.stage .selection-marquee-candidate{position:absolute;box-sizing:border-box;border:3px solid #387f89;background:rgba(56,127,137,.13);z-index:999994;pointer-events:none}
+.stage .selection-marquee-count{position:absolute;left:0;bottom:100%;margin-bottom:6px;padding:3px 7px;border-radius:4px;background:#183641;color:white;font:600 12px/18px system-ui,sans-serif;white-space:nowrap;pointer-events:none}
