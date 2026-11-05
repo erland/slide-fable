@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {resolveSelection,movableSelection,marqueeBounds,marqueeSelection,shouldStartMarquee} from '../src/core/selection.ts';
+import {resolveSelection,movableSelection,marqueeBounds,marqueeSelection,marqueeCandidates,shouldStartMarquee} from '../src/core/selection.ts';
 
 test('clicking a new object replaces selection and starts a drag',()=>{
  assert.deepEqual(resolveSelection(['first','second'],'third'),{ids:['third'],beginDrag:true});
@@ -69,4 +69,33 @@ test('touch marquee is opt-in while mouse and pen still work',()=>{
 });
 test('touch marquee uses the same rectangle containment logic as mouse',()=>{
  assert.deepEqual(marqueeSelection([],objects,marqueeBounds({x:0,y:0},{x:150,y:150})),['left','middle','locked']);
+});
+
+test('marquee live candidates match final selection for normal and Shift drags',()=>{
+ const rect=marqueeBounds({x:0,y:0},{x:150,y:150});
+ for(const extend of [false,true]){
+  const initial=['edge'];
+  const preview=marqueeCandidates(initial,objects,rect,extend);
+  assert.deepEqual(preview,marqueeSelection(initial,objects,rect,extend));
+ }
+});
+test('marquee preview does not include partially overlapping or invisible elements',()=>{
+ const rect={x:0,y:0,width:150,height:150};
+ assert.deepEqual(marqueeCandidates([],objects,rect),['left','middle','locked']);
+});
+test('marquee preview respects threshold and retains original for Shift gesture',()=>{
+ const tiny={x:0,y:0,width:3.9,height:60};
+ assert.deepEqual(marqueeCandidates(['edge'],objects,tiny,true),['edge']);
+ assert.deepEqual(marqueeCandidates(['edge'],objects,tiny,false),[]);
+ assert.deepEqual(marqueeCandidates(['edge'],objects,{...tiny,width:100,height:3.9},false),[]);
+});
+test('marquee preview never mutates initial selection or objects',()=>{
+ const original=['edge'];
+ const preview=marqueeCandidates(original,objects,{x:0,y:0,width:150,height:150},true);
+ assert.deepEqual(original,['edge']);
+ assert.deepEqual(objects[0].geometry,{x:10,y:20,width:50,height:40});
+ assert.deepEqual(preview,['edge','left','middle','locked']);
+});
+test('marquee preview rejects invalid threshold',()=>{
+ assert.throws(()=>marqueeCandidates([],objects,{x:0,y:0,width:50,height:50},false,NaN),/INVALID_MARQUEE_THRESHOLD/);
 });
