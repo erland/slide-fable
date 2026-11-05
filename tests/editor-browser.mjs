@@ -296,7 +296,7 @@ try{
  await page.mouse.move(cropBounds.x+cropBounds.width/2,cropBounds.y+cropBounds.height/2);
  await page.mouse.down();await page.mouse.move(cropBounds.x+cropBounds.width/2+15,cropBounds.y+cropBounds.height/2+10);await page.mouse.up();
  const cropUndoBefore=await api("return store.getSnapshot().undo;");
- await page.getByRole('button',{name:'Tillämpa beskärning',exact:true}).click();
+ await page.getByRole('region',{name:'Visuell bildbeskärning',exact:true}).getByRole('button',{name:'Tillämpa beskärning',exact:true}).click();
  const savedCrop=await api("return store.slide.view.elements.find(e=>e.id===arg).crop;",cropId);
  assert.ok(savedCrop.width<.5&&savedCrop.height<1);
  assert.ok(savedCrop.x>=0&&savedCrop.y>=0&&savedCrop.x+savedCrop.width<=1&&savedCrop.y+savedCrop.height<=1);
