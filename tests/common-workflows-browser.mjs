@@ -69,7 +69,7 @@ try{
  await overview.getByRole('button',{name:'Flytta valda sist',exact:true}).click();
  assert.deepEqual((await model()).slides.slice(-2).map(s=>s.id),duplicates);
  await overview.getByRole('button',{name:'Ta bort valda bilder',exact:true}).click();assert.equal((await model()).slides.length,3);
- await overview.locator('[data-slide-id="'+overviewIds[2]+'"]').dragTo(overview.locator('[data-slide-id="'+overviewIds[0]+'"]'));
+ await overview.locator('.overview-card[data-slide-id="'+overviewIds[2]+'"]').dragTo(overview.locator('.overview-card[data-slide-id="'+overviewIds[0]+'"]'));
  assert.deepEqual((await model()).slides.map(s=>s.id),[overviewIds[2],overviewIds[0],overviewIds[1]]);
  await overview.getByRole('button',{name:'Flytta valda senare',exact:true}).click();
  assert.deepEqual((await model()).slides.map(s=>s.id),[overviewIds[0],overviewIds[2],overviewIds[1]]);
