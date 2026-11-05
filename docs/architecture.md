@@ -60,3 +60,12 @@ Statisk HTTPS-hosting med rätt basväg och cache headers. Ingen databas behövs
 Node används vid build; lokal PDF-CLI är separat valfri komponent. Coolify/static
 container kan läggas till senare; ingen publik driftsättning utförs i planeringssteget.
 Inga obligatoriska externa API:er. Diagnostik stannar lokalt med exportbar rapport.
+
+### Enkla animeringar (COMMON-06)
+
+`core/playback.ts` planerar klickgrupper och automatiska starttider ur befintliga
+PPD 0.4 `slide.animations`. Övergångar lagras i `delivery.transition`.
+`PresentationSlide` och fristående HTML delar planering och DOM-uppspelning via
+Web Animations API; HTML bäddar in samma fristående funktioner utan nätberoenden.
+Navigering avbryter pågående effekter och rekonstruerar synlighet. Redigeraren
+visar alltid statiskt innehåll. Ingen schemamigrering eller ny dependency behövs.

@@ -132,3 +132,24 @@ PPTX-filer stöds ännu inte som källa. Komponenter med bildberoende text avvis
 för att undvika att innehåll ändras. En äldre målversion kan inte ta emot nyare
 0.4-objekt. Filer och kombinerade presentationer omfattas av befintliga storleks-
 och resursgränser. Bilder från externa resurser behåller sina tidigare begränsningar.
+
+
+### Enkla övergångar och animeringar
+
+Öppna **Visa → Övergångar och animeringar**. Välj Ingen eller Toning för aktuell
+bild och ställ in övergångstiden. Markera ett objekt och välj Visa, Tona in eller
+Försvinn. Listan visar uppspelningsordningen och låter dig flytta eller ta bort
+effekter. Varje ändring kan ångras. Objektanimeringar kräver PPD 0.4.
+
+Vid klick startar nästa steg. Med föregående räknas från föregående start,
+Efter föregående från föregående slut; fördröjningen läggs till detta. En första
+automatisk effekt startar när bilden öppnas. Använd förhandsvisningsknappen för
+att börja på aktuell bild. Nästa/pil/mellanslag spelar nästa steg innan bildbyte;
+Föregående återställer ett steg. Befintliga fragment delar samma stegnummer.
+Minskad rörelse visar effekternas slutlägen direkt. Esc avslutar i appen.
+
+Samma enkla uppspelning följer med fristående HTML och fungerar utan nätverk.
+HTML behåller hela PPD-modellen. PDF, PowerPoint och bildexport visar statiska
+bilder med alla synliga objekt; animeringar exporteras inte till Office.
+Importerade avancerade effekter bevaras i modellen och visas i listan, men spelas
+inte. Media och en avancerad animationstidslinje ingår inte i denna version.
