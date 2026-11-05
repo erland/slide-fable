@@ -7,7 +7,7 @@ export const themeChoices:ThemeChoice[]=[
  {id:'clear',name:'Klarblå',ink:'#16324f',surface:'#f4f8fc',accent:'#236cb0',headingFont:'Arial',bodyFont:'Arial'}
 ];
 export function applyThemeChoice(doc:D,choice:ThemeChoice){
- for(const color of [choice.ink,choice.surface,choice.accent])if(!/^#[0-9a-f]{6}$/i.test(color))throw Error('INVALID_THEME_COLOR');
+ for(const color of [choice.ink,choice.surface,choice.accent])if(!/^#[0-9a-f]{6}([0-9a-f]{2})?$/i.test(color))throw Error('INVALID_THEME_COLOR');
  for(const font of [choice.headingFont,choice.bodyFont])if(typeof font!=='string'||!font.trim()||font.length>200)throw Error('INVALID_THEME_FONT');
  const oldSurface=doc.theme.colors?.surface;
  doc.theme.colors={...doc.theme.colors,ink:choice.ink,surface:choice.surface,accent:choice.accent};

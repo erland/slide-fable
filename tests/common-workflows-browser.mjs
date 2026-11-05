@@ -41,6 +41,8 @@ try{
  assert.deepEqual(await model(),source,'Saving a design template must not change the presentation');
  await page.evaluate(async template=>{await (await import('/src/core/contract.ts')).validateFull(template);},template);
  await page.setViewportSize({width:768,height:1024});
+ await page.getByRole('button',{name:'Egenskaper',exact:true}).click();
+ assert.equal(await gallery.isVisible(),true);
  await page.screenshot({path:path.join(output,'design-gallery-tablet.png'),fullPage:true});
  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2));
  await page.setViewportSize({width:1440,height:1000});
