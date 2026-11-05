@@ -1,3 +1,4 @@
+import {supportsFormat,validateFormatChange,selectionFormatPatch,type SelectionFormatChange} from './selectionFormatting.ts';
 import {inspectPpd040} from './ppd040Preflight.ts';
 import {toOutline,normalizePpd040Styles} from './ppd040Staging.ts';
 import {validateCore} from './contract.ts';
@@ -44,6 +45,27 @@ export class EditorStore{
  updateElement(id:string,patch:D){this.transaction((d,s)=>{const e=s.view.elements.find((e:D)=>e.id===id);if(!e)return;const adjusted=copy(patch);
  if(d.schemaVersion==='0.4.0'&&adjusted.style)adjusted.style=toOutline(adjusted.style);
  Object.assign(e,adjusted);const binding=s.placeholderBindings?.find((b:D)=>b.elementId===id);if(binding){binding.overrides={...binding.overrides};for(const k of ['geometry','style'])if(adjusted[k])binding.overrides[k]=copy(adjusted[k]);}});}
+ formatSelected(change:SelectionFormatChange){
+  validateFormatChange(change);
+  const ids=new Set(this.state.selected);
+  const targets=this.slide.view.elements.filter((e:D)=>ids.has(e.id)&&supportsFormat(e,change.key));
+  if(!targets.length)return;
+  this.transaction((d,s)=>{
+   for(const e of s.view.elements.filter((item:D)=>ids.has(item.id)&&supportsFormat(item,change.key))){
+    const patch=selectionFormatPatch(d,s,e,change);
+    Object.assign(e,patch);
+    const binding=s.placeholderBindings?.find((b:D)=>b.elementId===e.id);
+    if(binding)binding.overrides={...binding.overrides,style:copy(patch.style)};
+    if(change.key==='color'||change.key==='fontSize'){
+     const text=copy(textOf(s,e));
+     if(typeof text!=='string'){
+      for(const p of text.paragraphs??[])for(const run of p.runs??[])run[change.key==='fontSize'?'size':'color']=change.value;
+      setText(s,e,text);
+     }
+    }
+   }
+  });
+ }
  editText(id:string,value:D|string){this.transaction((_d,s)=>{const e=s.view.elements.find((e:D)=>e.id===id);if(e)setText(s,e,copy(value));});}
  insert(element:D){this.transaction((d,s)=>s.view.elements.push(d.schemaVersion==='0.4.0'&&element.style?{...element,style:toOutline(element.style)}:element));this.select([element.id]);}
  add(type:string,shapeType='rect'){const g=box(180+this.slide.view.elements.length*12,220,600,240),base:D={id:uid(type),type,geometry:g,style:{}};

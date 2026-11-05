@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "authorization": "2026-11-05: user authorized sequential steps with progress updates and up to five repair attempts per failure",
+  "baseline": "4f86077e513ae484fee3a2df5c4f9a0042744484",
+  "release_readiness": "NOT_READY",
+  "steps": [
+    {
+      "id": "COMMON-01",
+      "title": "Gemensam formatering",
+      "status": "implemented_verification_pending"
+    },
+    {
+      "id": "COMMON-02",
+      "title": "Textverktyg och visuell bildbeskärning",
+      "status": "planned"
+    }
+  ],
+  "verification": {
+    "required": "Full Verify Slide Fable candidate CI",
+    "result": "pending"
+  },
+  "repair_attempts": 0
+}

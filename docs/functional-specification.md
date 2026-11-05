@@ -50,3 +50,15 @@ Tunga operationer ska kunna avbrytas utan modellförlust.
 Ingen inloggning, serverdatabas, realtidssamarbete, AI-tjänst, PPTX-import,
 appbutikspublicering eller abonnemang. Ingen automatisk synk mellan enheter;
 användaren flyttar sin HTML-fil. Inga sådana framtidskrav hindrar första delmålet.
+
+## Vanliga presentationsflöden – tillägg 2026-11-05
+
+SF-COMMON-01: Flerobjektsmarkering erbjuder gemensam fyllning, ramfärg,
+ramtjocklek, textfärg och textstorlek. Blandade värden visas uttryckligen.
+Endast olåsta objekt som stöder egenskapen ändras; grupper genomsöks inte.
+Textformat gäller hela objektets text, inklusive explicita run-värden.
+En åtgärd är en atomisk transaktion som kan ångras och göras om.
+
+Godkänt fortsatt arbete: förbättrade textverktyg och visuell bildbeskärning,
+därefter visuella teman/layouter, inklistring/tabeller/diagram, bildöversikt,
+animering/media och en separat avgränsad PPTX-importetapp.

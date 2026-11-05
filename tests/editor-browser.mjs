@@ -231,6 +231,25 @@ try{
  await page.locator('#slide-properties .multi-selection-properties').waitFor({state:'detached'});
  pass('UX-003:contextual-multi-selection');
 
+ // Common formatting must update multiple objects through the visible inspector.
+ const multiFormatBefore=await model();
+ const multiIds=await api("const a=store.add('shape'),b=store.add('shape'),locked=store.add('shape');store.updateElement(locked,{locked:true});store.updateElement(b,{style:{...store.slide.view.elements.find(e=>e.id===b).style,fill:{color:'#ffcc00'}}});store.select([a,b,locked]);return {a,b,locked};");
+ const multiPanel=page.locator('.multi-selection-formatting');
+ await multiPanel.waitFor();
+ assert.match(await multiPanel.innerText(),/Blandade värden/);
+ await multiPanel.getByLabel('Gemensam fyllning',{exact:true}).fill('#112233');
+ let multiDoc=await model(),multiElements=multiDoc.slides[0].view.elements;
+ for(const id of [multiIds.a,multiIds.b])assert.equal(multiElements.find(e=>e.id===id).style.fill.color,'#112233');
+ assert.notEqual(multiElements.find(e=>e.id===multiIds.locked).style.fill.color,'#112233');
+ await multiPanel.getByLabel('Gemensam textstorlek',{exact:true}).fill('48');
+ await multiPanel.getByLabel('Gemensam textstorlek',{exact:true}).press('Enter');
+ assert.equal((await model()).slides[0].view.elements.find(e=>e.id===multiIds.a).style.fontSize,48);
+ await api("store.undo();return true;");
+ assert.notEqual((await model()).slides[0].view.elements.find(e=>e.id===multiIds.a).style.fontSize,48);
+ await page.evaluate(async doc=>(await import('/src/core/editor.ts')).editorStore.load(doc),multiFormatBefore);
+ pass('SF-COMMON-01:multi-format-inspector-mixed-locked-and-undo');
+
+
 
 
  await page.getByRole('button',{name:'Lägg till bild',exact:true}).click();await page.getByRole('button',{name:'Lägg till bild',exact:true}).click();assert.equal((await model()).slides.length,3);pass('DEV005:create-three-slides');
