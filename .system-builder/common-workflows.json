@@ -17,7 +17,7 @@
   ],
   "verification": {
     "required": "Full Verify Slide Fable candidate CI",
-    "result": "pending"
+    "result": "repairing"
   },
-  "repair_attempts": 0
+  "repair_attempts": 1
 }
