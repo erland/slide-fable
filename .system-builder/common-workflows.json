@@ -37,20 +37,26 @@
     {
       "id": "COMMON-05",
       "title": "Bildöversikt och återanvändning mellan presentationer",
-      "status": "implemented_verification_pending"
+      "status": "completed",
+      "verification": {
+        "sha": "c4cbe2cf629f1e1454823387ff98cdbbf9301811",
+        "run": 42083688800,
+        "result": "PASS"
+      }
     }
   ],
   "verification": {
-    "result": "pending",
-    "required": "Full candidate CI for COMMON-05"
+    "sha": "c4cbe2cf629f1e1454823387ff98cdbbf9301811",
+    "run": 42083688800,
+    "result": "PASS"
   },
   "repair_attempts": 3,
   "repair_attempts_step_1": 2,
   "repair_attempts_step_2": 3,
   "next_action": {
-    "id": "COMMON-05",
-    "title": "Verifiera bildöversikt och återanvändning",
-    "status": "in_progress"
+    "id": "COMMON-04",
+    "title": "Inklistring, tabeller och diagram",
+    "status": "pending"
   },
   "manual_acceptance": [
     "Fysisk iPad/Safari",
