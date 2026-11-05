@@ -93,3 +93,12 @@ test('reuse fits different canvas sizes proportionally within a clipped frame',a
  assert.ok(frame);assert.equal(frame.geometry.height,900);assert.equal(frame.geometry.width,506.25);assert.equal(frame.geometry.y,0);
  assert.ok(frame.children.every(id=>slide.view.elements.some(e=>e.id===id)));validateCore(target.getSnapshot().doc);
 });
+
+test('deleting slides cleans navigation in all scenes without adding empty optional fields',()=>{
+ const store=new EditorStore();store.addSlide();const ids=store.getSnapshot().doc.slides.map(s=>s.id);
+ store.transaction(d=>{d.masters[0].elements=[{id:'master-link',type:'shape',geometry:{x:0,y:0,width:30,height:30},actions:[{event:'click',kind:'navigate-slide',targetId:ids[0]}]}];});
+ const before=copy(store.getSnapshot().doc);store.removeSlides([ids[0]]);
+ assert.equal(store.getSnapshot().doc.masters[0].elements[0].actions.length,0);
+ assert.ok(store.slide.view.elements.every(e=>!Object.hasOwn(e,'actions')));validateCore(store.getSnapshot().doc);
+ store.undo();assert.deepEqual(store.getSnapshot().doc,before);
+});

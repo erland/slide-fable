@@ -44,7 +44,7 @@
     "result": "pending",
     "required": "Full candidate CI for COMMON-05"
   },
-  "repair_attempts": 2,
+  "repair_attempts": 3,
   "repair_attempts_step_1": 2,
   "repair_attempts_step_2": 3,
   "next_action": {
@@ -57,5 +57,5 @@
     "PowerPoint Mac/Windows"
   ],
   "repair_attempts_step_3": 1,
-  "repair_attempts_step_5": 2
+  "repair_attempts_step_5": 3
 }

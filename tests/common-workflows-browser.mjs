@@ -111,7 +111,7 @@ try{
  await page.locator('.editor-header').getByRole('button',{name:'Ångra',exact:true}).first().click();assert.deepEqual(await model(),beforeReuse);
  await page.locator('.editor-header').getByRole('button',{name:'Gör om',exact:true}).first().click();assert.deepEqual(await model(),reused);
  await page.evaluate(async doc=>{await (await import('/src/core/contract.ts')).validateFull(doc);(await import('/src/core/editor.ts')).editorStore.load(JSON.parse(JSON.stringify(doc)));},reused);
- assert.deepEqual(await model(),reused);
+ assert.deepEqual(await model(),JSON.parse(JSON.stringify(reused)));
  pass('COMMON-05:file-reuse-preview-resources-navigation-undo-and-roundtrip');
  assert.deepEqual(errors,[]);
 }finally{
