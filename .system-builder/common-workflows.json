@@ -47,20 +47,26 @@
     {
       "id": "COMMON-06",
       "title": "Enkla bildövergångar och objektanimeringar",
-      "status": "implemented_verification_pending"
+      "status": "completed",
+      "verification": {
+        "sha": "3bcebc3b10acdde12f70546c92a5c264c08cc1ef",
+        "run": 42090095080,
+        "result": "PASS"
+      }
     }
   ],
   "verification": {
-    "result": "pending",
-    "required": "Full candidate CI for COMMON-06"
+    "sha": "3bcebc3b10acdde12f70546c92a5c264c08cc1ef",
+    "run": 42090095080,
+    "result": "PASS"
   },
   "repair_attempts": 3,
   "repair_attempts_step_1": 2,
   "repair_attempts_step_2": 3,
   "next_action": {
-    "id": "COMMON-06",
-    "title": "Verifiera första versionen av övergångar och animeringar",
-    "status": "in_progress"
+    "id": "COMMON-04",
+    "title": "Inklistring, tabeller och diagram",
+    "status": "pending"
   },
   "manual_acceptance": [
     "Fysisk iPad/Safari",
