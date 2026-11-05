@@ -128,6 +128,7 @@ try{
  await animationPanel.getByLabel('Fördröjning 1',{exact:true}).press('Tab');
  const animated=await model();assert.equal(animated.slides[0].animations.length,3);
  await page.screenshot({path:path.join(output,'animation-controls-desktop.png'),fullPage:true});
+ await page.setViewportSize({width:768,height:1024});await page.screenshot({path:path.join(output,'animation-controls-tablet.png'),fullPage:true});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2));await page.setViewportSize({width:1440,height:1000});
  await animationPanel.getByRole('button',{name:'Förhandsvisa från aktuell bild',exact:true}).click();
  const playerStage=page.locator('.presentation-fit'),firstObject=playerStage.locator('[data-element-id="'+animationIds.a+'"]'),secondObject=playerStage.locator('[data-element-id="'+animationIds.b+'"]');
  assert.equal(await firstObject.evaluate(n=>getComputedStyle(n).visibility),'hidden');
