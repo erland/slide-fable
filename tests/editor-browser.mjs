@@ -275,15 +275,12 @@ try{
  pass('SF-COMMON-02:text-font-paragraph-controls-render-and-roundtrip');
 
  // Crop editing is a local preview; commit is a single undoable document update.
- const cropId=await page.evaluate(async()=>{
-  const {editorStore:store}=await import('/src/core/editor.ts');
-  const {bytesHash}=await import('/src/core/contract.ts');
-  const canvas=document.createElement('canvas');canvas.width=800;canvas.height=400;const context=canvas.getContext('2d');context.fillStyle='#ff0000';context.fillRect(0,0,400,400);context.fillStyle='#0000ff';context.fillRect(400,0,400,400);
-  const uri=canvas.toDataURL(),bytes=new Uint8Array(await (await fetch(uri)).arrayBuffer()),hash=await bytesHash(bytes);
-  store.transaction(d=>{d.assets['common-crop-image']={storage:'embedded',mimeType:'image/png',uri,sha256:hash};});
-  store.insert({id:'common-crop-element',type:'image',assetRef:'common-crop-image',geometry:{x:100,y:200,width:400,height:400},fit:'cover'});
-  return 'common-crop-element';
+ const cropImageUri=await page.evaluate(()=>{
+  const canvas=document.createElement('canvas');canvas.width=800;canvas.height=400;const context=canvas.getContext('2d');context.fillStyle='#ff0000';context.fillRect(0,0,400,400);context.fillStyle='#0000ff';context.fillRect(400,0,400,400);return canvas.toDataURL();
  });
+ await page.locator('input[type="file"][accept="image/png,image/jpeg,image/webp,image/svg+xml"]').setInputFiles({name:'common-crop.png',mimeType:'image/png',buffer:Buffer.from(cropImageUri.split(',')[1],'base64')});
+ await page.locator('.editor-canvas-pane .stage .type-image').last().waitFor({state:'visible'});
+ const cropId=await api("const id=store.getSnapshot().selected[0];store.updateElement(id,{geometry:{x:100,y:200,width:400,height:400}});return id;");
  await page.getByRole('button',{name:'Beskär bild visuellt',exact:true}).click();
  const cropZoom=page.getByLabel('Zooma bildbeskärning',{exact:true});
  await cropZoom.focus();await cropZoom.press('Home');for(let i=0;i<20;i++)await cropZoom.press('ArrowRight');

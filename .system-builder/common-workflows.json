@@ -25,6 +25,6 @@
     "result": "pending_step_2",
     "environment_repair": "Bound browser download and use existing CHROMIUM_EXECUTABLE support as fallback; all gates preserved"
   },
-  "repair_attempts": 1,
+  "repair_attempts": 2,
   "repair_attempts_step_1": 2
 }
