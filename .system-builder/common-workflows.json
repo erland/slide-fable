@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "authorization": "2026-11-05: user authorized sequential steps with progress updates and up to five repair attempts per failure",
+  "authorization": "2026-11-05: user authorized priorities 3 then 5, progress updates, and up to five repair attempts per problem",
   "baseline": "4f86077e513ae484fee3a2df5c4f9a0042744484",
   "release_readiness": "NOT_READY",
   "steps": [
@@ -23,25 +23,45 @@
         "run": 42071784207,
         "result": "PASS"
       }
+    },
+    {
+      "id": "COMMON-03",
+      "title": "Visuellt layout- och temagalleri",
+      "status": "completed",
+      "verification": {
+        "sha": "a212193a967e1e0025940544432c344ce6326085",
+        "run": 42079576503,
+        "result": "PASS"
+      }
+    },
+    {
+      "id": "COMMON-05",
+      "title": "Bildöversikt och återanvändning mellan presentationer",
+      "status": "completed",
+      "verification": {
+        "sha": "c4cbe2cf629f1e1454823387ff98cdbbf9301811",
+        "run": 42083688800,
+        "result": "PASS"
+      }
     }
   ],
   "verification": {
-    "required": "Full Verify Slide Fable candidate CI",
-    "result": "PASS",
-    "implementation_sha": "e15946519275d7a84ba96286ec45d0df9d713c4a",
-    "run": 42071784207,
-    "unit_tests": 147
+    "sha": "c4cbe2cf629f1e1454823387ff98cdbbf9301811",
+    "run": 42083688800,
+    "result": "PASS"
   },
   "repair_attempts": 3,
   "repair_attempts_step_1": 2,
   "repair_attempts_step_2": 3,
   "next_action": {
-    "id": "COMMON-03",
-    "title": "Visuellt layout- och temagalleri",
-    "status": "planned"
+    "id": "COMMON-04",
+    "title": "Inklistring, tabeller och diagram",
+    "status": "pending"
   },
   "manual_acceptance": [
     "Fysisk iPad/Safari",
     "PowerPoint Mac/Windows"
-  ]
+  ],
+  "repair_attempts_step_3": 1,
+  "repair_attempts_step_5": 3
 }
