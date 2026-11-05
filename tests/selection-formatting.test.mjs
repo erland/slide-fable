@@ -62,3 +62,13 @@ test('invalid values and read-only changes are atomic',()=>{
  store.load(before.doc,true);store.select([id]);
  assert.throws(()=>store.formatSelected({key:'fill',value:'#123456'}),/READ_ONLY/);
 });
+
+test('formatting shared content does not alter a locked instance',()=>{
+ const store=new EditorStore(),[a,b]=store.slide.view.elements;
+ store.updateElement(b.id,{contentRef:a.contentRef,locked:true});
+ const before=structuredClone(textOf(store.slide,b));
+ store.select([a.id,b.id]);store.formatSelected({key:'color',value:'#aabbcc'});
+ const after=store.slide.view.elements;
+ assert.deepEqual(textOf(store.slide,after.find(e=>e.id===b.id)),before);
+ assert.notEqual(after.find(e=>e.id===a.id).contentRef,after.find(e=>e.id===b.id).contentRef);
+});

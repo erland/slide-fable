@@ -59,6 +59,14 @@ export class EditorStore{
     if(change.key==='color'||change.key==='fontSize'){
      const text=copy(textOf(s,e));
      if(typeof text!=='string'){
+      // Shared semantic content must not recolor locked or unselected instances.
+      if(e.contentRef&&s.view.elements.some((other:D)=>other.id!==e.id&&other.contentRef===e.contentRef&&(!ids.has(other.id)||!supportsFormat(other,change.key)))){
+       const blockId=uid('block');
+       for(const p of text.paragraphs??[])p.id=uid('p');
+       s.content.blocks.push({id:blockId,kind:'text',text});
+       e.contentRef=blockId+'#text';
+       if(binding?.contentRef)binding.contentRef=e.contentRef;
+      }
       for(const p of text.paragraphs??[])for(const run of p.runs??[])run[change.key==='fontSize'?'size':'color']=change.value;
       setText(s,e,text);
      }

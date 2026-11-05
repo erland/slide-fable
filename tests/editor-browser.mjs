@@ -246,6 +246,9 @@ try{
  assert.equal((await model()).slides[0].view.elements.find(e=>e.id===multiIds.a).style.fontSize,48);
  await api("store.undo();return true;");
  assert.notEqual((await model()).slides[0].view.elements.find(e=>e.id===multiIds.a).style.fontSize,48);
+ const outlineLine=await api("const id=store.add('line');store.select([id]);store.formatSelected({key:'outlineColor',value:'#aabbcc'});store.formatSelected({key:'outlineWidth',value:7});return id;");
+ const actualOutline=await page.locator('.stage [data-element-id="'+outlineLine+'"] svg line').evaluate(el=>({color:el.getAttribute('stroke'),width:el.getAttribute('stroke-width')}));
+ assert.deepEqual(actualOutline,{color:'#aabbcc',width:'7'});
  await page.evaluate(async doc=>(await import('/src/core/editor.ts')).editorStore.load(doc),multiFormatBefore);
  pass('SF-COMMON-01:multi-format-inspector-mixed-locked-and-undo');
 
