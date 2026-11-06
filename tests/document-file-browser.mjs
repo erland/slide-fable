@@ -1,0 +1,50 @@
+import {chromium} from 'playwright';
+import {spawn} from 'node:child_process';
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+const port=5198;
+const server=spawn('node',['node_modules/vite/bin/vite.js','--host','127.0.0.1','--port',String(port),'--strictPort'],{stdio:['ignore','pipe','pipe']});
+await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(Error('Vite start timeout')),20000);server.stdout.on('data',x=>{if(String(x).includes(String(port))){clearTimeout(timer);resolve();}});server.on('exit',code=>{clearTimeout(timer);reject(Error('Vite exit '+code));});});
+const browser=await chromium.launch({headless:true,...(process.env.CHROMIUM_EXECUTABLE?{executablePath:process.env.CHROMIUM_EXECUTABLE,args:['--no-sandbox','--disable-dev-shm-usage']}:{})});
+try{
+ for(const view of [{name:'desktop',width:1440,height:900},{name:'ipad-portrait',width:820,height:1180},{name:'mobile',width:390,height:844}]){
+  const context=await browser.newContext({viewport:{width:view.width,height:view.height},acceptDownloads:true});
+  const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
+  await page.goto(`http://127.0.0.1:${port}/`);
+  await page.locator('.editor-menu-disclosure > summary').waitFor();
+  const snapshot=()=>page.evaluate(async()=>structuredClone((await import('/src/core/editor.ts')).editorStore.getSnapshot().doc));
+  const original=await snapshot();
+  await page.locator('.editor-menu-disclosure>summary').click();
+  const menu=page.getByRole('navigation',{name:'Arkiv och redigering'});
+  for(const name of ['Ny presentation','Öppna presentation…','Spara','Spara som…','Exportera…'])assert.equal(await menu.getByRole('button',{name,exact:true}).count(),1,view.name+': '+name);
+  await menu.getByRole('button',{name:'Spara som…'}).click();
+  const dialog=page.getByRole('dialog');
+  await dialog.getByRole('heading',{name:'Spara som'}).waitFor();
+  await dialog.getByRole('textbox',{name:'Namn på kopian'}).fill('Kopia för arbetsgruppen');
+  const pending=page.waitForEvent('download');
+  await dialog.getByRole('button',{name:'Hämta separat kopia'}).click();
+  const download=await pending;
+  assert.equal(download.suggestedFilename(),'Kopia för arbetsgruppen.html');
+  const html=await readFile(await download.path(),'utf8');
+  const match=html.match(/<script id="ppd-data" type="application\/json">([^<]+)<\/script>/);
+  assert.ok(match,'self-contained HTML must embed a readable PPD document');
+  const saved=JSON.parse(match[1]);
+  assert.equal(saved.document.title,'Kopia för arbetsgruppen');
+  assert.notEqual(saved.document.id,original.document.id);
+  assert.deepEqual(saved.slides.map(s=>s.id),original.slides.map(s=>s.id));
+  assert.deepEqual(await snapshot(),original,'Save as must not change active working document');
+  await page.locator('.editor-menu-disclosure>summary').click();
+  const pendingSave=page.waitForEvent('download');
+  await menu.getByRole('button',{name:'Spara',exact:true}).click();
+  const savedCurrent=await pendingSave;
+  assert.equal(savedCurrent.suggestedFilename(),original.document.title+'.html');
+  assert.deepEqual(await snapshot(),original,'Save must not edit content');
+  await page.locator('.editor-menu-disclosure>summary').click();
+  await menu.getByRole('button',{name:'Exportera…'}).click();
+  await dialog.getByRole('heading',{name:'Exportera presentation'}).waitFor();
+  await dialog.getByRole('button',{name:'Stäng dialog'}).click();
+  assert.deepEqual(errors,[],view.name+' JS errors');
+  console.log('PASS document-file '+view.name);
+  await context.close();
+ }
+}finally{await browser.close();server.kill('SIGTERM');}

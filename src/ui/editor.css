@@ -416,3 +416,60 @@
 .layout-preview{width:100%;height:auto;aspect-ratio:16/9;border:1px solid var(--line);border-radius:3px;background:#fff}
 .design-layout-choice>span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 @media(max-width:520px){.editor-app .design-layout-choice{width:76px;min-width:76px}}
+
+/* Step 13: clear per-slide versus presentation-wide background actions. */
+.design-background-tools{gap:9px}
+.design-background-scope,.design-background-picker{display:flex;flex-direction:column;gap:2px;font-size:11px;color:var(--muted)}
+.design-background-scope select{max-width:125px;min-width:115px;font-size:12px}
+.design-background-swatches{display:flex;gap:4px;align-items:center}
+.editor-app .design-background-swatches button{width:26px;height:26px;min-width:26px;border-radius:5px;border:1px solid #86949a;padding:0;cursor:pointer}
+.design-background-swatches button:focus-visible{outline:3px solid #387f89;outline-offset:2px}
+.design-background-swatches button:disabled{opacity:.5;cursor:not-allowed}
+.design-background-picker input[type=color]{width:36px;height:31px;min-height:31px;padding:2px;cursor:pointer}
+@media(max-width:900px){.design-background-tools{gap:5px}.editor-app .design-background-swatches button{width:24px;height:24px;min-width:24px}}
+
+/* SF-PPT-14: keep Start at a stable height while selection changes, so double-click editing cannot shift the canvas between clicks. */
+.ribbon-actions.ribbon-start-actions{min-height:72px;max-height:72px;overflow-x:auto;overflow-y:hidden}
+.ribbon-start-selection{display:flex;align-items:center;gap:8px;min-width:max-content;border-left:1px solid var(--line);padding-left:10px}
+.ribbon-start-selection .ribbon-formatting{min-height:62px;border:0;padding:0;overflow:visible}
+.ribbon-selection-label{font-size:11px;font-weight:650;color:var(--muted);white-space:nowrap;flex-shrink:0}
+.ribbon-open-format{flex-shrink:0;min-height:34px;white-space:nowrap}
+/* File commands explain the distinction between the local working copy and downloads. */
+.editor-header .file-menu-note{font-size:11px;line-height:1.4;white-space:normal;max-width:225px;color:var(--muted);margin:6px 4px 2px;border-top:1px solid var(--line);padding-top:8px}
+/* Step 18: accessible contextual table/chart editing without leaving the ribbon. */
+.ribbon-data-tools{display:flex;align-items:center;gap:8px;position:relative;white-space:nowrap}
+.ribbon-data-tools label{display:flex;align-items:center;gap:5px}
+.ribbon-data-disclosure{position:relative}
+.ribbon-data-disclosure>summary{cursor:pointer;border:1px solid var(--line);border-radius:6px;padding:7px 10px;list-style:none;background:var(--surface,#fff)}
+.ribbon-data-disclosure>summary::after{content:' ▾'}
+.ribbon-data-popover{position:absolute;z-index:60;top:calc(100% + 6px);left:0;width:min(620px,calc(100vw - 28px));max-height:min(70vh,600px);overflow:auto;padding:16px;border:1px solid var(--line);border-radius:10px;background:var(--surface,#fff);box-shadow:0 12px 30px #0003;white-space:normal}
+.ribbon-data-popover fieldset{border:0;margin:0;padding:0;min-width:0}
+.ribbon-data-popover .table-grid,.ribbon-data-popover .chart-editor{max-width:100%;overflow-x:auto}
+@media(max-width:900px){.ribbon-data-popover{left:auto;right:0}}
+
+/* Step 19: dedicated animation and slideshow ribbons. Stable height avoids moving the canvas. */
+.ribbon-motion{display:flex;align-items:center;gap:9px;box-sizing:border-box;min-height:72px;max-height:72px;overflow-x:auto;overflow-y:hidden;padding:6px 12px;white-space:nowrap;scrollbar-width:thin}
+.ribbon-motion-title{font-weight:700;flex-shrink:0;font-size:12px}
+.ribbon-motion-hint{font-size:12px;color:var(--muted,#586b70);flex-shrink:0}
+.ribbon-motion label{font-size:12px;display:flex;align-items:center;gap:5px;flex-shrink:0}
+.ribbon-motion select,.ribbon-motion input{max-width:125px;min-height:34px;font-size:12px}
+.ribbon-motion input{width:85px}
+.ribbon-motion button{min-height:34px;flex-shrink:0;font-size:12px}
+@media(max-width:900px){.ribbon-motion{min-height:72px;max-height:72px}}
+
+/* Step 20: visually edit shared layouts in the existing Design inspector. */
+.master-layout-editor{display:grid;gap:10px;padding:12px 0;border-top:1px solid var(--line)}
+.master-layout-editor h3{margin:0}.master-layout-editor p{font-size:12px;line-height:1.45;margin:0;color:var(--muted)}
+.master-layout-editor-controls,.master-layout-colors,.master-layout-geometry{display:flex;gap:8px;flex-wrap:wrap;align-items:end}
+.master-layout-editor label{display:flex;flex-direction:column;gap:4px;font-size:12px;min-width:0}
+.master-layout-editor select,.master-layout-editor input[type=text]{max-width:100%}
+.master-layout-colors label{flex:1}
+.master-layout-colors input[type=color]{width:58px;height:38px;padding:2px}
+.master-layout-preview{width:100%;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface);touch-action:none}
+.master-layout-preview svg{display:block;width:100%;height:auto;touch-action:none}
+.master-layout-placeholder{cursor:grab;touch-action:none}.master-layout-placeholder:active{cursor:grabbing}
+.master-layout-geometry{border:1px solid var(--line);border-radius:8px;padding:9px}
+.master-layout-geometry label{flex:1 1 65px}.master-layout-geometry input{width:100%;min-width:0}
+.master-layout-list{display:flex;gap:5px;flex-wrap:wrap}
+.master-layout-list button[aria-pressed=true]{outline:2px solid #397f88}
+.master-layout-small-preview{max-width:200px}

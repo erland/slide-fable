@@ -108,3 +108,28 @@ test('spacing is bypassed by Alt or disabling snapping, and does not affect resi
  const resized=snapResize(moving,'e',[left,right],22,0);
  assert.equal(resized.guides.spacingX,undefined);
 });
+
+
+test('slide center and slide margins snap with visible guides even without peers',()=>{
+ const canvas={width:1280,height:720};
+ const centered=snapTranslation({x:430,y:210,width:200,height:100},[],108,99,true,false,7,10,canvas);
+ assert.equal(centered.dx,110);assert.equal(centered.dy,100);
+ assert.equal(centered.guides.x,640);assert.equal(centered.guides.y,360);
+ const margins=snapTranslation({x:30,y:20,width:200,height:100},[],-27,-18,true,false,7,10,canvas);
+ assert.equal(margins.dx,-30);assert.equal(margins.dy,-20);
+ assert.equal(margins.guides.x,0);assert.equal(margins.guides.y,0);
+});
+test('slide edge snapping works when resizing while fixed opposite edge stays put',()=>{
+ const canvas={width:1280,height:720};
+ const r=snapResize({x:800,y:350,width:300,height:250},'se',[],177,118,true,false,7,10,canvas);
+ assert.equal(r.rect.x,800);assert.equal(r.rect.y,350);
+ assert.equal(r.rect.width,480);assert.equal(r.rect.height,370);
+ assert.deepEqual(r.guides,{x:1280,y:720});
+});
+test('Alt bypasses slide guides and slide size is validated',()=>{
+ const canvas={width:1280,height:720};
+ const free=snapTranslation({x:30,y:20,width:200,height:100},[],-27,-18,true,true,7,10,canvas);
+ assert.deepEqual(free,{dx:-27,dy:-18,guides:{}});
+ assert.throws(()=>snapTranslation(moving,[],0,0,true,false,7,10,{width:0,height:720}),/INVALID_ALIGNMENT_GEOMETRY/);
+ assert.throws(()=>snapResize(moving,'e',[],0,0,true,false,7,10,{width:1280,height:NaN}),/INVALID_ALIGNMENT_GEOMETRY/);
+});

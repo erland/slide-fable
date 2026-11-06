@@ -14,7 +14,7 @@ try{
  await page.getByRole('button',{name:'Lägg till bild',exact:true}).waitFor();
  const read=()=>page.evaluate(async()=>{const store=(await import('/src/core/editor.ts')).editorStore;const drafts=await (await import('/src/core/persistence.ts')).listDrafts();const doc=store.getSnapshot().doc;return {id:doc.document.id,revision:doc.document.revision,dirty:store.getSnapshot().dirty,draft:drafts.find(d=>d.id===doc.document.id)};});
  const edit=()=>page.evaluate(async()=>{const store=(await import('/src/core/editor.ts')).editorStore;store.updateDocument({title:'Livscykel '+Date.now()});return store.getSnapshot().doc.document.revision;});
- const exportHtml=async()=>{await page.locator('.editor-header .editor-menu-disclosure > summary').click();const download=page.waitForEvent('download');await page.getByRole('button',{name:'Spara HTML'}).click();const saved=await download;await saved.path();return saved.suggestedFilename();};
+ const exportHtml=async()=>{await page.locator('.editor-header .editor-menu-disclosure > summary').click();const download=page.waitForEvent('download');await page.getByRole('button',{name:'Spara',exact:true}).click();const saved=await download;await saved.path();return saved.suggestedFilename();};
  const delay=ms=>page.waitForTimeout(ms);
  // Control: ordinary changes are persisted after debounce.
  const rev1=await edit();await delay(1000);let state=await read();assert.equal(state.draft?.model.document.revision,rev1,'Baseline autosave must persist revision');
