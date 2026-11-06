@@ -124,19 +124,24 @@ try{
  assert.equal(await pane.isVisible(),true);
  await page.setViewportSize({width:1440,height:1000});
  pass('SF-UX-01:tablet-panel-navigation');
- await page.setViewportSize({width:768,height:1024});
- const portraitLayout=await page.evaluate(()=>{const canvas=document.querySelector('.editor-canvas-pane')?.getBoundingClientRect(),slides=document.querySelector('#slide-filmstrip')?.getBoundingClientRect();return {canvasVisible:!!canvas&&canvas.height>0,slidesVisible:!!slides&&slides.height>0,below:!!canvas&&!!slides&&slides.top>=canvas.bottom-2};});
- assert.ok(portraitLayout.canvasVisible&&portraitLayout.slidesVisible&&portraitLayout.below,'Portrait must show canvas above slide strip');
- await page.setViewportSize({width:1180,height:820});
- const landscapeLayout=await page.evaluate(()=>{const canvas=document.querySelector('.editor-canvas-pane')?.getBoundingClientRect(),slides=document.querySelector('#slide-filmstrip')?.getBoundingClientRect();return {beside:!!canvas&&!!slides&&slides.right<=canvas.left+2};});
- assert.ok(landscapeLayout.beside,'Landscape must show slide strip beside canvas');
- await page.setViewportSize({width:1440,height:1000});
- pass('SF-UX-07:portrait-bottom-strip-landscape-sidebar');
- await page.setViewportSize({width:768,height:1024});
- const portraitReach=await page.evaluate(()=>{const strip=document.querySelector('#slide-filmstrip')?.getBoundingClientRect();return {bottom:strip?.bottom??Infinity,height:window.innerHeight};});
- assert.ok(portraitReach.bottom<=portraitReach.height+2,'Portrait slide picker must stay within viewport');
- await page.setViewportSize({width:1440,height:1000});
- assert.equal(await page.locator('.editor-menu-disclosure').evaluate(el=>el.hasAttribute('open')),false,'Secondary command menu is collapsed by default');
+  await page.setViewportSize({width:768,height:1024});
+  const portraitNav=page.getByRole('navigation',{name:'Arbetsytans paneler'});
+  await portraitNav.getByRole('button',{name:'Arbetsyta',exact:true}).click();
+  assert.equal(await pane.isVisible(),true,'Portrait canvas tab must show canvas');
+  assert.equal(await page.locator('#slide-filmstrip').isVisible(),false,'Portrait slide strip must not stack below canvas');
+  await portraitNav.getByRole('button',{name:'Bilder',exact:true}).click();
+  assert.equal(await page.locator('#slide-filmstrip').isVisible(),true,'Portrait slides tab must show slide picker');
+  await page.setViewportSize({width:1180,height:820});
+  const landscapeLayout=await page.evaluate(()=>{const canvas=document.querySelector('.editor-canvas-pane')?.getBoundingClientRect(),slides=document.querySelector('#slide-filmstrip')?.getBoundingClientRect();return {beside:!!canvas&&!!slides&&slides.right<=canvas.left+2};});
+  assert.ok(landscapeLayout.beside,'Landscape must show slide strip beside canvas');
+  await page.setViewportSize({width:1440,height:1000});
+  pass('SF-UX-07:portrait-panel-tabs-landscape-sidebar');
+  await page.setViewportSize({width:768,height:1024});
+  await portraitNav.getByRole('button',{name:'Bilder',exact:true}).click();
+  const portraitReach=await page.evaluate(()=>{const strip=document.querySelector('#slide-filmstrip')?.getBoundingClientRect();return {bottom:strip?.bottom??Infinity,height:window.innerHeight};});
+  assert.ok(portraitReach.bottom<=portraitReach.height+2,'Portrait slide picker must stay within viewport');
+  await page.setViewportSize({width:1440,height:1000});
+  assert.equal(await page.locator('.editor-menu-disclosure').evaluate(el=>el.hasAttribute('open')),false,'Secondary command menu is collapsed by default');
  await page.getByRole('tab',{name:'Visa'}).click();
  assert.equal(await page.getByRole('tabpanel',{name:'Visa'}).getByLabel('Zoom').isVisible(),true,'Zoom is available within Visa');
  await page.getByRole('tab',{name:'Infoga'}).click();
@@ -160,14 +165,15 @@ try{
  pass('SF-UX-06:mobile-panel-navigation-and-no-overflow');
 
  const toolbar=page.locator('.insert-tools');
- assert.equal(await toolbar.getByRole('button',{name:'Text',exact:true}).isVisible(),true);
+ assert.equal(await toolbar.getByRole('button',{name:'Textfält',exact:true}).isVisible(),true);
  assert.equal(await toolbar.locator('.shape-picker > summary').isVisible(),true);
- assert.equal(await toolbar.getByRole('button',{name:'Bildfil',exact:true}).isVisible(),true);
- assert.equal(await toolbar.getByRole('button',{name:'Diagram',exact:true}).isVisible(),false);
- await toolbar.locator('summary',{hasText:'Fler objekt'}).click();
+ assert.equal(await toolbar.getByRole('button',{name:'Bilder',exact:true}).isVisible(),true);
  assert.equal(await toolbar.getByRole('button',{name:'Diagram',exact:true}).isVisible(),true);
+ assert.equal(await toolbar.getByRole('button',{name:'Tabell',exact:true}).isVisible(),true);
  await toolbar.locator('summary',{hasText:'Fler objekt'}).click();
- pass('SF-UX-03:compact-insert-toolbar');
+ assert.equal(await toolbar.getByRole('button',{name:'Formel',exact:true}).isVisible(),true);
+ await toolbar.locator('summary',{hasText:'Fler objekt'}).click();
+ pass('SF-UX-03:grouped-insert-toolbar');
  const ribbon=page.getByRole('tablist',{name:'Menyflikar'});
  assert.equal(await ribbon.getByRole('tab',{name:'Infoga'}).getAttribute('aria-selected'),'true');
  await ribbon.getByRole('tab',{name:'Start'}).click();
@@ -198,7 +204,7 @@ try{
  pass('SF-UX-20:single-panel-command-location');
 
  await ribbon.getByRole('tab',{name:'Infoga'}).click();
- assert.equal(await toolbar.getByRole('button',{name:'Text',exact:true}).isVisible(),true);
+ assert.equal(await toolbar.getByRole('button',{name:'Textfält',exact:true}).isVisible(),true);
  pass('SF-UX-08:ribbon-tabs');
  const toggleRibbon=page.getByRole('button',{name:'Dölj verktyg'});
  await toggleRibbon.click();
@@ -232,7 +238,7 @@ try{
  assert.equal(await ribbon.getByRole('tab',{name:'Formatera'}).count(),1,'Selecting an object must show contextual tab');
  await ribbon.getByRole('tab',{name:'Formatera'}).click();
  const contextPanel=page.getByRole('tabpanel',{name:'Formatera'});
- assert.equal(await contextPanel.getByRole('button',{name:'Visa formatering'}).count(),1);
+ assert.equal(await contextPanel.getByRole('button',{name:'Kopiera objekt'}).count(),1);
   assert.equal(await page.locator('#slide-properties .properties-heading').getByRole('button',{name:'Stäng egenskapspanel'}).isVisible(),true);
  await contextPanel.locator('summary',{hasText:'Fler objektval'}).click();
  assert.equal(await contextPanel.getByRole('button',{name:'Ta bort markerat'}).isVisible(),true);
@@ -334,7 +340,7 @@ try{
 
 
 
- await page.getByRole('button',{name:'Lägg till bild',exact:true}).click();await page.getByRole('button',{name:'Lägg till bild',exact:true}).click();assert.equal((await model()).slides.length,3);pass('DEV005:create-three-slides');
+ await page.evaluate(async()=>{const {editorStore:store}=await import('/src/core/editor.ts');const {createDocument}=await import('/src/core/model.ts');store.load(createDocument());});await page.getByRole('button',{name:'Lägg till bild',exact:true}).click();await page.getByRole('button',{name:'Lägg till bild',exact:true}).click();assert.equal((await model()).slides.length,3);pass('DEV005:create-three-slides');
  await toolbar.locator('.shape-picker').evaluate(el=>{el.open=false;});await toolbar.locator('.shape-picker > summary').click();assert.equal(await toolbar.locator('.shape-picker').evaluate(el=>el.open),true,'Shape picker must remain open after click');await toolbar.locator('.shape-picker-items button',{hasText:'Rektangel'}).first().click();await page.getByLabel('Bredd',{exact:true}).fill('470');await page.getByLabel('Bredd',{exact:true}).press('Enter');assert.equal((await model()).slides[2].view.elements.at(-1).geometry.width,470);await page.getByRole('button',{name:'Ångra',exact:true}).click();assert.equal((await model()).slides[2].view.elements.at(-1).geometry.width,600);await page.getByRole('button',{name:'Gör om',exact:true}).click();pass('DEV005:geometry-and-undo');
  await toolbar.locator('.shape-picker > summary').click();
  await toolbar.locator('.shape-picker-items button',{hasText:'Triangel'}).click();
@@ -349,7 +355,7 @@ try{
  assert.equal((await model()).slides[2].view.elements.at(-1).shapeType,'ellipse');
  pass('SF-SH-04:visual-shape-picker');
 
- await page.getByRole('button',{name:'Text',exact:true}).click();
+ await page.getByRole('button',{name:'Textfält',exact:true}).click();
  const newTextId=(await model()).slides[2].view.elements.at(-1).id;
  await page.locator('.editor-canvas-pane .stage [data-element-id="'+newTextId+'"]').dblclick();
  const inline=page.locator('.canvas-inline-editor');
@@ -403,8 +409,8 @@ try{
 
 
 
- await page.getByRole('button',{name:'Text',exact:true}).click();const edit=page.getByRole('textbox',{name:'Redigera objektets text'});await edit.fill('Svensk berättelse ÅÄÖ');await page.getByRole('button',{name:'Fetstil',exact:true}).click();await edit.press('End');await edit.type(' med rik text');await page.getByRole('button',{name:'Bild',exact:true}).click();await page.getByRole('tab',{name:'Visa'}).click();await page.locator('.workspace-controls-disclosure > summary').click();await page.getByRole('group',{name:'Visa eller dölj paneler'}).getByRole('button',{name:'Visa anteckningar',exact:true}).click();await page.getByRole('tab',{name:'Infoga'}).click();await page.getByLabel('Talaranteckningar',{exact:true}).fill('HEMLIG ANTECKNING');await page.getByLabel('Talaranteckningar',{exact:true}).press('Tab');assert.ok(JSON.stringify(await model()).includes('Svensk berättelse'));pass('DEV008:rich-text-edit-and-save');
- await page.getByRole('status').filter({hasText:'Arbetskopia sparad'}).waitFor();const before=await model();await page.reload();await page.getByRole('button',{name:/Min presentation ·/}).click();assert.deepEqual(await model(),before);pass('DEV006:reload-explicit-recovery');
+ await page.getByRole('button',{name:'Textfält',exact:true}).click();const edit=page.getByRole('textbox',{name:'Redigera objektets text'});await edit.fill('Svensk berättelse ÅÄÖ');await page.getByRole('button',{name:'Fetstil',exact:true}).click();await edit.press('End');await edit.type(' med rik text');await page.getByRole('button',{name:'Bild',exact:true}).click();await page.getByRole('tab',{name:'Visa'}).click();await page.locator('.workspace-controls-disclosure > summary').click();await page.getByRole('group',{name:'Visa eller dölj paneler'}).getByRole('button',{name:'Visa anteckningar',exact:true}).click();await page.getByRole('tab',{name:'Infoga'}).click();await page.getByLabel('Talaranteckningar',{exact:true}).fill('HEMLIG ANTECKNING');await page.getByLabel('Talaranteckningar',{exact:true}).press('Tab');assert.ok(JSON.stringify(await model()).includes('Svensk berättelse'));pass('DEV008:rich-text-edit-and-save');
+ await page.getByRole('status').filter({hasText:'Arbetskopia sparad'}).waitFor();const before=await model();await page.reload();await page.getByRole('button',{name:/Min presentation ·/}).first().click();assert.deepEqual(await model(),before);pass('DEV006:reload-explicit-recovery');
  const cas=await page.evaluate(async()=>{const p=await import('/src/core/persistence.ts'),doc=(await import('/src/core/editor.ts')).editorStore.getSnapshot().doc;let conflict=false;try{await p.saveDraft(doc,null,'other-tab');}catch(e){conflict=String(e).includes('CONFLICT');}return conflict;});assert.equal(cas,true);pass('DEV006:atomic-stale-tab-conflict');
  const quota=await page.evaluate(async()=>{const proto=IDBObjectStore.prototype,old=proto.put;proto.put=function(){throw new DOMException('test quota','QuotaExceededError');};try{const p=await import('/src/core/persistence.ts'),d=(await import('/src/core/model.ts')).createDocument();await p.saveDraft(d,null,'test');return false;}catch(e){return String(e).includes('Quota');}finally{proto.put=old;}});assert.equal(quota,true);pass('DEV006:quota-error-does-not-report-success');
  await api("for(const type of ['table','chart','semanticDiagram','equation','vectorPath'])store.add(type);return true;");
@@ -604,7 +610,7 @@ try{
  for(const [name,width,height] of [['desktop',1440,1000],['tablet',768,1024],['phone',390,844]]){await page.setViewportSize({width,height});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);if(width<=800){await page.getByRole('button',{name:'Egenskaper',exact:true}).click();await page.getByRole('button',{name:'Objekt',exact:true}).waitFor();if(width<=800){const sheet=page.locator('#slide-properties');assert.equal(await sheet.isVisible(),true,name+': inspector opens');const metrics=await page.evaluate(()=>{const sheet=document.querySelector('#slide-properties'),canvas=document.querySelector('.editor-canvas-pane');const a=sheet.getBoundingClientRect(),b=canvas.getBoundingClientRect();return {sheetBottom:a.bottom,canvasBottom:b.bottom,position:getComputedStyle(sheet).position,screenWidth:document.documentElement.scrollWidth};});assert.equal(metrics.position,'relative',name+': sheet must not float above canvas');
  assert.ok(metrics.sheetBottom>metrics.canvasBottom-1,name+': portrait sheet follows the workspace canvas');assert.ok(metrics.sheetBottom>=metrics.canvasBottom-1,name+': sheet must follow canvas');assert.ok(metrics.screenWidth<=width,name+': sheet must not cause horizontal overflow');await sheet.getByRole('button',{name:'Stäng egenskapspanel'}).click();assert.equal(await sheet.isVisible(),false,name+': close hides inspector');}await page.getByRole('button',{name:'Arbetsyta',exact:true}).click();}await page.getByRole('tab',{name:'Infoga'}).click();const picker=page.locator('.shape-picker');assert.equal(await picker.locator('summary').isVisible(),true,name+': shape picker reachable');await picker.evaluate(el=>{el.open=false;});await picker.locator('summary').click();assert.equal(await picker.evaluate(el=>el.open),true,name+': shape gallery opens');assert.equal(await picker.locator('button',{hasText:'Triangel'}).isVisible(),true,name+': gallery choices visible');await picker.locator('button',{hasText:'Triangel'}).click();assert.equal(await picker.evaluate(el=>el.open),false,name+': gallery closes after insertion');await page.getByRole('tab',{name:'Rita'}).click();assert.equal(await page.getByRole('tabpanel',{name:'Rita'}).getByLabel('Rita linjefärg').count(),1,name+': draw formatting available');pass('SF-SH-06:shape-gallery-and-draw-'+name);await page.screenshot({path:path.join(output,name+'.png'),fullPage:true});pass('responsive:'+name);}
  await page.setViewportSize({width:1024,height:1366});
- await page.getByRole('button',{name:'Visa egenskapspanel',exact:true}).click();
+ await page.getByRole('navigation',{name:'Arbetsytans paneler'}).getByRole('button',{name:'Egenskaper',exact:true}).click();
  await page.locator('#slide-properties').waitFor({state:'visible'});
  const ipadPortrait=await page.evaluate(()=>{
   const inspector=document.querySelector('#slide-properties').getBoundingClientRect();
@@ -620,7 +626,7 @@ try{
  for(const [width,height] of [[820,1180],[900,1200],[1024,1366]]){
   await page.setViewportSize({width,height});
   const toggle=page.locator('.properties-toggle');
-  if((await toggle.getAttribute('aria-expanded'))!=='true')await toggle.click();
+  if(await page.getByRole('navigation',{name:'Arbetsytans paneler'}).isVisible())await page.getByRole('navigation',{name:'Arbetsytans paneler'}).getByRole('button',{name:'Egenskaper',exact:true}).click();else if((await toggle.getAttribute('aria-expanded'))!=='true')await toggle.click();
   await page.locator('#slide-properties').waitFor({state:'visible'});
   const p=await page.evaluate(()=>{
    const pane=document.querySelector('#slide-properties');
@@ -629,9 +635,9 @@ try{
   });
   assert.notEqual(p.display,'none',width+': inspector visible when toggled open');
   assert.ok(p.right<=p.width+2,width+': inspector within viewport');
-  await toggle.click();
+  const responsiveNav=page.getByRole('navigation',{name:'Arbetsytans paneler'});if(await responsiveNav.isVisible())await responsiveNav.getByRole('button',{name:'Arbetsyta',exact:true}).click();else await toggle.click();
   assert.equal(await page.locator('#slide-properties').isVisible(),false,width+': toggle closes inspector');
-  await toggle.click();
+  if(await responsiveNav.isVisible())await responsiveNav.getByRole('button',{name:'Egenskaper',exact:true}).click();else await toggle.click();
   assert.equal(await page.locator('#slide-properties').isVisible(),true,width+': toggle reopens inspector');
   pass('UX-portrait:inspector-visibility-'+width);
  }
@@ -847,7 +853,7 @@ try{
   const table=before.slides[0].view.elements.find(e=>e.id==='table-layout-040');
   const snapshot={widths:table.tableLayout.columnWidths,padding:table.tableLayout.cellPadding,border:table.cells[0][0].borders.top};
   const opened=readPpd040Json(writePpd040Json(before));
-  const draftId=opened.document.id;
+  opened.document.id=crypto.randomUUID(); const draftId=opened.document.id;
   let saved;
   try{
    const version=await saveDraft(opened,null,'table-regression');
