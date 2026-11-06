@@ -17,6 +17,8 @@ async function model(){return page.evaluate(async()=>(await import('/src/core/ed
 async function api(fn,arg){return page.evaluate(async({source,arg})=>{const store=(await import('/src/core/editor.ts')).editorStore;return new Function('store','arg',source)(store,arg);},{source:fn,arg});}
 try{
  await page.goto('http://127.0.0.1:5178/');await page.getByRole('button',{name:'Lägg till bild',exact:true}).waitFor();
+ assert.equal(await page.getByRole('tab',{name:'Start'}).getAttribute('aria-selected'),'true','Start should be the default PowerPoint-like ribbon');
+ assert.equal(await page.locator('.editor-header .editor-menu-disclosure > summary').innerText(),'Arkiv');
 
  const exportFixture=JSON.parse(await readFile(path.resolve('fixtures/export-regression-v1.json'),'utf8'));
  const fixtureReports=await page.evaluate(async fixture=>{
@@ -62,6 +64,21 @@ try{
   await page.getByRole('button',{name:'Klar',exact:true}).click();
  }
  pass('SF-UX-04:initial-title-and-body-preserve-font-size');
+ // SF-PPT-04: slide context menu targets the clicked thumbnail, not the previously active slide.
+ await page.getByRole('button',{name:'Lägg till bild'}).click();
+ let slideCards=page.locator('#slide-filmstrip .slide-card');
+ assert.equal(await slideCards.count(),2);
+ await page.getByRole('button',{name:'Fler alternativ för bild 1'}).click();
+ await page.getByRole('menuitem',{name:'Duplicera bild'}).click();
+ assert.equal(await slideCards.count(),3);
+ assert.equal((await model()).slides.length,3);
+ await page.getByRole('button',{name:'Fler alternativ för bild 1'}).click();
+ await page.getByRole('menuitem',{name:'Dölj bild'}).click();
+ assert.equal((await model()).slides[0].hidden,true);
+ await page.getByRole('button',{name:'Fler alternativ för bild 1'}).click();
+ await page.getByRole('menuitem',{name:'Visa bild'}).click();
+ assert.equal((await model()).slides[0].hidden,false);
+ pass('SF-PPT-04:thumbnail-menu-duplicate-and-visibility');
  assert.equal(await page.locator('.editor-header > .editor-menu-disclosure').count(),1,'Document menu belongs in header');
  assert.equal(await page.locator('main ~ .workspace-controls-disclosure').count(),0,'Panel controls should not use an extra toolbar row');
  await page.getByRole('tab',{name:'Visa'}).click();
@@ -155,7 +172,7 @@ try{
  assert.equal(await ribbon.getByRole('tab',{name:'Infoga'}).getAttribute('aria-selected'),'true');
  await ribbon.getByRole('tab',{name:'Start'}).click();
  assert.equal(await page.getByRole('tabpanel',{name:'Start'}).getByRole('button',{name:'Ny bild'}).isVisible(),true);
- assert.deepEqual(await page.getByRole('tabpanel',{name:'Start'}).locator('.ribbon-actions > button').allTextContents(),['Ångra','Gör om','Ny bild','Kopiera','Klistra in'],'Start command order must follow the tab configuration');
+ assert.deepEqual(await page.getByRole('tabpanel',{name:'Start'}).locator('.ribbon-actions > button').allTextContents(),['Ny bild','Kopiera','Klistra in','Ångra','Gör om','Layout'],'Start command order must follow the tab configuration');
  assert.equal(await page.getByRole('tabpanel',{name:'Start'}).getByRole('button',{name:'Ny bild'}).isEnabled(),true,'Shared New slide command is enabled in editable mode');
  assert.equal(await page.getByRole('tabpanel',{name:'Start'}).getByRole('button',{name:'Kopiera',exact:true}).count(),1,'Shared Copy command stays available in Start');
  assert.equal(await page.getByRole('tabpanel',{name:'Start'}).getByRole('button',{name:'Klistra in',exact:true}).count(),1,'Shared Paste command stays available in Start');
@@ -210,12 +227,12 @@ try{
  pass('SF-UX-11:ribbon-keyboard-navigation');
 
  await page.evaluate(async()=> (await import('/src/core/editor.ts')).editorStore.select([]));
- assert.equal(await ribbon.getByRole('tab',{name:'Objekt'}).count(),0,'Contextual tab must be absent without selection');
+ assert.equal(await ribbon.getByRole('tab',{name:'Formatera'}).count(),0,'Contextual tab must be absent without selection');
  await page.locator('.editor-canvas-pane .stage .render-element.type-text').first().click();
- assert.equal(await ribbon.getByRole('tab',{name:'Objekt'}).count(),1,'Selecting an object must show contextual tab');
- await ribbon.getByRole('tab',{name:'Objekt'}).click();
- const contextPanel=page.getByRole('tabpanel',{name:'Objekt'});
- assert.equal(await contextPanel.getByRole('button',{name:'Objektegenskaper'}).count(),0);
+ assert.equal(await ribbon.getByRole('tab',{name:'Formatera'}).count(),1,'Selecting an object must show contextual tab');
+ await ribbon.getByRole('tab',{name:'Formatera'}).click();
+ const contextPanel=page.getByRole('tabpanel',{name:'Formatera'});
+ assert.equal(await contextPanel.getByRole('button',{name:'Visa formatering'}).count(),1);
   assert.equal(await page.locator('#slide-properties .properties-heading').getByRole('button',{name:'Stäng egenskapspanel'}).isVisible(),true);
  await contextPanel.locator('summary',{hasText:'Fler objektval'}).click();
  assert.equal(await contextPanel.getByRole('button',{name:'Ta bort markerat'}).isVisible(),true);

@@ -301,3 +301,32 @@ test('persisted guided corner scaling matches calculated preview and can be undo
  store.undo();
  for(const item of source)assert.deepEqual(store.slide.view.elements.find(e=>e.id===item.id).geometry,item.geometry);
 });
+
+test('keyboard nudge moves all unlocked selected objects in one undo step',()=>{
+ const store=new EditorStore();
+ const a=store.add('shape'), b=store.add('shape'), locked=store.add('shape');
+ const before=Object.fromEntries([a,b,locked].map(id=>[id,{...store.slide.view.elements.find(e=>e.id===id).geometry}]));
+ store.updateElement(locked,{locked:true});
+ store.select([a,b,locked]);
+ const previousUndo=store.getSnapshot().undo;
+ store.nudgeSelected(10,-1);
+ assert.equal(store.getSnapshot().undo,previousUndo+1);
+ for(const id of [a,b]){
+  const g=store.slide.view.elements.find(e=>e.id===id).geometry;
+  assert.equal(g.x,before[id].x+10);assert.equal(g.y,before[id].y-1);
+ }
+ assert.deepEqual(store.slide.view.elements.find(e=>e.id===locked).geometry,before[locked]);
+ store.undo();
+ for(const id of [a,b,locked])assert.deepEqual(store.slide.view.elements.find(e=>e.id===id).geometry,before[id]);
+});
+test('nudge skips empty or entirely locked selections without history',()=>{
+ const store=new EditorStore();const a=store.add('shape');
+ store.select([]);
+ const undo=store.getSnapshot().undo;
+ store.nudgeSelected(1,0);assert.equal(store.getSnapshot().undo,undo);
+ store.updateElement(a,{locked:true});store.select([a]);
+ const afterLock=store.getSnapshot().undo;
+ store.nudgeSelected(1,0);store.nudgeSelected(0,0);
+ assert.equal(store.getSnapshot().undo,afterLock);
+ assert.throws(()=>store.nudgeSelected(Infinity,0),/INVALID_NUDGE_DELTA/);
+});
