@@ -18,7 +18,7 @@ try{
  const model=()=>page.evaluate(async()=>(await import('/src/core/editor.ts')).editorStore.getSnapshot().doc);
  const before=await model();
  await page.getByRole('tab',{name:'Design',exact:true}).click();
- await page.getByRole('button',{name:'Layout och tema',exact:true}).click();
+ await page.getByRole('button',{name:'Anpassa design…',exact:true}).click();
  const gallery=page.getByRole('region',{name:'Layout- och temagalleri'});
  assert.equal(await gallery.getByRole('group',{name:'Layoutgalleri'}).getByRole('button').count(),5);
  await gallery.getByRole('button',{name:'Använd layout Två kolumner',exact:true}).click();

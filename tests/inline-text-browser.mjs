@@ -1,0 +1,58 @@
+import { chromium } from 'playwright';
+import { spawn } from 'node:child_process';
+import assert from 'node:assert/strict';
+
+const server = spawn('node', ['node_modules/vite/bin/vite.js', '--host', '127.0.0.1', '--port', '5189', '--strictPort'], { stdio: ['ignore','pipe','pipe'] });
+const stderr=[];
+server.stderr.on('data', d=>stderr.push(String(d)));
+await new Promise((resolve,reject)=>{
+  const timer=setTimeout(()=>reject(new Error('Vite startup timeout: '+stderr.join(''))),15000);
+  server.stdout.on('data',d=>{if(String(d).includes('5189')){clearTimeout(timer);resolve();}});
+  server.on('exit',code=>{clearTimeout(timer);reject(new Error('Vite exited '+code+': '+stderr.join('')));});
+});
+const browser=await chromium.launch({headless:true,...(process.env.CHROMIUM_EXECUTABLE?{executablePath:process.env.CHROMIUM_EXECUTABLE,args:['--no-sandbox','--disable-dev-shm-usage']}:{})});
+const checks=[];
+try {
+  for(const viewport of [{name:'desktop',width:1440,height:900},{name:'ipad-portrait',width:820,height:1180},{name:'mobile',width:390,height:844}]) {
+    const context=await browser.newContext({viewport:{width:viewport.width,height:viewport.height}});
+    const page=await context.newPage();const errors=[];page.on('pageerror',err=>errors.push(err.message));
+    await page.goto('http://127.0.0.1:5189/');
+    const node=page.locator('.editor-canvas-pane .stage .render-element.type-text').first();
+    await node.dblclick();
+    const group=page.getByRole('group',{name:'Redigera text på bilden'});
+    await group.waitFor({state:'visible'});
+    const editable=group.getByRole('textbox',{name:'Redigera objektets text'});
+    await editable.waitFor({state:'visible'});
+    assert.equal(await editable.evaluate(el=>document.activeElement===el),true,viewport.name+': focus should enter text editing');
+    const toolbar=group.getByRole('toolbar',{name:'Snabbformatera markerad text'});
+    assert.equal(await toolbar.isVisible(),true,viewport.name+': compact formatting should be visible');
+    for(const label of ['Fetstil','Kursiv','Understruken','Textstorlek i direktredigering','Textfärg i direktredigering'])
+      assert.equal(await toolbar.getByLabel(label,{exact:true}).count(),1,viewport.name+': missing '+label);
+    const old=await page.evaluate(async()=>JSON.stringify((await import('/src/core/editor.ts')).editorStore.getSnapshot().doc));
+    await editable.fill('Prova direktredigering');
+    await editable.press('ControlOrMeta+A');
+    await toolbar.getByRole('button',{name:'Fetstil'}).click();
+    assert.equal(await editable.evaluate(el=>document.activeElement===el),true,viewport.name+': toolbar must return focus');
+    assert.ok(await editable.locator('strong').count()>0,viewport.name+': bold should apply to selection');
+    await group.getByRole('button',{name:'Klar'}).click();
+    assert.equal(await group.count(),0,viewport.name+': Done should dismiss edit mode');
+    const changed=await page.evaluate(async()=>JSON.stringify((await import('/src/core/editor.ts')).editorStore.getSnapshot().doc));
+    assert.notEqual(changed,old,viewport.name+': editing should persist');
+    await page.locator('.editor-header').getByRole('button',{name:'Ångra',exact:true}).click();
+    const undone=await page.evaluate(async()=>JSON.stringify((await import('/src/core/editor.ts')).editorStore.getSnapshot().doc));
+    assert.notEqual(undone,changed,viewport.name+': Undo should revert a text-editing transaction');
+    await page.locator('.editor-header').getByRole('button',{name:'Gör om',exact:true}).click();
+    const redone=await page.evaluate(async()=>JSON.stringify((await import('/src/core/editor.ts')).editorStore.getSnapshot().doc));
+    assert.equal(redone,changed,viewport.name+': Redo should restore the formatting transaction');
+    const changedElement=page.locator('.editor-canvas-pane .stage .render-element.type-text').first();
+    await changedElement.dblclick();
+    const again=page.getByRole('group',{name:'Redigera text på bilden'});
+    await again.getByRole('textbox',{name:'Redigera objektets text'}).press('Escape');
+    assert.equal(await again.count(),0,viewport.name+': Escape should dismiss edit mode');
+    assert.deepEqual(errors,[],viewport.name+': no page errors');
+    checks.push({viewport:viewport.name,result:'PASS'});
+    console.log('PASS inline editing',viewport.name);
+    await context.close();
+  }
+} finally {await browser.close(); server.kill('SIGTERM');}
+console.log(JSON.stringify({checks,result:'PASS'},null,2));

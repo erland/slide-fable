@@ -114,6 +114,23 @@ export class EditorStore{
  paste(payload:D){let selected:string[]=[];this.transaction((d,s)=>{const c=cloneObjects(payload.elements,payload.blocks);const assetMap=new Map<string,string>();for(const [id,a] of Object.entries(payload.assets) as [string,D][]){if(d.assets[id]&&JSON.stringify(d.assets[id])!==JSON.stringify(a)){const n=uid('asset');d.assets[n]=copy(a);assetMap.set(id,n);}else d.assets[id]=copy(a);}const rewrite=(o:D)=>{for(const [k,v] of Object.entries(o)){if(typeof v==='string'&&['assetRef','fallbackAssetRef','posterAssetRef','renderedAssetRef'].includes(k)&&assetMap.has(v))o[k]=assetMap.get(v);else if(Array.isArray(v))v.forEach(x=>{if(x&&typeof x==='object')rewrite(x);});else if(v&&typeof v==='object'&&k!=='extensions')rewrite(v);}};c.elements.forEach(e=>{rewrite(e);if(e.geometry&&(payload.roots??payload.elements.map((x:D)=>x.id)).some((id:string)=>c.ids.get(id)===e.id)){e.geometry.x+=24;e.geometry.y+=24;}});s.view.elements.push(...c.elements);s.content.blocks??=[];s.content.blocks.push(...c.blocks);selected=(payload.roots??payload.elements.map((e:D)=>e.id)).map((id:string)=>c.ids.get(id)!);});this.select(selected);}
  group(){if(this.state.selected.length<2)return;let id='';this.transaction((d,s)=>{const children=s.view.elements.filter((e:D)=>this.state.selected.includes(e.id));if(children.some((e:D)=>s.view.elements.some((p:D)=>p.children?.includes(e.id))))throw Error('Gruppera objekt på samma översta nivå.');const geometries=children.map((e:D)=>effective(d,s,e).geometry);const x=Math.min(...geometries.map((g:D)=>g.x)),y=Math.min(...geometries.map((g:D)=>g.y)),r=Math.max(...geometries.map((g:D)=>g.x+g.width)),b=Math.max(...geometries.map((g:D)=>g.y+g.height));for(const [i,e] of children.entries())e.geometry={...geometries[i],x:geometries[i].x-x,y:geometries[i].y-y};s.placeholderBindings=s.placeholderBindings?.filter((b:D)=>!children.some((e:D)=>e.id===b.elementId));id=uid('group');s.view.elements.push({id,type:'group',geometry:box(x,y,r-x,b-y),transform:box(0,0,r-x,b-y),children:children.map((e:D)=>e.id)});});this.select([id]);}
  ungroup(){const id=this.state.selected[0];this.transaction((_d,s)=>{const g=s.view.elements.find((e:D)=>e.id===id&&e.type==='group');if(!g)return;if(g.geometry.rotation)throw Error('Återställ gruppens rotation före avgruppering.');const b=g.geometry,t=g.transform??b;for(const cid of g.children){const e=s.view.elements.find((e:D)=>e.id===cid);e.geometry={...e.geometry,x:b.x+e.geometry.x*b.width/t.width,y:b.y+e.geometry.y*b.height/t.height,width:e.geometry.width*b.width/t.width,height:e.geometry.height*b.height/t.height};}s.view.elements=s.view.elements.filter((e:D)=>e.id!==id);if(s.animations)s.animations=s.animations.filter((a:D)=>a.targetId!==id);});this.select([]);}
+ /** Move the entire editable selection as one undoable keyboard operation. */
+ nudgeSelected(dx:number,dy:number){
+  if(!Number.isFinite(dx)||!Number.isFinite(dy))throw Error('INVALID_NUDGE_DELTA');
+  if(dx===0&&dy===0)return;
+  const ids=new Set(this.state.selected);
+  if(!this.slide.view.elements.some((e:D)=>ids.has(e.id)&&!e.locked))return;
+  this.transaction((d,s)=>{
+   for(const e of s.view.elements){
+    if(!ids.has(e.id)||e.locked)continue;
+    const g=effective(d,s,e).geometry;
+    const moved={...g,x:g.x+dx,y:g.y+dy};
+    e.geometry={...e.geometry,x:moved.x,y:moved.y};
+    const binding=s.placeholderBindings?.find((b:D)=>b.elementId===e.id);
+    if(binding)binding.overrides={...binding.overrides,geometry:copy(moved)};
+   }
+  });
+ }
  align(mode:string){
   const ids=this.state.selected;
   const editable=this.slide.view.elements.filter((e:D)=>ids.includes(e.id)&&!e.locked);
