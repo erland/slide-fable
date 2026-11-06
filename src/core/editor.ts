@@ -1,5 +1,6 @@
 import {duplicateSlides,moveSlidesBefore,moveSlidesBy,selectedSlideIds,reuseSlides} from './slideOperations.ts';
 import {applySlideLayout,applyThemeChoice,type ThemeChoice} from './designGallery.ts';
+import {applySlideBackground,resetSlideBackground,type BackgroundScope} from './backgroundControls.ts';
 import {supportsFormat,validateFormatChange,selectionFormatPatch,type SelectionFormatChange} from './selectionFormatting.ts';
 import {inspectPpd040} from './ppd040Preflight.ts';
 import {toOutline,normalizePpd040Styles} from './ppd040Staging.ts';
@@ -213,6 +214,8 @@ export class EditorStore{
 
  reorder(id:string,mode:string){this.transaction((_d,s)=>{const sorted=[...s.view.elements].sort((a:D,b:D)=>(a.zIndex??0)-(b.zIndex??0));const i=sorted.findIndex((e:D)=>e.id===id);const [e]=sorted.splice(i,1);sorted.splice(mode==='front'?sorted.length:mode==='back'?0:Math.max(0,Math.min(sorted.length,i+(mode==='up'?1:-1))),0,e);sorted.forEach((e:D,i:number)=>e.zIndex=i);});}
  applyTheme(choice:ThemeChoice){this.transaction(d=>applyThemeChoice(d,choice));}
+ setBackgroundColor(color:string,scope:BackgroundScope='current'){if(!/^#[\da-f]{6}$/i.test(color))throw Error('INVALID_BACKGROUND_COLOR');const targets=scope==='all'?this.state.doc.slides:[this.slide];if(targets.every((s:D)=>s.view.background?.type==='color'&&s.view.background.color?.toLowerCase()===color.toLowerCase()))return;this.transaction(d=>applySlideBackground(d,this.state.slideId,color,scope));}
+ resetBackground(scope:BackgroundScope='current'){const targets=scope==='all'?this.state.doc.slides:[this.slide];if(!targets.some((s:D)=>s.view.background!==undefined))return;this.transaction(d=>resetSlideBackground(d,this.state.slideId,scope));}
  applyLayout(layoutId:string){if(layoutOf(this.state.doc,this.slide)?.id!==layoutId)this.transaction((d,s)=>applySlideLayout(d,s,layoutId));}
  applyLayouts(ids:string[],layoutId:string){const selected=selectedSlideIds(this.state.doc,ids);if(!selected.length)return;this.transaction(d=>{for(const s of d.slides)if(selected.includes(s.id)&&layoutOf(d,s)?.id!==layoutId)applySlideLayout(d,s,layoutId);validateCore(d);});}
  duplicateSlides(ids:string[]){if(!ids.length)return [];let created:string[]=[];this.transaction(d=>{created=duplicateSlides(d,ids);validateCore(d);});this.selectSlide(created[0]);return created;}

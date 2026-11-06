@@ -41,9 +41,11 @@ export function snapTranslation(
  enabled=true,
  bypass=false,
  tolerance=7,
- grid=10
+ grid=10,
+ canvas?:{width:number;height:number}
 ):{dx:number;dy:number;guides:AlignmentGuides}{
  if(![moving.x,moving.y,moving.width,moving.height,dx,dy,tolerance,grid].every(Number.isFinite)||moving.width<=0||moving.height<=0||tolerance<0||grid<=0)throw Error('INVALID_ALIGNMENT_GEOMETRY');
+ if(canvas&&(!Number.isFinite(canvas.width)||!Number.isFinite(canvas.height)||canvas.width<=0||canvas.height<=0))throw Error('INVALID_ALIGNMENT_GEOMETRY');
  if(!enabled||bypass)return {dx,dy,guides:{}};
  const axis=(from:number,size:number,delta:number,candidates:number[])=>{
   const anchors=[from+delta,from+delta+size/2,from+delta+size];
@@ -58,8 +60,8 @@ export function snapTranslation(
   const snapped=Math.round((from+delta)/grid)*grid-from;
   return {delta:snapped,guide:undefined};
  };
- const xTargets=others.flatMap(r=>[r.x,r.x+r.width/2,r.x+r.width]);
- const yTargets=others.flatMap(r=>[r.y,r.y+r.height/2,r.y+r.height]);
+ const xTargets=[...others.flatMap(r=>[r.x,r.x+r.width/2,r.x+r.width]),...(canvas?[0,canvas.width/2,canvas.width]:[])];
+ const yTargets=[...others.flatMap(r=>[r.y,r.y+r.height/2,r.y+r.height]),...(canvas?[0,canvas.height/2,canvas.height]:[])];
  const x=axis(moving.x,moving.width,dx,xTargets);
  const y=axis(moving.y,moving.height,dy,yTargets);
  const spacingX=x.guide===undefined?equalSpacingGuide(moving,others,'x',dx,dy,tolerance):null;
@@ -81,10 +83,12 @@ export function snapResize(
  enabled=true,
  bypass=false,
  tolerance=7,
- grid=10
+ grid=10,
+ canvas?:{width:number;height:number}
 ):{rect:Rect;guides:AlignmentGuides}{
  if(![moving.x,moving.y,moving.width,moving.height,dx,dy,tolerance,grid].every(Number.isFinite)||
     moving.width<=0||moving.height<=0||tolerance<0||grid<=0)throw Error('INVALID_ALIGNMENT_GEOMETRY');
+ if(canvas&&(!Number.isFinite(canvas.width)||!Number.isFinite(canvas.height)||canvas.width<=0||canvas.height<=0))throw Error('INVALID_ALIGNMENT_GEOMETRY');
  const activeX=direction.includes('w')?'w':direction.includes('e')?'e':null;
  const activeY=direction.includes('n')?'n':direction.includes('s')?'s':null;
  if(!activeX&&!activeY)throw Error('INVALID_RESIZE_DIRECTION');
@@ -101,8 +105,8 @@ export function snapResize(
   if(guide!==undefined)return {delta:delta+offset,guide};
   return {delta:Math.round(delta/grid)*grid,guide:undefined as number|undefined};
  };
- const horizontal=axis(activeX,dx,others.flatMap(r=>[r.x,r.x+r.width/2,r.x+r.width]),activeX==='w'?moving.x:moving.x+moving.width);
- const vertical=axis(activeY,dy,others.flatMap(r=>[r.y,r.y+r.height/2,r.y+r.height]),activeY==='n'?moving.y:moving.y+moving.height);
+ const horizontal=axis(activeX,dx,[...others.flatMap(r=>[r.x,r.x+r.width/2,r.x+r.width]),...(canvas?[0,canvas.width/2,canvas.width]:[])],activeX==='w'?moving.x:moving.x+moving.width);
+ const vertical=axis(activeY,dy,[...others.flatMap(r=>[r.y,r.y+r.height/2,r.y+r.height]),...(canvas?[0,canvas.height/2,canvas.height]:[])],activeY==='n'?moving.y:moving.y+moving.height);
  const rect=resizeRect(moving,direction,horizontal.delta,vertical.delta);
  // A minimum-size clamp prevents reaching the candidate; do not show a false guide.
  const edgeX=activeX==='w'?rect.x:rect.x+rect.width;
