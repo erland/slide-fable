@@ -118,7 +118,7 @@ try{
  await page.setViewportSize({width:768,height:1024});
  await page.getByRole('button',{name:'Arbetsyta',exact:true}).click();
  assert.equal(await pane.isVisible(),true);
- await page.getByRole('button',{name:'Bilder',exact:true}).click();
+ await page.getByRole('navigation',{name:'Arbetsytans paneler'}).getByRole('button',{name:'Bilder',exact:true}).click();
  assert.equal(await page.locator('#slide-filmstrip').isVisible(),true);
  await page.getByRole('button',{name:'Arbetsyta',exact:true}).click();
  assert.equal(await pane.isVisible(),true);
