@@ -479,3 +479,10 @@
 .editor-header .document-heading .document-title{flex:none;display:block;min-width:0}
 .editor-header .draft-indicator{font-size:11px;line-height:1.25;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 @media(max-width:800px){.editor-header .document-heading{order:2;flex:1 0 100%;min-width:0}.editor-header .document-heading .document-title{font-size:12px}.editor-header .draft-indicator{font-size:11px}}
+
+/* SF-NEXT-05a: keep the phone header compact while displaying local save status. */
+@media(max-width:520px){
+ .editor-header .document-heading{flex-direction:row;align-items:center;gap:6px}
+ .editor-header .document-heading .document-title{flex:0 1 auto;max-width:50%;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ .editor-header .draft-indicator{flex:1 1 0;min-width:0;font-size:10px}
+}
