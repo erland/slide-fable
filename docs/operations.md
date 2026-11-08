@@ -30,8 +30,9 @@ python scripts/verify_release_candidate.py
 Miljön kan ange CHROMIUM_EXECUTABLE för ett befintligt Chromium. Skriptet kör
 build, lint, kontrakt, editorflöden, offline-/uppdateringsfall och källkontroller.
 Browser-skärmbilder och tillfälliga exporter hamnar utanför källprojektet.
-Fjärr-CI-konfiguration följer med men en faktisk GitHub Actions-körning är inte
-utförd här. För --require-ready krävs dessutom att alla öppna releasegrindar
+GitHub Actions-verifiering finns i `.github/workflows/verify.yml` och körs på
+push och pull requests. Aktuella körningsresultat ska alltid kontrolleras på
+respektive commit; ett äldre grönt resultat är inte en releaseattest. För --require-ready krävs dessutom att alla öppna releasegrindar
 stängts med belägg; annars blir avslutskoden 2.
 
 ## Statisk hosting
@@ -41,7 +42,9 @@ manifest och service-worker-scope avser katalogen där appen installeras.
 Använd ingen generisk fallback som svarar med HTML för saknade JS-filer.
 Servera sw.js och index.html utan lång HTTP-cache. Hashade resurser kan ha
 lång cache. Lägg ut nya resurser innan index/sw och behåll äldre hashade resurser
-under övergången. Ingen driftsättning till extern server har utförts.
+under övergången. GitHub Pages-workflowen i `.github/workflows/deploy-pages.yml` triggas av
+push till `main` eller manuell körning och försöker publicera `dist/`.
+En startad workflow är inte bevis för genomförd publicering; kontrollera status.
 
 En väntande uppdatering aktiveras först när användaren väljer det och alla
 svarande flikar inom scope är rena och utan pågående export/import. Spara HTML i
@@ -65,7 +68,9 @@ Filen får högst vara 50 MiB, modellen högst 200 bilder/10 000 objekt, resurse
 högst 10 MiB per resurs/25 MiB totalt. Bildinfogning begränsas till 40 megapixlar.
 Detta är skyddsgränser, inte uppmätta prestandagarantier på en surfplatta.
 
-0.3.0 migreras enligt fastställd 0.3.1-profil. 0.1/0.2 stöds endast för den
+Nya dokument skapas som PPD 0.4.0 och kanoniskt schema är
+`schemas/ppd.schema.json` (0.4.0). 0.3.0 migreras till den äldre
+0.3.1-profilen via separat kontraktsväg. 0.1/0.2 stöds endast för den
 uttryckliga dokumenterade delprofilen i legacy.ts och medföljande fixtures.
 Andra äldre dokument får inte utlovas fungera. Okända framtida modeller kan
 öppnas i begränsat skrivskydd när en säker inspektionsmodell kan valideras;

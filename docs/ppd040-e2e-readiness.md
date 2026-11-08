@@ -1,4 +1,6 @@
-# PPD 0.4.0 – end-to-end-beredskap (teststeg)
+# PPD 0.4.0 – historiskt end-to-end-teststeg
+
+> **Historiskt verifieringsunderlag:** Den här rapporten beskriver omfattningen av en tidigare, avgränsad 0.4-testetapp. Nu skapar `createDocument()` 0.4.0 och huvudschemat är 0.4.0. Uppgifter nedan om att 0.3.1 fortfarande är standard och att faktisk PDF/PPTX-export saknas gäller inte som aktuell helhetsstatus. Senare exporter och browserflöden testas i andra regressioner; faktisk Office-/Safari-acceptans återstår. Se `docs/ppd-contract.md` och `docs/release-review.md`.
 
 ## Körbara kontroller i denna PR
 

@@ -1,4 +1,27 @@
-# Slide Fable PPD-kontrakt 0.3.1
+# Slide Fable – PPD-kontrakt och versionsstatus
+
+> **Aktuell implementering (kontrollerad mot `main` 2026-11-08):** Nya presentationer skapas med `schemaVersion: "0.4.0"` i `src/core/model.ts`. Kanoniskt schema är `schemas/ppd.schema.json` (PPD 0.4.0), medan `schemas/ppd-0.3.1.schema.json` behålls för äldre data. `src/core/contract.ts` validerar 0.4.0 via `inspectPpd040` och har separata vägar för 0.3.0/0.3.1 och begränsade 0.1/0.2-profiler. Schema-/API-stöd garanterar **inte** full redigerings- eller exportparitet. Produktionsstatus: **NOT_READY**.
+
+## Aktiva formatkällor
+
+| Del | Status och källa |
+| --- | --- |
+| Nya dokument | PPD 0.4.0 – `src/core/model.ts:createDocument` |
+| Kanonisk schemafil | PPD 0.4.0 – `schemas/ppd.schema.json` |
+| Äldre 0.3.1-schema | `schemas/ppd-0.3.1.schema.json` |
+| Import, validering och förhandling | `src/core/contract.ts`; separat `src/core/legacy.ts` för avgränsad äldre profil |
+| Export | `src/export/`; styrks bara inom dokumenterade regressioner, inte genom schemat ensamt |
+| Historiskt förslag till 0.4 | `docs/ppd-004-v040-proposal.md` och `proposals/ppd-0.4.0.schema.json` – historiskt beslutsunderlag |
+
+0.3.0 kan migreras till 0.3.1 via den dokumenterade verifierade vägen, men detta innebär inte generell migration av alla äldre dokument till 0.4.0. Okända framtida versioner och okända obligatoriska funktioner måste hanteras enligt versionsförhandling och säkerhetsvalidering. Historisk 0.1/0.2-kompatibilitet är fortfarande en **öppen releasegrind**.
+
+## Tidigare PPD 0.3.1-kontrakt (historiskt underlag)
+
+Texten nedan är bevarad som specifikation för det tidigare DEV-001-kontraktet. Påståenden om vad som **ännu inte** var implementerat avser det steget 2026-10-19 och är **inte** en aktuell beskrivning av applikationens funktionalitet eller standardformat. För aktuell funktionalitet gäller kod och verifieringsrapporter.
+
+---
+
+## Historiskt kontrakt: PPD 0.3.1
 
 Fastställt för DEV-001 2026-10-19. Projektlokal profil, inte en publicerad extern
 PPD-standard. Produktversion och schemaVersion är separata. Bifogat 0.3.0-schema
