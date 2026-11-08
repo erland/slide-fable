@@ -78,8 +78,8 @@ Nya dokument skapas som **PPD 0.4.0** i `src/core/model.ts`; `schemas/ppd.schema
 
 ## Dokumentation
 
-- [Användarguide](docs/user-guide.md) – redigering, sparande, återställning och export.
-- [Funktionell specifikation](docs/functional-specification.md) – målet för MVP.
+- [Användarguide](docs/user-guide.md) – redigering, tabeller och diagram, paneler, sparande, återställning och export.
+- [Funktionell specifikation](docs/functional-specification.md) – målet för MVP samt källbelagd implementerad funktionsprofil.
 - [Arkitektur](docs/architecture.md) – teknisk uppbyggnad.
 - [PPD-kontrakt](docs/ppd-contract.md) – presentationsformatet.
 - [Drift och felsökning](docs/operations.md) – byggning, hosting och uppdateringar.

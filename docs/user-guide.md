@@ -8,8 +8,9 @@ python -m http.server 8000 --directory preview
 
 Öppna http://localhost:8000. För telefon och läsplatta på en annan enhet behövs
 statisk HTTPS-hosting för installation och offlinefunktion. Öppna appen med nät
-första gången och invänta ”redo för offline”. Den här leveransen har ingen vald
-extern hosting eller serverdel.
+första gången och invänta ”redo för offline”. Den här appen har ingen serverdel för dokumentlagring. En GitHub Pages-
+publicering är konfigurerad via Actions, men kontrollera att den faktiskt lyckats
+innan du förlitar dig på den för installation och offlineanvändning.
 
 ## Skapa och redigera
 
@@ -24,22 +25,73 @@ förflyttning förbikopplar rutnätet. Förstoring och rullning används för st
 Lagerlistan gör även överlappande objekt åtkomliga.
 
 Textredigeraren i objektpanelen har fetstil, kursiv, understrykning, listor,
-listnivåer, länkar, justering, storlek och färg. Tabeller har cellinmatning,
-sammanfogning åt höger, rubrikceller och tillägg av rader/kolumner. Diagram har
-datatabell. Processdiagram har nodtext och riktning. LaTeX/MathML och vektorbanor
-bevaras som redigeringskälla.
+listnivåer, länkar, justering, storlek och färg. Tabeller och diagram har även
+särskilda redigeringsverktyg (se nedan). Processdiagram har nodtext och riktning.
+LaTeX/MathML och vektorbanor bevaras som redigeringskälla.
 
 Bilders passning, mask, fokus och beskärning finns i objektpanelen. Ersätt bild
 behåller objektets geometri och befintlig beskärning/fokus. Ange alternativtext.
-En del avancerade egenskaper, exempelvis masterobjekt, effekter, tabellspann,
-relationer och komponentdefinitioner, redigeras som JSON med validering. Det är
-ett tekniskt gränssnitt i denna utvecklingsversion.
+En del avancerade egenskaper, exempelvis vissa masterobjekt, relationer och
+komponentdefinitioner, kräver fortfarande JSON-redigering med validering.
+**Enkla tabellsammanslagningar/-delningar och animeringar har däremot visuella
+verktyg.** JSON-gränssnittet är ett tekniskt komplement i denna utvecklingsversion.
 
 Under Design väljer du layout, återställer lokala layoutavvikelser och redigerar
 tema/master. En frikopplad layout behåller den aktuella objektgeometrin. Skapa
 komponent från markeringen och infoga instanser från dokumentets bibliotek.
 Bildpanelen innehåller duplicering, borttagning och ordning. Bildfliken innehåller
 sektioner, läsordning, fragment och sök/ersätt.
+
+## Tabeller och diagram utan JSON
+
+Infoga en tabell med **Infoga → Tabell**, eller markera en befintlig tabell.
+Under **Start → Tabellverktyg → Redigera tabell** kan du öppna cellredigering
+direkt i verktygsfältet. Välj **Fler egenskaper** för hela tabellredigeraren.
+
+- Ändra celltext och markera en cell som rubrikcell med **Rubrikcell**.
+- Använd **Sammanfoga →** för att slå samman cellen med grannen till höger.
+  Textinnehållet i båda cellerna kombineras i den sammanslagna cellen.
+- Välj **Dela cell** på en horisontellt sammanslagen cell för att dela upp den
+  igen. Ursprungscellen behåller sitt textinnehåll; tillkommande celler är tomma.
+  Detta återställer inte automatiskt den text som fanns i granncellerna före
+  sammanfogningen – använd **Ångra** om du vill återfå exakt ursprungsläge.
+- **Dela cell** är avsiktligt avaktiverad för vertikala spann eller
+  inkonsekvent rutnätsbredd. Det är inte ett generellt verktyg för alla
+  komplexa rad- och kolumnspann.
+- Lägg till rader/kolumner, ändra kolumnbredder, cellmarginaler och individuella
+  cellkantlinjer. **Flytta sista kolumnen först** är spärrad när celler har spann.
+
+Infoga ett diagram med **Infoga → Diagram** eller markera ett befintligt.
+Använd **Formatera → Diagramverktyg → Redigera diagramdata** för att ändra
+innehållet utan JSON, eller **Fler egenskaper** för diagramredigeraren.
+
+- Välj diagramtyp bland de stödda **stapel-, linje- och cirkeldiagrammen**.
+- Redigera **serienamn**, **kategorinamn** och **numeriska värden**.
+- Använd **Ny serie** och **Ny kategori** för att lägga till data.
+- Använd **Ta bort serie/kategori** och **Uppåt/Nedåt** för att ta bort eller
+  ändra ordningen. Minst en serie och kategori måste finnas kvar.
+- När en kategori flyttas eller tas bort följer värdena i alla serier med
+  samma kategori, så att dataserierna förblir synkroniserade.
+- Ändringar i tabeller och diagram är ångringsbara via redigerarens
+  vanliga historik.
+
+Funktionerna ovan beskriver den implementerade redigeraren och dess
+automatiserade Chromium-regressionstester. Det är **inte** en garanti för att
+alla tabellspann, diagramformat eller exportvarianter fungerar identiskt i
+PowerPoint på Mac/Windows. Se `docs/release-review.md`.
+
+## Paneler och bildersättning
+
+På större skärmar kan du visa eller dölja **Egenskaper**. På smalare skärmar
+växlar du via **Bilder**, **Arbetsyta** och **Egenskaper**. En markerad form
+behåller sin markering vid vanligt panelbyte. Om du stänger egenskapspanelen
+återgår vyn till arbetsytan; panelen kan öppnas igen.
+
+För en markerad bild finns **Ersätt bild** under formatering/egenskaper.
+Det valda bildobjektet behålls med sin geometri medan själva bildresursen
+byts. **Infoga → Bilder** är däremot avsett för ett *nytt* bildobjekt.
+Bildersättning och panelväxling testas automatiskt på desktop, stående iPad-
+storlek och mobilstorlek; dessa tester ersätter inte ett fysiskt Safari-test.
 
 ## Spara och återställ
 
