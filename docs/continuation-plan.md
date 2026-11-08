@@ -1,5 +1,8 @@
 # Slide Fable – fortsättning efter nulägesavstämning
 
+> **Aktuell läsanvisning efter DOC-FIX-03 (2026-11-08):** Detta dokument innehåller kronologisk historik och äldre rekommendationer. Aktuellt beslut, aktuell commit och nästa åtgärd står i [STATUS.md](../STATUS.md); tidigare SF-NEXT-09-noteringar om obekräftat CI-fel ersätts av verifierad GitHub-körning på PR #120 och tidigare main. All releaseacceptans är fortfarande `NOT_READY`.
+
+
 Denna **kompletterande** plan avser kvalitet och användarupplevelse på den befintliga redigeraren. Den ersätter inte de ursprungliga DEV-001–015-kraven eller deras releasegrindar (`docs/development-plan.md`, `docs/release-review.md`). Kör ett steg per utvecklingsomgång. För att undvika att bryta det validerade äldre arbetsstatusschemat ligger SF-NEXT-steget här i stället för att omnumrera den historiska DEV-listan.
 
 ## SF-NEXT-01 – avstämning av faktisk status
@@ -147,3 +150,11 @@ Reproducerat och korrigerat felvänt egenskapspaneltillstånd vid öppna/stäng 
 CI-evidens uppdaterad för felande delprov. Python-releasegrindtest 10/10 PASS och planeringshygien PASS. **Samlad CI-kandidatverifiering återstår**, eftersom lokalt `rfc8785` saknas och Agent Workspace saknar Python. `SF-NEXT-09` förblir partiellt utfört tills CI-verifiering för denna revision har PASS; release är `NOT_READY`. Se `docs/sf-next-09-candidate-verification.md`.
 
 **Observerad spärr SF-NEXT-09:** `panel-workflow-browser.mjs` uppvisar intermittent bildersättningsfel i iPad portrait/mobil efter längre eller riktad browserkörning. Ingen komplett kandidat-PASS har uppnåtts; nästa steg är REPAIR med diagnostik och reproducerbart test, därefter full CI.
+
+## DOC-FIX-01–03 – dokumentationsharmonisering (2026-11-08)
+
+- **DOC-FIX-01:** PPD 0.4 och faktisk Pages-workflow dokumenterade i PR #119 (mergad).
+- **DOC-FIX-02:** användarguide och källbelagd funktionsprofil uppdaterade i PR #120 (mergad).
+- **DOC-FIX-03:** status, senaste kodrevision, CI-evidens och nästa prioritet harmoniseras med `STATUS.md` och `.system-builder/work-status.yaml` i separat dokumentations-PR. Den äldre DEV-004–015-planen är fortsatt normerande för kvarstående full acceptans.
+
+**Aktuellt efter DOC-FIX-03:** kontrollera/slutför CI och Pages för `main` efter PR #120 samt utred Pages-fel; planera därefter återstående manuella releasegrindar. De gamla uppmaningarna ovan att starta SF-NEXT-07a/08 eller reparera SF-NEXT-09 är **historiska**, inte aktiva arbetsorder. Produktionsrelease förblir **NOT_READY**.
