@@ -106,3 +106,27 @@ Minskad rörelse tillämpar slutläget direkt men behåller klickstegen. Uppspel
 Importerade andra effekter bevaras men spelas inte. PDF/PPTX/bildexport är statiska
 med samtliga synliga objekt och exportvarning. Ingen avancerad tidslinje,
 ljud-/videohantering eller nya schemafält ingår i denna första version.
+
+## Implementerad funktionsprofil – avstämning 2026-11-08
+
+Den ursprungliga specifikationen ovan är **normerande målbild**; den får inte
+likställas med att alla krav har full acceptans. Följande delmängd kan beläggas
+direkt i redigerarens kod och automatiserade tester på `main` efter PR #119:
+
+| Område | Implementerad användarfunktion | Begränsning och evidens |
+| --- | --- | --- |
+| Tabeller | Celltext, rubrikcell, rader/kolumner, horisontell sammanfogning och **Dela cell**, kolumnbredder, marginaler, kantlinjer | Delning gäller endast giltigt horisontellt spann utan vertikala spann och inkonsekvent rutnät. `src/editor/ObjectEditors.tsx`, `src/editor/tableCells.ts`, `tests/table-split-browser.mjs` |
+| Diagram | Stapel/linje/cirkel; namn, kategorier, numeriska värden; skapa, ta bort och flytta serier/kategorier utan JSON | Minst en serie/kategori. Kategoriflytt och borttagning synkroniserar värden. `src/editor/ObjectEditors.tsx`, `tests/data-ribbon-browser.mjs` |
+| Responsiva paneler | Växla mellan bilder, arbetsyta och egenskaper; markering och paneltillstånd hålls samman; bildersättning | Automatiserade Chromium-prov på skärmstorlekar, inte fysisk Safari-acceptans. `src/ui/EditorApp.tsx`, `tests/panel-workflow-browser.mjs` |
+| Bildredigering | Infoga, ersätt, beskär visuellt och ändra bildinställningar | Full export- och hårdvaruparitet ej slutaccepterad. `src/ui/EditorApp.tsx`, `src/editor/ImageCropEditor.tsx` |
+| Presentation | Enkel toningsövergång och objektanimeringar på PPD 0.4; offline HTML-spelare | Ingen avancerad animationstidslinje eller Office-animeringsexport. `src/ui/AnimationPanel.tsx`, `src/core/playback.ts` |
+| Export | Fristående HTML, PDF, PPTX och rasterformat med exportprofiler och varningar | OOXML-/PDF-regressionstester finns, men faktisk Office Mac/Windows och oberoende PDF-läsare återstår som acceptanskrav. `src/export/`, `docs/release-review.md` |
+
+**Versionsgräns:** Nya presentationer använder PPD 0.4.0, men formatets
+schema- och modellstöd innebär inte att varje egenskap har komplett
+redigering, rendering och export. Se `docs/ppd-contract.md`.
+
+**Releasegräns:** Automatiskt verifierad delmängd betyder inte att hela
+MVP:n är färdig. `NOT_READY` kvarstår tills öppna releasegrindar fått
+egna belägg. När en funktion eller ett acceptanskrav ändras bör både
+matrisen och `docs/user-guide.md` uppdateras.
