@@ -1,6 +1,6 @@
-# PPD 0.4.0 – konkret formatförslag (brytande version)
+# PPD 0.4.0 – historiskt formatförslag (brytande version)
 
-**Status:** föreslaget kontrakt, ännu **inte** driftsatt. Källa: `proposals/ppd-0.4.0.schema.json`. `schemas/ppd.schema.json` förblir 0.3.1 så att appen fungerar fram till en samordnad övergång.
+**Historiskt beslutsunderlag:** Detta var ett förslag innan införandet. Nu skapar `createDocument()` PPD 0.4.0 och `schemas/ppd.schema.json` är det kanoniska 0.4.0-schemat. Förslagskopian ligger kvar i `proposals/ppd-0.4.0.schema.json`. Beskrivna införandesteg nedan är historiska och ska inte tolkas som återstående arbete utan ny kontroll av koden. Se `docs/ppd-contract.md`.
 
 ## Varför version 0.4.0 och inte 0.3.2?
 
