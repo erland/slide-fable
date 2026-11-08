@@ -1,4 +1,4 @@
-# PPD 0.4 – spärrkontroll inför standardbyte
+# PPD 0.4 – historisk spärrkontroll inför standardbyte
 
 Den här PR:en lägger till en **körbar beredskapskontroll**, inte ett formatbyte. Kontrollens uppgift är att uttryckligen visa kvarvarande obligatoriska beroenden innan `createDocument()` börjar skriva 0.4.0.
 
