@@ -217,7 +217,7 @@ current_main_status:
     status_at_assessment: in_progress
   latest_main_pages:
     run_id: 42478775696
-    status_at_assessment: in_progress
+    result: failure
   previous_pages_failure:
     run_id: 42477107473
     result: failure
