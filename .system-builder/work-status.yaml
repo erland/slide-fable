@@ -5,8 +5,8 @@ implementation: in_progress
 selected_step: null
 in_progress: null
 next:
-  recommended: RELEASE_CI_DEPLOY_REVIEW
-  title: Kontrollera senaste main-verifiering och utred felande Pages-deploy; därefter planera manuella releasegrindar
+  recommended: DEV-004
+  title: Komplettera historisk migration och öppna acceptansgrindar (ursprunglig DEV-plan; se även current_main_status för operativ rekommendation)
 blocking_issues:
 - id: R-01
   description: Full historisk 0.1/0.2-migration saknar representativa ursprungliga
@@ -199,6 +199,8 @@ continuation_progress:
   note: Earlier SF-NEXT-09 Agent Workspace failures are historical; GitHub CI on merged PR #118 passed. Manual legacy DEV-004 through DEV-015 acceptance remains open.
   release_readiness: NOT_READY
 current_main_status:
+  operational_next_action: RELEASE_CI_DEPLOY_REVIEW
+  operational_next_description: Kontrollera senaste main-verifiering och utred Pages-deploy; därefter manuella releasegrindar
   date: '2026-11-08'
   commit: 9e0ed268dfce72295f535e480ea964a2275f19a5
   recent_merges: [118, 119, 120]
