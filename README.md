@@ -6,7 +6,7 @@ Slide Fable är ett svenskspråkigt presentationsverktyg byggt med React, TypeSc
 
 **[Öppna Slide Fable på GitHub Pages](https://erland.github.io/slide-fable/)**
 
-> **Utvecklingsversion:** GitHub Pages-adressen är den avsedda installationsadressen, men fungerar först när repositoryts Pages-källa är inställd på **GitHub Actions** och en release har publicerats och distribuerats. Projektets aktuella releasebedömning är **NOT_READY** för fullständig MVP/produktion; se [releasegranskningen](docs/release-review.md). En tillgänglig demo är inte ett godkännande av alla funktioner.
+> **Utvecklingsversion:** GitHub Pages-adressen är den avsedda installationsadressen, och kan publiceras genom push till `main` eller manuell körning av deploy-workflowen, förutsatt att GitHub Pages är konfigurerat med **GitHub Actions** som källa. Projektets aktuella releasebedömning är **NOT_READY** för fullständig MVP/produktion; se [releasegranskningen](docs/release-review.md). En tillgänglig demo är inte ett godkännande av alla funktioner.
 
 ## Kom igång
 
@@ -68,9 +68,13 @@ python scripts/verify_release_candidate.py
 
 ## Release och GitHub Pages
 
-[Deploy-workflow](.github/workflows/deploy-pages.yml) körs när en **GitHub-release publiceras** (inte en prerelease). Den checkar ut release-taggen, installerar beroenden, kör lint och enhetstester, bygger med `SF_BUILD_ID` satt till release-taggen och publicerar `dist/` till GitHub Pages. Versionsnumret som visas i den publicerade appens sidfot kommer alltså från release-taggen, exempelvis `v0.6.0`, utan separat ändring av `package.json`.
+[Deploy-workflow](.github/workflows/deploy-pages.yml) startar vid **push till `main`** eller manuell `workflow_dispatch`, inte när en GitHub-release publiceras. Den checkar ut den aktuella koden, installerar Node-beroenden och Playwright Chromium, kör lint och `npm test`, bygger med `SF_BUILD_ID` satt till commit-SHA och försöker distribuera `dist/` till GitHub Pages. Visad byggidentitet är därför baserad på commit-SHA, inte automatiskt på en release-tagg.
 
-Första gången behöver **Settings → Pages → Build and deployment → Source** ställas in på **GitHub Actions**. Publicera en release från en commit som finns på huvudgrenen efter merge och kontrollera den faktiska publiceringen samt installation och offlinefunktion.
+Första gången behöver **Settings → Pages → Build and deployment → Source** ställas in på **GitHub Actions**. Kontrollera att deploy-jobbet verkligen passerar och att tjänsten fungerar innan installationslänken betraktas som tillgänglig. Deploy och releaseacceptans är skilda beslut; projektet är fortfarande **NOT_READY** för full MVP/produktion.
+
+## Aktivt presentationsformat
+
+Nya dokument skapas som **PPD 0.4.0** i `src/core/model.ts`; `schemas/ppd.schema.json` är det aktiva 0.4.0-schemat. Äldre 0.3.1-schema finns separat i `schemas/ppd-0.3.1.schema.json`. Detta beskriver **implementerad formatversion**, inte att alla formatfunktioner har fullständig UI-/PDF-/PPTX-paritet eller att releasen är accepterad. Se [PPD-kontraktet](docs/ppd-contract.md).
 
 ## Dokumentation
 
