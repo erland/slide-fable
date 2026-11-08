@@ -1,5 +1,8 @@
 # Slutgranskning – Slide Fable 0.5.0
 
+> **Statusavstämning 2026-11-08, efter PR #120:** Senaste identifierade `main` är `9e0ed268dfce72295f535e480ea964a2275f19a5`. GitHub PR-verifiering [#120 / 42477284467](https://github.com/erland/slide-fable/actions/runs/42477284467) är **success** på PR-HEAD; föregående `main` [42477107458](https://github.com/erland/slide-fable/actions/runs/42477107458) är **success**. Verifiering och Pages-deploy för nya `main` var **pågående vid avstämningen** ([verifiering](https://github.com/erland/slide-fable/actions/runs/42478775686), [Pages](https://github.com/erland/slide-fable/actions/runs/42478775696)). Äldre Pages-deploy [42477107473](https://github.com/erland/slide-fable/actions/runs/42477107473) misslyckades; orsaken utreds separat. Automatisk CI-success är **inte** bevis för att manuella RG-005–010 eller full MVP-acceptans är klara. Grindstatus `NOT_READY` kvarstår. För entydig aktuell lägesbild, se [STATUS.md](../STATUS.md).
+
+
 Bedömning: **NOT_READY** för MVP/produktion. Utvecklingsleveransen är körbar och
 har automatiserat verifierade delkedjor. Genomgången når DEV-015, men det innebär
 inte att alla föregående klarkriterier är uppfyllda. Originalkraven har inte
