@@ -1,5 +1,7 @@
 # PPD 0.4 – historisk spärrkontroll inför standardbyte
 
+> **Historiskt teststeg, inte aktuell standardstatus.** Nya dokument skapas nu i PPD 0.4.0 och `schemas/ppd.schema.json` är också 0.4.0. Tabellen, den tidigare rekommendationen och dåtidens grindutfall nedan avser läget **före** formatbytet och ska inte tolkas som aktuell implementationsstatus. Se `docs/ppd-contract.md` och `src/core/model.ts`.
+
 Den här PR:en lägger till en **körbar beredskapskontroll**, inte ett formatbyte. Kontrollens uppgift är att uttryckligen visa kvarvarande obligatoriska beroenden innan `createDocument()` börjar skriva 0.4.0.
 
 ## Bekräftade hinder från den aktuella kodbasen
