@@ -25,6 +25,10 @@ def validate_profile(profile: dict) -> dict:
             raise ValueError(f'Invalid gate kind/status for {gid}')
         if not all(isinstance(gate.get(x), str) and gate[x].strip() for x in ('area', 'evidence', 'scope')):
             raise ValueError(f'Incomplete evidence/scope for {gid}')
+        if kind == 'AUTOMATED':
+            required = gate.get('required_checks')
+            if not isinstance(required, list) or not required or any(not isinstance(n, str) or not n.strip() for n in required) or len(set(required)) != len(required):
+                raise ValueError(f'Automated gate {gid} needs unique required_checks')
         if kind == 'BLOCKED' and status != 'BLOCKED':
             raise ValueError(f'Blocked gate {gid} must be BLOCKED')
         if kind != 'AUTOMATED' and status == 'PASS':
@@ -36,14 +40,22 @@ def validate_profile(profile: dict) -> dict:
 def summarize(profile: dict, automated_checks: list[dict] | None = None) -> dict:
     """Derive current evidence state. Only exact named CI checks can become PASS."""
     validate_profile(profile)
-    checks = {c['name']: c.get('result') for c in (automated_checks or [])}
+    checks: dict[str, str] = {}
+    for check in automated_checks or []:
+        name, result = check.get('name'), check.get('result')
+        if not isinstance(name, str) or name in checks or result not in {'PASS', 'FAIL'}:
+            raise ValueError('Check evidence must have unique names and PASS/FAIL result')
+        checks[name] = result
     rows = []
     for gate in profile['gates']:
         status = gate['status']
-        check = gate.get('ci_check')
-        if gate['kind'] == 'AUTOMATED' and check and check in checks:
-            status = checks[check] if checks[check] in {'PASS', 'FAIL'} else 'PENDING'
-        rows.append({**gate, 'result': status})
+        missing = []
+        if gate['kind'] == 'AUTOMATED':
+            required = gate['required_checks']
+            missing = [name for name in required if name not in checks]
+            status = ('FAIL' if any(checks.get(name) == 'FAIL' for name in required)
+                      else 'PENDING' if missing else 'PASS')
+        rows.append({**gate, 'result': status, **({'missing_checks': missing} if gate['kind'] == 'AUTOMATED' else {})})
     return {
         'profile_schema_version': 1,
         'release_readiness': 'NOT_READY',

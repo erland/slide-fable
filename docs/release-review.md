@@ -111,3 +111,7 @@ från faktisk CI-körning; `RG-005`–`RG-008` och `RG-010` är manuella
 accepterans-/plattformskontroller utan attest; `RG-009` är blockerad av saknat
 historiskt originalunderlag. Green CI/Chromium bevisar inte Safari på fysisk
 Apple-enhet, Office-redigerbarhet eller en fullständig MVP-release.
+
+## SF-NEXT-08 – uppdatering 2026-11-08
+
+Automatiska grindar `RG-001`–`RG-004` kräver numera all sin namngivna kontroll-evidens och kan inte längre få PASS enbart på exempelvis lint. Se `docs/sf-next-08-release-evidence.md` för Agent Workspace-körningar och återstående manuella protokoll. **Releasestatusen är fortsatt NOT_READY**; ett grönt automatiskt delprov stänger inte manuella grindar.

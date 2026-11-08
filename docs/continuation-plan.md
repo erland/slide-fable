@@ -117,3 +117,33 @@ Denna **kompletterande** plan avser kvalitet och användarupplevelse på den bef
 - **Leverans:** `docs/sf-next-06-ux-release-review.md` med källbelagd arbetsflödesmatris, P1/P2-åtgärdskandidater och releasegrindar. Ingen applikationskod har ändrats och ingen ny browser-/Office-/Safari-verifiering påstås.
 - **Beslut:** Release `NOT_READY` kvarstår. Automatisk deltesttäckning är inte formell acceptans. Gamla DEV-004–015 och RG-001–010 ändras inte.
 - **Nästa avgränsade steg:** SF-NEXT-07a – UI-kommando för att dela horisontellt sammanslagen tabellcell, med tester för modell, Ångra, persistens, PPTX och responsiva vyer. Följ därefter panelarbetsflöden och verkliga releaseprov.
+
+## SF-NEXT-07a – Dela sammanslagen tabellcell (implementation 2026-11-08)
+
+Kommando, säker modellfunktion, enhetstest och browserregression levererade. Tre enhetstester PASS. **Pending verification:** npm build PASS i Agent Workspace; full npm test avbröts på tidsgräns och separat lint återstår; ej markera completed. Se `docs/sf-next-07a-verification.md`. Efter full PASS: SF-NEXT-07b, sammanhängande panel- och markeringstest. Release fortsatt NOT_READY.
+
+## SF-NEXT-07a – slutverifierat 2026-11-08
+
+Horisontellt sammanslagna celler kan nu delas via UI med bevarad innehålls- och cellidentitet, säker tabellbredd och validerad PPTX-tabellstruktur. **COMPLETED:** ESLint PASS, 180 enhetstester PASS, alla grupper av browserregressioner PASS och TypeScript/Vite-build PASS i Agent Workspace. Se `docs/sf-next-07a-verification.md` för testgrupper, miljö, omfattning och återstående releasegrindar.
+
+**SF-NEXT-07b (rekommenderat nästa steg):** Testa och förbättra sammanhängande markera objekt → öppna/förankra egenskapspanel → redigera → byt bild → återgå i desktop, iPad portrait och mobil. Utgå från verifierade UX-problem, undvik ny generell panelarkitektur utan behov.
+
+
+## SF-NEXT-07b – sammanhängande panel- och markeringstest (COMPLETED 2026-11-08)
+
+Reproducerat och korrigerat felvänt egenskapspaneltillstånd vid öppna/stäng i `EditorApp.tsx`. Ny sammanhängande browserregression `tests/panel-workflow-browser.mjs` omfattar desktop/iPad portrait/mobil, objektmarkering, formatering, panelbyte, stäng/återöppna samt bildinfogning/ersättning. **ESLint, 180/180 enhetstester, samtliga browserregressioner i tre grupper och produktionsbygge PASS** i Agent Workspace. Se `docs/sf-next-07b-verification.md`.
+
+**SF-NEXT-08 – rekommenderat nästa steg:** samla releasebevis för riktig Safari/iPad/iPhone, Office Mac och Windows, självständig PDF-läsare och tillgänglighet; avstämning mot RG-001–010 och AT-krav. Håll historisk 0.1/0.2-migration blockerad utan ursprungliga filer. Ändra inte `NOT_READY` utan acceptans.
+
+## SF-NEXT-08 – verifierbar release-evidens (2026-11-08)
+
+**Avgränsad leverans genomförd.** `RG-001`–`RG-004` har kompletta kontrollkrav och kan inte längre felaktigt få PASS med en ensam delkontroll. Nya Python-tester, GitHub Actions-evidensfil och dokumenterad manuell acceptansplan. Se `docs/sf-next-08-release-evidence.md`. Fysisk Safari, Office, oberoende PDF och historisk PPD kvarstår; release **NOT_READY**.
+
+**Nästa rekommenderade steg:** kör full kandidat- och CI-verifiering med Python-beroenden och samla bevisfil. Därefter genomför manuella RG-005–010 och prioritera bekräftade fel.
+
+
+## SF-NEXT-09 – sammanställd releaseverifiering (2026-11-08)
+
+CI-evidens uppdaterad för felande delprov. Python-releasegrindtest 10/10 PASS och planeringshygien PASS. **Samlad CI-kandidatverifiering återstår**, eftersom lokalt `rfc8785` saknas och Agent Workspace saknar Python. `SF-NEXT-09` förblir partiellt utfört tills CI-verifiering för denna revision har PASS; release är `NOT_READY`. Se `docs/sf-next-09-candidate-verification.md`.
+
+**Observerad spärr SF-NEXT-09:** `panel-workflow-browser.mjs` uppvisar intermittent bildersättningsfel i iPad portrait/mobil efter längre eller riktad browserkörning. Ingen komplett kandidat-PASS har uppnåtts; nästa steg är REPAIR med diagnostik och reproducerbart test, därefter full CI.

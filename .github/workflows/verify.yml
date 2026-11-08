@@ -47,6 +47,7 @@ jobs:
         env:
           EDITOR_OUTPUT: ${{ runner.temp }}/slide-fable-editor-evidence
           PWA_OUTPUT: ${{ runner.temp }}/slide-fable-pwa-evidence
+          RELEASE_EVIDENCE_OUTPUT: ${{ runner.temp }}/slide-fable-release-evidence.json
       - name: Archive editor screenshots and test reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -55,5 +56,6 @@ jobs:
           path: |
             ${{ runner.temp }}/slide-fable-editor-evidence/
             ${{ runner.temp }}/slide-fable-pwa-evidence/
+            ${{ runner.temp }}/slide-fable-release-evidence.json
           if-no-files-found: warn
           retention-days: 14

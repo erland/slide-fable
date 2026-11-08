@@ -19,7 +19,7 @@
     "test:lifecycle": "node tests/lifecycle-browser.mjs",
     "profile:history": "node --experimental-strip-types scripts/profile-history.mjs",
     "test:common-workflows": "node tests/common-workflows-browser.mjs",
-    "test:raw": "npm run test:data-ribbon && npm run test:export-advanced && node --experimental-strip-types --test tests/*.test.mjs && npm run test:lifecycle && npm run test:pwa && npm run test:inline-ux && npm run test:insert-gallery && npm run test:design-ribbon && npm run test:background-ribbon && npm run test:start-format && npm run test:text-fit-ribbon && npm run test:document-file && npm run test:motion-ribbon && npm run test:master-layout && npm run test:export-geometry && npm run test:export-data",
+    "test:raw": "npm run test:data-ribbon && npm run test:export-advanced && node --experimental-strip-types --test tests/*.test.mjs && npm run test:lifecycle && npm run test:pwa && npm run test:inline-ux && npm run test:insert-gallery && npm run test:design-ribbon && npm run test:background-ribbon && npm run test:start-format && npm run test:text-fit-ribbon && npm run test:document-file && npm run test:motion-ribbon && npm run test:master-layout && npm run test:export-geometry && npm run test:export-data && npm run test:table-split && npm run test:panel-workflow",
     "test:inline-ux": "node tests/inline-text-browser.mjs",
     "test:insert-gallery": "node tests/insert-gallery-browser.mjs",
     "test:design-ribbon": "node tests/design-ribbon-browser.mjs",
@@ -32,7 +32,9 @@
     "test:master-layout": "node tests/master-layout-browser.mjs",
     "test:export-geometry": "node tests/export-geometry-parity-browser.mjs",
     "test:export-data": "node tests/export-data-parity-browser.mjs",
-    "test:export-advanced": "node tests/export-advanced-data-browser.mjs"
+    "test:export-advanced": "node tests/export-advanced-data-browser.mjs",
+    "test:table-split": "node tests/table-split-browser.mjs",
+    "test:panel-workflow": "node tests/panel-workflow-browser.mjs"
   },
   "dependencies": {
     "@pdf-lib/fontkit": "1.1.1",
