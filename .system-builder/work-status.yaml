@@ -5,9 +5,8 @@ implementation: in_progress
 selected_step: null
 in_progress: null
 next:
-  recommended: DEV-004
-  title: Komplettera historisk migration och öppna acceptansgrindar (ursprunglig DEV-plan;
-    se även aktuell fortsättningsplan)
+  recommended: RELEASE_CI_DEPLOY_REVIEW
+  title: Kontrollera senaste main-verifiering och utred felande Pages-deploy; därefter planera manuella releasegrindar
 blocking_issues:
 - id: R-01
   description: Full historisk 0.1/0.2-migration saknar representativa ursprungliga
@@ -168,9 +167,8 @@ sequence_reviewed_through: DEV-015
 release_readiness: NOT_READY
 current_state_assessment:
   date: '2026-11-08'
-  source: ZIP snapshot inspected, GitHub main b109873028b7aaad5e6b7fbd15d0993e0ed1ade9
-    (2026-11-06)
-  github_main: b109873028b7aaad5e6b7fbd15d0993e0ed1ade9
+  source: Historical assessment on b109873 (2026-11-06); superseded by current_main_status and STATUS.md
+  github_main: b109873028b7aaad5e6b7fbd15d0993e0ed1ade9 # historical baseline, not current HEAD
   github_ci:
     run_id: 42291779345
     result: success
@@ -191,15 +189,34 @@ ux_review_sf_next_02:
   application_code_modified: false
   release_readiness: NOT_READY
 continuation_progress:
-  active_series: SF-NEXT
-  last_completed: SF-NEXT-08
+  active_series: DOC-FIX
+  last_completed: DOC-FIX-02
   date: '2026-11-08'
-  result: SF_NEXT_09_BLOCKED_BROWSER_REGRESSION_AND_PYTHON_CI
-  evidence: docs/sf-next-09-candidate-verification.md
-  verification: Python release-gate tests 10/10 PASS; planning PASS; Node npm test
-    FAILED at intermittent panel image-replacement browser assertion
-  next_recommended: REPAIR panel image replacement regression, then complete full
-    Python/Node candidate CI
-  note: Full Python candidate cannot run in current local or Agent Workspace environments.
-    No full candidate PASS asserted. Original DEV-004 blocked remains.
+  result: DOCUMENTATION_SYNC_DOC_FIX_03_IN_PROGRESS
+  evidence: STATUS.md
+  verification: GitHub PR #120 verify success (run 42477284467); prior main verify success (run 42477107458). Latest main verification pending at assessment.
+  next_recommended: RELEASE_CI_DEPLOY_REVIEW
+  note: Earlier SF-NEXT-09 Agent Workspace failures are historical; GitHub CI on merged PR #118 passed. Manual legacy DEV-004 through DEV-015 acceptance remains open.
+  release_readiness: NOT_READY
+current_main_status:
+  date: '2026-11-08'
+  commit: 9e0ed268dfce72295f535e480ea964a2275f19a5
+  recent_merges: [118, 119, 120]
+  successful_pr_verify:
+    run_id: 42477284467
+    commit: cff69fa0889c9d6b99fe62db978040d02429930d
+    result: success
+  previous_main_verify:
+    run_id: 42477107458
+    commit: e8dab853ad1578f934b56bbd10070b65122daffe
+    result: success
+  latest_main_verify:
+    run_id: 42478775686
+    status_at_assessment: in_progress
+  latest_main_pages:
+    run_id: 42478775696
+    status_at_assessment: in_progress
+  previous_pages_failure:
+    run_id: 42477107473
+    result: failure
   release_readiness: NOT_READY
