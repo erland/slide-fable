@@ -1,5 +1,8 @@
 # SF-NEXT-09 – kandidatverifiering och releasebedömning
 
+> **Efterföljande GitHub-evidens (2026-11-08):** Denna rapport skrevs innan kandidaten checkades in. Efter den korrigerade bildtestfixturen mergades [PR #118](https://github.com/erland/slide-fable/pull/118) och **Verify Slide Fable candidate** på den mergeade `main`-revisionen `dff61345` [körning 42474605854](https://github.com/erland/slide-fable/actions/runs/42474605854) rapporterade **success**. Därefter passerade [PR #119](https://github.com/erland/slide-fable/pull/119) och [PR #120](https://github.com/erland/slide-fable/pull/120) sina PR-kontroller, samt föregående main `e8dab85` [42477107458](https://github.com/erland/slide-fable/actions/runs/42477107458). Dessa resultat ger nyare evidens än de ursprungliga Agent Workspace-blockeringarna nedan. De bevisar **inte** full manuell releaseacceptans eller en lyckad Pages-driftsättning. Se [STATUS.md](../STATUS.md).
+
+
 Datum: 2026-11-08. **Steg: PARTIAL / EXTERNAL CI REQUIRED. Release: NOT_READY.**
 
 ## Ändring
