@@ -473,3 +473,9 @@
 .master-layout-list{display:flex;gap:5px;flex-wrap:wrap}
 .master-layout-list button[aria-pressed=true]{outline:2px solid #397f88}
 .master-layout-small-preview{max-width:200px}
+
+/* SF-NEXT-05: keep local draft status visible while editing, including portrait tablets. */
+.editor-header .document-heading{flex:1 1 145px;min-width:0;display:flex;flex-direction:column;gap:2px}
+.editor-header .document-heading .document-title{flex:none;display:block;min-width:0}
+.editor-header .draft-indicator{font-size:11px;line-height:1.25;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(max-width:800px){.editor-header .document-heading{order:2;flex:1 0 100%;min-width:0}.editor-header .document-heading .document-title{font-size:12px}.editor-header .draft-indicator{font-size:11px}}

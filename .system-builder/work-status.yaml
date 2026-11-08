@@ -6,24 +6,22 @@ selected_step: null
 in_progress: null
 next:
   recommended: DEV-004
-  title: Komplettera historisk migration och stäng kvarvarande acceptansgrindar
+  title: Komplettera historisk migration och öppna acceptansgrindar (ursprunglig DEV-plan; se även aktuell
+    fortsättningsplan)
 blocking_issues:
 - id: R-01
-  description: Full historisk 0.1/0.2-migration saknar representativa ursprungliga
-    filer och kontrakt.
+  description: Full historisk 0.1/0.2-migration saknar representativa ursprungliga filer och kontrakt.
 - id: R-02
-  description: Fulla redigerings-, objekt-, effekt- och exportkrav återstår enligt
-    docs/release-review.md.
+  description: Fulla redigerings-, objekt-, effekt- och exportkrav återstår enligt docs/release-review.md.
 - id: R-03
-  description: Safari/iPad/iPhone, WebKit, Office Mac/Windows och full referenssvit
-    saknar acceptans.
+  description: Safari/iPad/iPhone, WebKit, Office Mac/Windows och full referenssvit saknar acceptans.
 risks_before_implementation:
-- Full open-gate list in docs/release-review.md; no READY transition is authorized
-  by green automation alone.
+- Full open-gate list in docs/release-review.md; no READY transition is authorized by green automation
+  alone.
 validation:
   last_result: AUTOMATED_PASS_RELEASE_NOT_READY
-  scope: DEV-004–015 implementation and final review; full plan acceptance remains
-    open
+  scope: Historical DEV-004–015 acceptance review (unchanged); current main CI evidence recorded separately
+    in current_state_assessment
   evidence: .system-builder/final-verification.json
 project_hygiene:
   last_result: passed
@@ -161,7 +159,30 @@ deferred_verification:
 - check: PowerPoint Mac/Windows open and edit
   reason: Office environment unavailable
   required_before: DEV-014/015 release readiness
-execution_authorization: User authorized consecutive implementation through end of
-  plan, 2026-10-19
+execution_authorization: User authorized consecutive implementation through end of plan, 2026-10-19
 sequence_reviewed_through: DEV-015
 release_readiness: NOT_READY
+current_state_assessment:
+  date: '2026-11-08'
+  source: ZIP snapshot inspected, GitHub main b109873028b7aaad5e6b7fbd15d0993e0ed1ade9 (2026-11-06)
+  github_main: b109873028b7aaad5e6b7fbd15d0993e0ed1ade9
+  github_ci:
+    run_id: 42291779345
+    result: success
+    scope: automated GitHub verify.yml; not release acceptance
+  open_pull_requests_at_assessment: 0
+  summary: Functionality has advanced beyond original DEV-004–015 partial review; legacy acceptance gates
+    remain open until reverified.
+  review: docs/current-state-2026-11-08.md
+  continuation_plan: docs/continuation-plan.md
+  review_status: completed_docs_only
+  release_readiness: NOT_READY
+
+ux_review_sf_next_02:
+  date: '2026-11-08'
+  result: static_review_completed_browser_validation_deferred
+  evidence: docs/ux-review-sf-next-02.md
+  prioritized_finding: UX-02-01
+  next_continuation_step: SF-NEXT-03
+  application_code_modified: false
+  release_readiness: NOT_READY

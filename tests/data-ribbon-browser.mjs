@@ -34,12 +34,57 @@ try{
   await chartTools.locator('summary',{hasText:'Redigera diagramdata'}).click();
   const chartPanel=chartTools.getByRole('region',{name:'Redigera diagraminnehåll'});
   await chartPanel.waitFor();
+  const originalCategory=(await doc()).slides[0].view.elements.find(e=>e.type==='chart').dataset.categories[0];
+  const oldSeriesName=(await doc()).slides[0].view.elements.find(e=>e.type==='chart').dataset.series[0].name;
   await chartPanel.getByRole('textbox',{name:'Kategori 1'}).fill('Försäljning');
   assert.equal((await doc()).slides[0].view.elements.find(e=>e.type==='chart').dataset.categories[0],'Försäljning');
+  await chartPanel.getByRole('textbox',{name:'Serie 1 namn'}).fill('Intäkter');
+  assert.equal((await doc()).slides[0].view.elements.find(e=>e.type==='chart').dataset.series[0].name,'Intäkter');
+  // Remove one series and one category without leaving misaligned values; both operations are undoable.
+  const originalData=structuredClone((await doc()).slides[0].view.elements.find(e=>e.type==='chart').dataset);
+  assert.equal(await chartPanel.getByRole('button',{name:'Ta bort serie 1'}).isDisabled(),true);
+  await chartPanel.getByRole('button',{name:'Ny serie'}).click();
+  await chartPanel.getByRole('button',{name:'Ny kategori'}).click();
+  let ds=(await doc()).slides[0].view.elements.find(e=>e.type==='chart').dataset;
+  assert.equal(ds.series.length,2);
+  assert.equal(ds.categories.length,4);
+  assert.equal(ds.series[1].values.length,4);
+  // Move a category and verify that values of every series follow the category.
+  const beforeMoves=structuredClone(ds);
+  assert.equal(await chartPanel.getByRole('button',{name:'Flytta kategori 1 uppåt'}).isDisabled(),true);
+  assert.equal(await chartPanel.getByRole('button',{name:'Flytta kategori 4 nedåt'}).isDisabled(),true);
+  assert.equal(await chartPanel.getByRole('button',{name:'Flytta serie 1 uppåt'}).isDisabled(),true);
+  assert.equal(await chartPanel.getByRole('button',{name:'Flytta serie 2 nedåt'}).isDisabled(),true);
+  await chartPanel.getByRole('button',{name:'Flytta kategori 1 nedåt'}).click();
+  ds=(await doc()).slides[0].view.elements.find(e=>e.type==='chart').dataset;
+  assert.deepEqual(ds.categories,[beforeMoves.categories[1],beforeMoves.categories[0],...beforeMoves.categories.slice(2)]);
+  for(let j=0;j<ds.series.length;j++)assert.deepEqual(ds.series[j].values,[beforeMoves.series[j].values[1],beforeMoves.series[j].values[0],...beforeMoves.series[j].values.slice(2)]);
+  await chartPanel.getByRole('button',{name:'Flytta serie 2 uppåt'}).click();
+  ds=(await doc()).slides[0].view.elements.find(e=>e.type==='chart').dataset;
+  assert.deepEqual(ds.series.map(s=>s.id),[beforeMoves.series[1].id,beforeMoves.series[0].id]);
+  assert.deepEqual(ds.series.map(s=>s.values),[beforeMoves.series[1].values.map((v,i,a)=>i===0?a[1]:i===1?a[0]:v),beforeMoves.series[0].values.map((v,i,a)=>i===0?a[1]:i===1?a[0]:v)]);
+  // Moving back via the UI preserves the original data and series identities.
+  await chartPanel.getByRole('button',{name:'Flytta serie 1 nedåt'}).click();
+  await chartPanel.getByRole('button',{name:'Flytta kategori 2 uppåt'}).click();
+  ds=(await doc()).slides[0].view.elements.find(e=>e.type==='chart').dataset;
+  assert.deepEqual(ds,beforeMoves);
+  await chartPanel.getByRole('button',{name:'Ta bort serie 2'}).click();
+  await chartPanel.getByRole('button',{name:'Ta bort kategori 2'}).click();
+  ds=(await doc()).slides[0].view.elements.find(e=>e.type==='chart').dataset;
+  assert.equal(ds.series.length,1);
+  assert.deepEqual(ds.categories,[originalData.categories[0],originalData.categories[2],'Ny kategori']);
+  assert.deepEqual(ds.series[0].values,[originalData.series[0].values[0],originalData.series[0].values[2],0]);
   await chartTools.getByRole('button',{name:'Fler egenskaper'}).click();
   assert.equal(await page.getByRole('heading',{name:'Objektegenskaper'}).isVisible(),true);
+  for(let i=0;i<8;i++)await page.evaluate(async()=>{(await import('/src/core/editor.ts')).editorStore.undo();});
+  ds=(await doc()).slides[0].view.elements.find(e=>e.type==='chart').dataset;
+  assert.deepEqual(ds,originalData);
+  // Undo may clear the selection; the document history, not panel persistence, is under test.
+
   await page.evaluate(async()=>{(await import('/src/core/editor.ts')).editorStore.undo();});
-  assert.notEqual((await doc()).slides[0].view.elements.find(e=>e.type==='chart').dataset.categories[0],'Försäljning');
+  assert.equal((await doc()).slides[0].view.elements.find(e=>e.type==='chart').dataset.series[0].name,oldSeriesName);
+  await page.evaluate(async()=>{(await import('/src/core/editor.ts')).editorStore.undo();});
+  assert.equal((await doc()).slides[0].view.elements.find(e=>e.type==='chart').dataset.categories[0],originalCategory);
   assert.deepEqual(errors,[]);
   assert.notEqual(original,'Kvartal 1');
   console.log('PASS data-ribbon '+viewport.name);
