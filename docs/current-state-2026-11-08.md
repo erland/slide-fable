@@ -1,5 +1,8 @@
 # Slide Fable – källbaserad nulägesavstämning 2026-11-08
 
+> **Historisk avstämning:** Texten nedan beskriver källläget vid den ursprungliga analysen av `b109873`, inte senaste `main`. Efterföljande merge genom PR #118, #119 och #120 dokumenteras i [STATUS.md](../STATUS.md), med aktuell CI-status och nästa steg. Behåll detta dokument för spårbar historik, inte som auktoritativ aktuell releasebedömning.
+
+
 ## Källor och tillförlitlighet
 
 - Bifogad ZIP `slide-fable-main 4.zip`, källfiler i `src/`, tester i `tests/`, `package.json` och `docs/`.
