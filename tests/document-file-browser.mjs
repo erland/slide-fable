@@ -12,6 +12,12 @@ try{
   const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto(`http://127.0.0.1:${port}/`);
   await page.locator('.editor-menu-disclosure > summary').waitFor();
+  const heading=page.locator('.editor-header .document-heading');
+  assert.equal(await heading.isVisible(),true,view.name+': document heading is visible');
+  const localStatus=heading.getByRole('status');
+  assert.ok((await localStatus.textContent()).includes('Arbetskopia'),view.name+': local save is explicitly named');
+  assert.ok((await localStatus.getAttribute('title')).includes('separat HTML-fil'),view.name+': downloaded file is distinct from local draft');
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),view.name+': header must not cause horizontal overflow');
   const snapshot=()=>page.evaluate(async()=>structuredClone((await import('/src/core/editor.ts')).editorStore.getSnapshot().doc));
   const original=await snapshot();
   await page.locator('.editor-menu-disclosure>summary').click();

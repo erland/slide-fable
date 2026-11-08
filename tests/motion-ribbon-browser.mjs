@@ -12,6 +12,19 @@ try{
   page.on('pageerror',e=>errors.push(e.message));await page.goto(`http://127.0.0.1:${port}/`);
   const model=()=>page.evaluate(async()=>structuredClone((await import('/src/core/editor.ts')).editorStore.getSnapshot().doc));
   const initial=await model();
+  // Regression: a ribbon command must restore a panel that the user explicitly closed.
+  await page.getByRole('tab',{name:'Visa',exact:true}).click();
+  await page.getByRole('button',{name:'Övergångar och animeringar',exact:true}).click();
+  assert.equal(await page.locator('#workspace').getAttribute('data-properties-open'),'true',viewport.name+': details opened');
+  assert.equal(await page.locator('#workspace').getAttribute('data-panel'),'properties',viewport.name+': effects selected');
+  assert.equal(await page.getByRole('button',{name:'Effekter',exact:true}).getAttribute('aria-pressed'),'true');
+  assert.equal(await page.locator('#slide-properties').isVisible(),true,viewport.name+': effects panel visible');
+  await page.getByRole('button',{name:'Stäng egenskapspanel'}).click();
+  assert.equal(await page.locator('#workspace').getAttribute('data-properties-open'),'false',viewport.name+': closed by user');
+  if(viewport.width<=800)await page.getByRole('button',{name:'Arbetsyta',exact:true}).click();
+  await page.getByRole('button',{name:'Övergångar och animeringar',exact:true}).click();
+  assert.equal(await page.locator('#slide-properties').isVisible(),true,viewport.name+': command reopens closed panel');
+  assert.equal(await page.getByRole('button',{name:'Effekter',exact:true}).getAttribute('aria-pressed'),'true');
   for(const name of ['Övergångar','Animeringar','Bildspel'])assert.equal(await page.getByRole('tab',{name,exact:true}).count(),1);
   await page.getByRole('tab',{name:'Övergångar',exact:true}).click();
   const transitions=page.getByRole('group',{name:'Bildövergångar'});
