@@ -100,6 +100,7 @@ try{
   assert.equal(ds.series.length,1);
   assert.deepEqual(ds.categories,[originalData.categories[0],originalData.categories[2],'Ny kategori']);
   assert.deepEqual(ds.series[0].values,[originalData.series[0].values[0],originalData.series[0].values[2],0]);
+  await chartPanel.getByRole('button',{name:'Stäng redigering'}).click();
   await chartTools.getByRole('button',{name:'Fler egenskaper'}).click();
   assert.equal(await page.getByRole('heading',{name:'Objektegenskaper'}).isVisible(),true);
   for(let i=0;i<8;i++)await page.evaluate(async()=>{(await import('/src/core/editor.ts')).editorStore.undo();});
