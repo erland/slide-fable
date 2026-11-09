@@ -486,3 +486,12 @@
  .editor-header .document-heading .document-title{flex:0 1 auto;max-width:50%;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
  .editor-header .draft-indicator{flex:1 1 0;min-width:0;font-size:10px}
 }
+
+
+/* SF-GAP-03B: bounded responsive local icon picker. */
+.icon-picker{position:relative}
+.icon-picker-items{position:absolute;z-index:75;top:calc(100% + 5px);left:0;width:min(330px,calc(100vw - 24px));max-height:min(430px,65dvh);overflow:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--panel);box-shadow:0 8px 20px #0002}
+.icon-picker:not([open]) .icon-picker-items{display:none}
+.editor-app .icon-picker-items button{display:flex;align-items:center;gap:7px;text-align:left;white-space:normal;min-height:48px;padding:6px;font-size:12px}
+.icon-picker-items svg{flex:0 0 32px}
+@media(max-width:800px){.icon-picker-items{left:auto;right:0}}
