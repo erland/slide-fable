@@ -23,7 +23,7 @@ try{
    assert.equal(shape.type,'shape',v.name+': '+kind+' element type');
    assert.equal(shape.shapeType,kind,v.name+': '+kind+' PPD subtype');
    const polygon=page.locator(`[data-element-id="${shape.id}"] svg polygon`).first();
-   await polygon.waitFor();
+   await polygon.waitFor({state:'attached'});
    assert.ok((await polygon.getAttribute('points'))?.split(' ').length>=4,v.name+': '+kind+' polygon');
   }
   const pptx=await page.evaluate(async()=>{
