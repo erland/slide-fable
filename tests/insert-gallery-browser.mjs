@@ -1,6 +1,7 @@
 import { chromium } from 'playwright';
 import { spawn } from 'node:child_process';
 import assert from 'node:assert/strict';
+import JSZip from 'jszip';
 const server=spawn('node',['node_modules/vite/bin/vite.js','--host','127.0.0.1','--port','5191','--strictPort'],{stdio:['ignore','pipe','pipe']});
 const stderr=[];server.stderr.on('data',d=>stderr.push(String(d)));
 await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(new Error('Vite startup timeout '+stderr.join(''))),15000);server.stdout.on('data',d=>{if(String(d).includes('5191')){clearTimeout(timer);resolve();}});server.on('exit',c=>{clearTimeout(timer);reject(new Error('Vite exited '+c+stderr.join('')));});});
@@ -15,7 +16,26 @@ try{
   await panel.getByRole('button',{name:'Tabell',exact:true}).click();assert.equal(await count(),old+2,v.name+': table');
   await panel.getByRole('button',{name:'Diagram',exact:true}).click();assert.equal(await count(),old+3,v.name+': chart');
   await panel.getByText('Former ▾').click();await panel.getByRole('button',{name:'Rektangel',exact:true}).click();assert.equal(await count(),old+4,v.name+': shape');
-  await panel.getByText('Fler objekt ▾').click();await panel.getByRole('button',{name:'Process'}).click();assert.equal(await count(),old+5,v.name+': process');
+  for(const [label,kind] of [['Romb (beslut)','diamond'],['Sexhörning','hexagon'],['Femhörning','pentagon'],['Chevron (flödessteg)','chevron']]){
+   await panel.getByText('Former ▾').click();
+   await panel.getByRole('button',{name:label,exact:true}).click();
+   const shape=await page.evaluate(async()=>{const {editorStore}=await import('/src/core/editor.ts');return editorStore.slide.view.elements.at(-1);});
+   assert.equal(shape.type,'shape',v.name+': '+kind+' element type');
+   assert.equal(shape.shapeType,kind,v.name+': '+kind+' PPD subtype');
+   const polygon=page.locator(`[data-element-id="${shape.id}"] svg polygon`).first();
+   await polygon.waitFor({state:'attached'});
+   assert.ok((await polygon.getAttribute('points'))?.split(' ').length>=4,v.name+': '+kind+' polygon');
+  }
+  const pptx=await page.evaluate(async()=>{
+   const {editorStore}=await import('/src/core/editor.ts');
+   const {pptxExport}=await import('/src/export/office.ts');
+   const state=editorStore.getSnapshot();return Array.from((await pptxExport(state.doc,[editorStore.slide],'editable-first',false)).file);
+  });
+  const zip=await JSZip.loadAsync(Uint8Array.from(pptx)),slideXml=await zip.file('ppt/slides/slide1.xml')?.async('string');
+  assert.ok(slideXml,v.name+': PPTX slide must exist');
+  for(const name of ['diamond','hexagon','pentagon','chevron'])assert.ok(slideXml.includes(`prst="${name}"`),v.name+': native PPTX shape '+name);
+  console.log('PASS native flowchart shapes and editable PowerPoint '+v.name);
+  await panel.getByText('Fler objekt ▾').click();await panel.getByRole('button',{name:'Process'}).click();assert.equal(await count(),old+9,v.name+': process');
   assert.deepEqual(errors,[],v.name+': console errors');console.log('PASS insert gallery '+v.name);await context.close();
  }
 }finally{await browser.close();server.kill('SIGTERM');}
