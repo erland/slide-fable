@@ -494,7 +494,7 @@
 .icon-picker:not([open]) .icon-picker-items{display:none}
 .editor-app .icon-picker-items button{display:flex;align-items:center;gap:7px;text-align:left;white-space:normal;min-height:48px;padding:6px;font-size:12px}
 .icon-picker-items svg{flex:0 0 32px}
-@media(max-width:800px){.icon-picker-items{left:auto;right:0}}
+@media(max-width:800px){.icon-picker-items{position:fixed;top:min(22vh,170px);left:12px;right:12px;width:auto;max-height:calc(100dvh - min(22vh,170px) - 16px);overflow:auto}}
 
 
 /* SF-GAP-03C: search controls occupy full rows; icon buttons keep two-column grid. */
