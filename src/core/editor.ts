@@ -57,7 +57,16 @@ export class EditorStore{
    const paragraphs=typeof value==='string'?[]:value.paragraphs??[];
    const indices=paragraphs.map((p:D,i:number)=>p.paragraphStyle?.listType&&p.paragraphStyle.listType!=='none'?i:-1).filter((i:number)=>i>=0);
    if(indices.length<2)throw Error('BULLETS_REQUIRE_LIST');
-   this.transaction((d,s)=>{s.animations??=[];for(const index of indices)s.animations.push({id:uid('animation'),targetId,effect:'appear',phase:'entrance',trigger:'on-click',durationMs:0,delayMs:0,from:{paragraph:{x:index,y:0}}});validateCore(d);});
+   this.transaction((d,s)=>{
+    s.animations??=[];
+    // Reapplying bullet steps replaces the prior sequence without accumulating click groups.
+    const isBulletStep=(a:D)=>a.targetId===targetId&&a.effect==='appear'&&a.phase==='entrance'&&Number.isInteger(a.from?.paragraph?.x);
+    const first=s.animations.findIndex(isBulletStep);
+    s.animations=s.animations.filter((a:D)=>!isBulletStep(a));
+    const steps=indices.map((index:number)=>({id:uid('animation'),targetId,effect:'appear',phase:'entrance',trigger:'on-click',durationMs:0,delayMs:0,from:{paragraph:{x:index,y:0}}}));
+    s.animations.splice(first<0?s.animations.length:first,0,...steps);
+    validateCore(d);
+   });
    return;
   }
   this.transaction((d,s)=>{s.animations??=[];s.animations.push({id:uid('animation'),targetId,effect:effect==='exit'?'appear':effect,phase:effect==='exit'||effect==='fly-out'?'exit':'entrance',trigger:'on-click',durationMs:['fade','fly-in','fly-out'].includes(effect)?400:0,delayMs:0,...(effect==='fly-in'?{from:{offset:{x:-1,y:0}}}:effect==='fly-out'?{to:{x:1,y:0}}:{})});validateCore(d);});
