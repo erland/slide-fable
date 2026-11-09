@@ -79,3 +79,57 @@ test('same-target effects use one composed WAAPI animation with deterministic cl
  assert.equal(calls.length,2,'Replay creates only the new timeline');
  replay();assert.equal(calls[1].cancelled,true);
 });
+
+test('SF-ANIM-02 fly-in/out is valid PPD, configurable and undoable',()=>{
+ const store=new EditorStore(),id=store.add('shape');
+ store.addAnimation(id,'fly-in');store.addAnimation(id,'fly-out');
+ let [entry,exit]=store.slide.animations;
+ assert.deepEqual(entry.from,{offset:{x:-1,y:0}});assert.equal(entry.effect,'fly-in');assert.equal(entry.phase,'entrance');
+ assert.deepEqual(exit.to,{x:1,y:0});assert.equal(exit.effect,'fly-out');assert.equal(exit.phase,'exit');
+ store.updateAnimation(entry.id,{from:{offset:{x:0,y:-1}}});
+ store.updateAnimation(exit.id,{to:{x:0,y:1}});
+ assert.deepEqual(store.slide.animations[0].from.offset,{x:0,y:-1});
+ assert.deepEqual(store.slide.animations[1].to,{x:0,y:1});
+ assert.ok(!preflight(store.getSnapshot().doc,'html').warnings.some(w=>w.includes('Importerade avancerade animeringar')),'Supported fly effects should not trigger unsupported HTML warning');
+ assert.throws(()=>store.updateAnimation(entry.id,{from:{offset:{x:3,y:0}}}),/INVALID_ANIMATION_PATCH/);
+ validateCore(store.getSnapshot().doc);
+ store.undo();assert.deepEqual(store.slide.animations[1].to,{x:1,y:0});
+ store.redo();assert.deepEqual(store.slide.animations[1].to,{x:0,y:1});
+});
+test('SF-ANIM-02 list builds one click step per list paragraph and preserves non-list paragraphs',()=>{
+ const store=new EditorStore(),id=store.add('text');
+ store.updateElement(id,{text:{paragraphs:[
+  {id:'p0',runs:[{text:'Rubrik'}]},
+  {id:'p1',runs:[{text:'Första'}],paragraphStyle:{listType:'bullet'}},
+  {id:'p2',runs:[{text:'Andra'}],paragraphStyle:{listType:'bullet'}},
+  {id:'p3',runs:[{text:'Tredje'}],paragraphStyle:{listType:'number'}}
+ ]}});
+ store.addAnimation(id,'bullet-steps');
+ assert.equal(store.slide.animations.length,3);
+ assert.deepEqual(store.slide.animations.map(a=>a.from.paragraph.x),[1,2,3]);
+ assert.deepEqual(animationSchedule(store.slide).map(a=>a.group),[1,2,3]);
+ assert.equal(playbackSteps(store.slide),3);
+ validateCore(store.getSnapshot().doc);
+ store.undo();assert.equal(store.slide.animations?.length??0,0);
+ store.redo();assert.equal(store.slide.animations.length,3);
+});
+test('SF-ANIM-02 fly effects use relative translate without overriding shape rotation',()=>{
+ globalThis.CSS={escape:s=>s};
+ const calls=[],node={style:{visibility:'',opacity:''},animate:(frames,options)=>{calls.push({frames,options});return {cancel(){}};}};
+ const root={querySelector:()=>node};
+ const slide={animations:[{targetId:'fly',effect:'fly-in',phase:'entrance',trigger:'on-click',durationMs:400,delayMs:70,from:{offset:{x:0,y:-1}}},{targetId:'fly',effect:'fly-out',phase:'exit',trigger:'on-click',durationMs:300,delayMs:0,to:{x:1,y:0}}]};
+ applyPlayback(root,slide,1);assert.equal(calls[0].frames[0].translate,'0% -110%');assert.equal(calls[0].frames[1].translate,'0% 0%');
+ assert.equal(calls[0].options.delay,70);
+ applyPlayback(root,slide,2);assert.equal(calls[1].frames[0].translate,'0% 0%');assert.equal(calls[1].frames[1].translate,'110% 0%');
+});
+test('SF-ANIM-02 bullet animation only hides paragraph target rather than its text box',()=>{
+ globalThis.CSS={escape:s=>s};
+ const make=()=>({style:{visibility:'',opacity:''},animate(frames,options){this.frames=frames;this.options=options;return {cancel(){}};}});
+ const nodes=[make(),make(),make()],parent=make();
+ parent.querySelectorAll=()=>nodes;
+ const root={querySelector:()=>parent};
+ const slide={animations:[1,2].map((i)=>({targetId:'list',effect:'appear',phase:'entrance',trigger:'on-click',durationMs:0,delayMs:0,from:{paragraph:{x:i,y:0}}}))};
+ const clean0=applyPlayback(root,slide,0);assert.equal(parent.style.visibility,'');assert.equal(nodes[0].style.visibility,'');assert.equal(nodes[1].style.visibility,'hidden');assert.equal(nodes[2].style.visibility,'hidden');clean0();
+ const clean1=applyPlayback(root,slide,1,false,false);assert.equal(nodes[1].style.visibility,'visible');assert.equal(nodes[2].style.visibility,'hidden');clean1();
+ const clean2=applyPlayback(root,slide,2,true,false);assert.equal(nodes[1].style.visibility,'visible');assert.equal(nodes[2].style.visibility,'visible');clean2();
+});

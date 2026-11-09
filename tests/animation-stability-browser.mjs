@@ -48,6 +48,44 @@ try{
   assert.ok(result.clearAfterCancel,viewport.name+' cancels and restores inline styles');
   assert.ok(result.visibleAfterJump,viewport.name+' forward jump');
   assert.ok(result.hiddenAfterBack,viewport.name+' backward reconstruction');
+  const feature=await page.evaluate(async()=>{
+   const {applyPlayback,animationSchedule}=await import('/src/core/playback.ts');
+   const root=document.createElement('div'),shape=document.createElement('div');
+   shape.dataset.elementId='fly02';shape.style.transform='rotate(27deg)';root.append(shape);
+   const list=document.createElement('div');list.dataset.elementId='list02';
+   for(let i=0;i<3;i++){const p=document.createElement('p');p.textContent='Punkt '+(i+1);list.append(p);}
+   root.append(list);document.body.append(root);
+   const slide={animations:[
+    {id:'in',targetId:'fly02',effect:'fly-in',phase:'entrance',trigger:'on-click',durationMs:320,delayMs:80,from:{offset:{x:0,y:-1}}},
+    ...[0,1,2].map(i=>({id:'p'+i,targetId:'list02',effect:'appear',phase:'entrance',trigger:'on-click',durationMs:0,delayMs:0,from:{paragraph:{x:i,y:0}}})),
+    {id:'out',targetId:'fly02',effect:'fly-out',phase:'exit',trigger:'on-click',durationMs:300,delayMs:0,to:{x:1,y:0}}
+   ]};
+   const first=applyPlayback(root,slide,1);
+   const waapi=shape.getAnimations()[0],frames=waapi.effect.getKeyframes(),transform=shape.style.transform;
+   first();
+   const initial=applyPlayback(root,slide,0);
+   const initialHidden=[...list.querySelectorAll('p')].map(p=>getComputedStyle(p).visibility==='hidden');
+   initial();
+   const step2=applyPlayback(root,slide,2,true,false);
+   const bulletState=[...list.querySelectorAll('p')].map(p=>p.style.visibility);
+   step2();
+   const step4=applyPlayback(root,slide,4,true,false);
+   const complete=[...list.querySelectorAll('p')].map(p=>p.style.visibility);
+   step4();
+   const exit=applyPlayback(root,slide,5);
+   const exitFrames=shape.getAnimations()[0]?.effect?.getKeyframes()??[];
+   exit();root.remove();
+   return {groups:animationSchedule(slide).map(a=>a.group),from:frames[0].translate,to:frames.at(-1).translate,transform,initialHidden,bulletState,complete,exitTranslate:exitFrames.at(-1)?.translate};
+  });
+  assert.deepEqual(feature.groups,[1,2,3,4,5],viewport.name+' click groups');
+  assert.equal(feature.from,'0% -110%',viewport.name+' fly-in direction');
+  assert.equal(feature.to,'0% 0%',viewport.name+' fly-in finishes centered');
+  assert.equal(feature.transform,'rotate(27deg)',viewport.name+' rotation retained');
+  assert.deepEqual(feature.initialHidden,[true,true,true],viewport.name+' bullets hidden at start');
+  assert.deepEqual(feature.bulletState,['visible','hidden','hidden'],viewport.name+' one bullet per click');
+  assert.deepEqual(feature.complete,['visible','visible','visible'],viewport.name+' all bullets shown');
+  assert.equal(feature.exitTranslate,'110% 0%',viewport.name+' fly-out direction');
+  console.log('PASS fly and paragraph playback '+viewport.name);
   assert.deepEqual(errors,[],viewport.name+' runtime errors');
   console.log('PASS stable animations '+viewport.name);
   await context.close();

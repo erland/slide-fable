@@ -2,7 +2,7 @@ import type {D} from './model.ts';
 /** Shared by the presenter and the self-contained HTML player. Unsupported effects stay visible. */
 export function animationSchedule(slide:D){
  let group=0,previousStart=0,previousEnd=0;
- return (slide.animations??[]).filter((a:D)=>['appear','fade'].includes(a.effect)&&['entrance','exit'].includes(a.phase??'entrance')).map((a:D)=>{
+ return (slide.animations??[]).filter((a:D)=>['appear','fade','fly-in','fly-out'].includes(a.effect)&&['entrance','exit'].includes(a.phase??'entrance')).map((a:D)=>{
   const trigger=a.trigger??'on-click';
   if(trigger==='on-click'){group++;previousStart=0;previousEnd=0;}
   const anchor=trigger==='after-previous'?previousEnd:trigger==='with-previous'?previousStart:0;
@@ -17,12 +17,17 @@ export function playbackSteps(slide:D){return Math.max(0,...animationSchedule(sl
 /** Always reconstruct a step from the PPD: no WAAPI state or timer survives navigation. */
 export function applyPlayback(root:HTMLElement,slide:D,step:number,reduced=false,animate=true){
  const schedule=animationSchedule(slide),running:Animation[]=[],original=new Map<HTMLElement,{visibility:string;opacity:string}>();
- const targets=new Set<string>(schedule.map((a:D)=>a.targetId));
- for(const id of targets){
-  const node=root.querySelector<HTMLElement>('[data-element-id="'+CSS.escape(id)+'"]');if(!node)continue;
+ const keyOf=(a:D)=>a.targetId+'|'+(Number.isInteger(a.from?.paragraph?.x)?a.from.paragraph.x:'all');
+ const targets=new Set<string>(schedule.map(keyOf));
+ for(const key of targets){
+  const effects=schedule.filter((a:D)=>keyOf(a)===key);
+  const id=effects[0].targetId,index=effects[0].from?.paragraph?.x;
+  const parent=root.querySelector<HTMLElement>('[data-element-id="'+CSS.escape(id)+'"]');
+  // Paragraph effects target individual list paragraphs; the parent remains visible.
+  const node=Number.isInteger(index)?parent?.querySelectorAll<HTMLElement>('p')[index]:parent;
+  if(!node)continue;
   original.set(node,{visibility:node.style.visibility,opacity:node.style.opacity});
   const rawBase=node.style.opacity===''?1:Number(node.style.opacity),base=Number.isFinite(rawBase)?rawBase:1;
-  const effects=schedule.filter((a:D)=>a.targetId===id);
   let visible=effects[0].phase==='exit';
   for(const a of effects)if(a.group<step||(!animate&&a.group<=step))visible=a.phase!=='exit';
   node.style.visibility=visible?'visible':'hidden';node.style.opacity=visible?String(base):'0';
@@ -36,17 +41,22 @@ export function applyPlayback(root:HTMLElement,slide:D,step:number,reduced=false
   }
   if(current.length===1){
    const a=current[0],entrance=a.phase==='entrance',from=visible?base:0,to=entrance?base:0;
-   running.push(node.animate(a.effect==='fade'
-    ?[{opacity:from,visibility:'visible'},{opacity:to,visibility:entrance?'visible':'hidden'}]
-    :[{opacity:to,visibility:entrance?'visible':'hidden'},{opacity:to,visibility:entrance?'visible':'hidden'}],
-    {duration:a.effect==='appear'?1:Math.max(1,a.duration),delay:a.start,fill:'forwards',easing:'linear'}));
+   const isFly=a.effect==='fly-in'||a.effect==='fly-out';
+   const delta=a.effect==='fly-in'?a.from?.offset:a.to;
+   const off=((Number(delta?.x)||0)*110)+'% '+((Number(delta?.y)||0)*110)+'%';
+   const frames=isFly
+    ?[{opacity:entrance?0:base,visibility:'visible',translate:entrance?off:'0% 0%'},{opacity:entrance?base:0,visibility:entrance?'visible':'hidden',translate:entrance?'0% 0%':off}]
+    :a.effect==='fade'
+     ?[{opacity:from,visibility:'visible'},{opacity:to,visibility:entrance?'visible':'hidden'}]
+     :[{opacity:to,visibility:entrance?'visible':'hidden'},{opacity:to,visibility:entrance?'visible':'hidden'}];
+   running.push(node.animate(frames,{duration:a.effect==='appear'?1:Math.max(1,a.duration),delay:a.start,fill:'forwards',easing:'linear'}));
    continue;
   }
   // One WAAPI timeline per target prevents competing fill-forwards effects.
   // If two effects overlap on the same target, the latest started effect takes precedence.
   const ordered=current.map((a:D,index:number)=>({...a,index})).sort((a:D,b:D)=>a.start-b.start||a.index-b.index);
   const end=Math.max(1,...ordered.map((a:D)=>a.start+Math.max(a.effect==='appear'?1:a.duration,1)));
-  const keyframes:{offset:number;opacity:number;visibility:string}[]=[{offset:0,opacity:visible?base:0,visibility:visible?'visible':'hidden'}];
+  const keyframes:{offset:number;opacity:number;visibility:string;translate?:string}[]=[{offset:0,opacity:visible?base:0,visibility:visible?'visible':'hidden'}];
   let priorEnd=0,priorVisible=visible;
   for(let i=0;i<ordered.length;i++){
    const a=ordered[i],entrance=a.phase==='entrance',from=entrance?0:base,to=entrance?base:0;
@@ -55,10 +65,12 @@ export function applyPlayback(root:HTMLElement,slide:D,step:number,reduced=false
    // from becoming visible before its trigger time.
    if(start>priorEnd)keyframes.push({offset:start/end,opacity:priorVisible?base:0,visibility:priorVisible?'visible':'hidden'});
    const startOpacity=a.effect==='appear'?to:from;
-   keyframes.push({offset:start/end,opacity:startOpacity,visibility:entrance||a.effect==='fade'?'visible':'hidden'});
+   const isFly=a.effect==='fly-in'||a.effect==='fly-out',delta=a.effect==='fly-in'?a.from?.offset:a.to;
+   const off=((Number(delta?.x)||0)*110)+'% '+((Number(delta?.y)||0)*110)+'%';
+   keyframes.push({offset:start/end,opacity:startOpacity,visibility:entrance||a.effect==='fade'||isFly?'visible':'hidden',...(isFly?{translate:entrance?off:'0% 0%'}:{})});
    const stop=Math.min(finish,ordered[i+1]?.start??finish),progress=Math.max(0,Math.min(1,(stop-start)/Math.max(a.effect==='appear'?1:a.duration,1)));
-   const endOpacity=a.effect==='fade'?from+(to-from)*progress:to;
-   keyframes.push({offset:stop/end,opacity:endOpacity,visibility:entrance||progress<1&&a.effect==='fade'?'visible':'hidden'});
+   const endOpacity=a.effect==='fade'||isFly?from+(to-from)*progress:to;
+   keyframes.push({offset:stop/end,opacity:endOpacity,visibility:entrance||progress<1&&(a.effect==='fade'||isFly)?'visible':'hidden',...(isFly?{translate:entrance?((1-progress)*(Number(delta?.x)||0)*110)+'% '+((1-progress)*(Number(delta?.y)||0)*110)+'%':(progress*(Number(delta?.x)||0)*110)+'% '+(progress*(Number(delta?.y)||0)*110)+'%'}:{})});
    priorEnd=stop;priorVisible=entrance;
   }
   if(priorEnd<end)keyframes.push({offset:1,opacity:priorVisible?base:0,visibility:priorVisible?'visible':'hidden'});
