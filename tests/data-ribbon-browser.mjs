@@ -23,6 +23,7 @@ try{
   const original=(await doc()).slides[0].view.elements.find(e=>e.type==='table').cells[0][0].text;
   await tablePanel.getByRole('textbox',{name:'Cell 1 1'}).fill('Kvartal 1');
   assert.equal((await doc()).slides[0].view.elements.find(e=>e.type==='table').cells[0][0].text,'Kvartal 1');
+  await tablePanel.getByRole('button',{name:'Stäng redigering'}).click();
   await page.getByRole('tab',{name:'Formatera',exact:true}).click();
   const format=page.getByRole('tabpanel',{name:'Formatera'});
   await format.getByRole('group',{name:'Tabellverktyg'}).waitFor();
