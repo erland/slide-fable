@@ -49,7 +49,8 @@ try{
   await slideshow.getByRole('button',{name:'Från början'}).click();
   await page.getByRole('button',{name:'Avsluta',exact:true}).click();
   assert.deepEqual(await model(),animated,'Start slideshow must not modify document');
-  // SF-ANIM-02: directional effects and list builds must be usable in all viewports.
+  // SF-ANIM-02: return to editor and explicitly reselect the animated shape.
+  await page.evaluate(async targetId=>(await import('/src/core/editor.ts')).editorStore.select([targetId]),id);
   await page.getByRole('tab',{name:'Animeringar',exact:true}).click();
   const advanced=page.getByRole('group',{name:'Objektanimeringar'});
   await advanced.getByRole('button',{name:'Flyg in',exact:true}).click();
