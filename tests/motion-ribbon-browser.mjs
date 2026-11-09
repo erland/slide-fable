@@ -64,8 +64,8 @@ try{
   const timing=page.locator('.animation-panel .animation-timing');
   assert.equal(await timing.count(),2,viewport.name+' two scheduled effects');
   assert.match(await timing.nth(1).innerText(),/Klick 2 · Start 0 ms · Varaktighet 400 ms/);
-  await page.locator('.animation-panel').getByLabel('Fördröjning 2').fill('150');
-  await page.locator('.animation-panel').getByLabel('Fördröjning 2').press('Tab');
+  await page.locator('.animation-panel').getByRole('spinbutton',{name:'Fördröjning 2',exact:true}).fill('150');
+  await page.locator('.animation-panel').getByRole('spinbutton',{name:'Fördröjning 2',exact:true}).press('Tab');
   assert.match(await timing.nth(1).innerText(),/Klick 2 · Start 150 ms · Varaktighet 400 ms/,viewport.name+' delay updates displayed start');
   await page.locator('.animation-panel').getByLabel('Start 2').selectOption('with-previous');
   assert.match(await timing.nth(1).innerText(),/Klick 1 · Start 150 ms · Varaktighet 400 ms/,viewport.name+' grouped timing follows trigger');
