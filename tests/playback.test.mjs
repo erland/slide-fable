@@ -133,3 +133,25 @@ test('SF-ANIM-02 bullet animation only hides paragraph target rather than its te
  const clean1=applyPlayback(root,slide,1,false,false);assert.equal(nodes[1].style.visibility,'visible');assert.equal(nodes[2].style.visibility,'hidden');clean1();
  const clean2=applyPlayback(root,slide,2,true,false);assert.equal(nodes[1].style.visibility,'visible');assert.equal(nodes[2].style.visibility,'visible');clean2();
 });
+
+test('SF-ANIM-02B reapplying bullet steps replaces rather than duplicates existing steps',()=>{
+ const store=new EditorStore(),id=store.add('text');
+ store.updateElement(id,{text:{paragraphs:[
+  {id:'b0',runs:[{text:'Ett'}],paragraphStyle:{listType:'bullet'}},
+  {id:'b1',runs:[{text:'Två'}],paragraphStyle:{listType:'bullet'}}
+ ]}});
+ store.addAnimation(id,'fade');
+ store.addAnimation(id,'bullet-steps');
+ assert.equal(store.slide.animations.length,3);
+ const prior=store.slide.animations.map(a=>a.id);
+ store.addAnimation(id,'bullet-steps');
+ assert.equal(store.slide.animations.length,3,'Repeated command must not add click groups');
+ assert.equal(store.slide.animations[0].id,prior[0],'Unrelated target effect must survive');
+ assert.deepEqual(store.slide.animations.slice(1).map(a=>a.from.paragraph.x),[0,1]);
+ assert.equal(playbackSteps(store.slide),3);
+ store.undo();
+ assert.deepEqual(store.slide.animations.map(a=>a.id),prior,'Undo restores original sequence');
+ store.redo();
+ assert.equal(store.slide.animations.length,3,'Redo retains replacement');
+ validateCore(store.getSnapshot().doc);
+});
