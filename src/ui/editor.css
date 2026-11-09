@@ -494,4 +494,15 @@
 .icon-picker:not([open]) .icon-picker-items{display:none}
 .editor-app .icon-picker-items button{display:flex;align-items:center;gap:7px;text-align:left;white-space:normal;min-height:48px;padding:6px;font-size:12px}
 .icon-picker-items svg{flex:0 0 32px}
-@media(max-width:800px){.icon-picker-items{left:auto;right:0}}
+@media(max-width:800px){.icon-picker-items{position:fixed;top:min(22vh,170px);left:12px;right:12px;width:auto;max-height:calc(100dvh - min(22vh,170px) - 16px);overflow:auto}}
+
+
+/* SF-GAP-03C: search controls occupy full rows; icon buttons keep two-column grid. */
+.icon-picker-items .icon-search-label,.icon-picker-items .icon-category-filter,.icon-picker-items .icon-filter-status,.icon-picker-items .icon-empty-state{grid-column:1/-1}
+.icon-picker-items .icon-search-label{display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:600}
+.icon-picker-items .icon-search-label input{width:100%;min-width:0;min-height:36px;padding:6px 8px;border:1px solid var(--line);border-radius:6px}
+.icon-picker-items .icon-category-filter{display:flex;flex-wrap:wrap;gap:4px}
+.editor-app .icon-category-filter button{flex:1;min-height:34px;min-width:60px;justify-content:center;font-size:12px}
+.icon-category-filter button[aria-pressed="true"]{border-color:#387f89;background:#d5e5df;color:#183641;font-weight:700}
+.icon-picker-items .icon-filter-status{font-size:11px;color:var(--muted,#667)}
+.icon-picker-items .icon-empty-state{margin:4px 0;font-size:12px}
