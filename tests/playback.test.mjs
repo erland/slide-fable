@@ -109,7 +109,7 @@ test('SF-ANIM-02 list builds one click step per list paragraph and preserves non
  assert.deepEqual(animationSchedule(store.slide).map(a=>a.group),[1,2,3]);
  assert.equal(playbackSteps(store.slide),3);
  validateCore(store.getSnapshot().doc);
- store.undo();assert.equal(store.slide.animations.length,0);
+ store.undo();assert.equal(store.slide.animations?.length??0,0);
  store.redo();assert.equal(store.slide.animations.length,3);
 });
 test('SF-ANIM-02 fly effects use relative translate without overriding shape rotation',()=>{
