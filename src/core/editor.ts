@@ -50,12 +50,27 @@ export class EditorStore{
  addAnimation(targetId:string,effect:string){
   if(this.state.doc.schemaVersion!=='0.4.0')throw Error('ANIMATION_REQUIRES_PPD_040');
   const target=this.slide.view.elements.find((e:D)=>e.id===targetId&&!e.locked&&e.visible!==false);
-  if(!target||!['appear','fade','exit'].includes(effect))throw Error('INVALID_ANIMATION');
-  this.transaction((d,s)=>{s.animations??=[];s.animations.push({id:uid('animation'),targetId,effect:effect==='exit'?'appear':effect,phase:effect==='exit'?'exit':'entrance',trigger:'on-click',durationMs:effect==='fade'?400:0,delayMs:0});validateCore(d);});
+  if(!target||!['appear','fade','exit','fly-in','fly-out','bullet-steps'].includes(effect))throw Error('INVALID_ANIMATION');
+  if(effect==='bullet-steps'){
+   if(!['text','shape'].includes(target.type))throw Error('BULLETS_REQUIRE_TEXT');
+   const value=textOf(this.slide,target);
+   const paragraphs=typeof value==='string'?[]:value.paragraphs??[];
+   const indices=paragraphs.map((p:D,i:number)=>p.paragraphStyle?.listType&&p.paragraphStyle.listType!=='none'?i:-1).filter((i:number)=>i>=0);
+   if(indices.length<2)throw Error('BULLETS_REQUIRE_LIST');
+   this.transaction((d,s)=>{s.animations??=[];for(const index of indices)s.animations.push({id:uid('animation'),targetId,effect:'appear',phase:'entrance',trigger:'on-click',durationMs:0,delayMs:0,from:{paragraph:{x:index,y:0}}});validateCore(d);});
+   return;
+  }
+  this.transaction((d,s)=>{s.animations??=[];s.animations.push({id:uid('animation'),targetId,effect:effect==='exit'?'appear':effect,phase:effect==='exit'||effect==='fly-out'?'exit':'entrance',trigger:'on-click',durationMs:['fade','fly-in','fly-out'].includes(effect)?400:0,delayMs:0,...(effect==='fly-in'?{from:{offset:{x:-1,y:0}}}:effect==='fly-out'?{to:{x:1,y:0}}:{})});validateCore(d);});
  }
  updateAnimation(id:string,patch:D){
-  for(const [key,value] of Object.entries(patch))if(!(['durationMs','delayMs'].includes(key)&&Number.isInteger(value)&&Number(value)>=0&&Number(value)<=60000)&&!(key==='trigger'&&['on-click','with-previous','after-previous'].includes(String(value))))throw Error('INVALID_ANIMATION_PATCH');
-  this.transaction((d,s)=>{const a=s.animations?.find((a:D)=>a.id===id);if(!a)throw Error('ANIMATION_NOT_FOUND');Object.assign(a,patch);validateCore(d);});
+  for(const [key,value] of Object.entries(patch)){
+   const timing=['durationMs','delayMs'].includes(key)&&Number.isInteger(value)&&Number(value)>=0&&Number(value)<=60000;
+   const trigger=key==='trigger'&&['on-click','with-previous','after-previous'].includes(String(value));
+   const offset=key==='from'&&value&&typeof value==='object'&&Object.keys(value).length===1&&Object.keys(value)[0]==='offset'&&[-1,0,1].includes(value.offset?.x)&&[-1,0,1].includes(value.offset?.y)&&Math.abs(value.offset.x)+Math.abs(value.offset.y)===1;
+   const destination=key==='to'&&value&&typeof value==='object'&&Object.keys(value).length===2&&[-1,0,1].includes(value.x)&&[-1,0,1].includes(value.y)&&Math.abs(value.x)+Math.abs(value.y)===1;
+   if(!timing&&!trigger&&!offset&&!destination)throw Error('INVALID_ANIMATION_PATCH');
+  }
+  this.transaction((d,s)=>{const a=s.animations?.find((a:D)=>a.id===id);if(!a)throw Error('ANIMATION_NOT_FOUND');if('from' in patch&&a.effect!=='fly-in'||'to' in patch&&a.effect!=='fly-out')throw Error('INVALID_ANIMATION_PATCH');Object.assign(a,patch);validateCore(d);});
  }
  removeAnimation(id:string){this.transaction((_d,s)=>{s.animations=(s.animations??[]).filter((a:D)=>a.id!==id);});}
  moveAnimation(id:string,delta:number){this.transaction((_d,s)=>{const items=s.animations??[],i=items.findIndex((a:D)=>a.id===id),to=i+delta;if(i<0||to<0||to>=items.length||![-1,1].includes(delta))return;[items[i],items[to]]=[items[to],items[i]];});}
