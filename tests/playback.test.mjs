@@ -90,6 +90,7 @@ test('SF-ANIM-02 fly-in/out is valid PPD, configurable and undoable',()=>{
  store.updateAnimation(exit.id,{to:{x:0,y:1}});
  assert.deepEqual(store.slide.animations[0].from.offset,{x:0,y:-1});
  assert.deepEqual(store.slide.animations[1].to,{x:0,y:1});
+ assert.ok(!preflight(store.getSnapshot().doc,'html').warnings.some(w=>w.includes('Importerade avancerade animeringar')),'Supported fly effects should not trigger unsupported HTML warning');
  assert.throws(()=>store.updateAnimation(entry.id,{from:{offset:{x:3,y:0}}}),/INVALID_ANIMATION_PATCH/);
  validateCore(store.getSnapshot().doc);
  store.undo();assert.deepEqual(store.slide.animations[1].to,{x:1,y:0});
