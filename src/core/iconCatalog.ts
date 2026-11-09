@@ -22,3 +22,11 @@ export function iconElement(id:string,elementId:string){
    style:{fill:{color:'#ffffff',opacity:0},stroke:{color:'#183641'},strokeWidth:5},
    accessibility:{altText:icon.label}};
 }
+
+/** Case- and accent-insensitive local catalogue filtering, with no network or regex input. */
+export type IconGroup='Alla'|'IT'|'Verksamhet';
+function normalized(value:string):string{return value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('sv-SE').trim();}
+export function filterIcons(query:string,group:IconGroup='Alla'):IconChoice[]{
+ const terms=normalized(query.slice(0,120)).split(/\s+/).filter(Boolean);
+ return iconCatalog.filter(icon=>(group==='Alla'||icon.group===group)&&terms.every(term=>normalized(icon.label+' '+icon.id+' '+icon.group).includes(term)));
+}
