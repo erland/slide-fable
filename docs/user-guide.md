@@ -189,8 +189,7 @@ och resursgränser. Bilder från externa resurser behåller sina tidigare begrä
 ### Enkla övergångar och animeringar
 
 Öppna **Visa → Övergångar och animeringar**. Välj Ingen eller Toning för aktuell
-bild och ställ in övergångstiden. Markera ett objekt och välj Visa, Tona in eller
-Försvinn. Listan visar uppspelningsordningen och låter dig flytta eller ta bort
+bild och ställ in övergångstiden. Markera ett objekt och välj Visa, Tona in, Försvinn, Flyg in eller Flyg ut. För flyg-effekter kan du välja riktning i egenskapspanelen. Markera ett textobjekt med minst två punkter och välj **Punkter stegvis** för att visa en punkt per klick. Listan visar uppspelningsordningen och låter dig flytta eller ta bort
 effekter. Varje ändring kan ångras. Objektanimeringar kräver PPD 0.4.
 
 Vid klick startar nästa steg. Med föregående räknas från föregående start,
@@ -200,7 +199,7 @@ att börja på aktuell bild. Nästa/pil/mellanslag spelar nästa steg innan bild
 Föregående återställer ett steg. Befintliga fragment delar samma stegnummer.
 Minskad rörelse visar effekternas slutlägen direkt. Esc avslutar i appen.
 
-Samma enkla uppspelning följer med fristående HTML och fungerar utan nätverk.
+Samma uppspelning, inklusive flyg-effekter och stegvisa punktlistor, följer med fristående HTML och fungerar utan nätverk.
 HTML behåller hela PPD-modellen. PDF, PowerPoint och bildexport visar statiska
 bilder med alla synliga objekt; animeringar exporteras inte till Office.
 Importerade avancerade effekter bevaras i modellen och visas i listan, men spelas
