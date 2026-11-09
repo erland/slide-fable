@@ -74,6 +74,20 @@ try{
   await advanced.getByRole('button',{name:'Punkter stegvis'}).click();
   const listAnimations=(await model()).slides[0].animations.filter(a=>a.targetId===listId);
   assert.deepEqual(listAnimations.map(a=>a.from.paragraph.x),[0,1,2],viewport.name+' sequential bullet model');
+  // SF-ANIM-04: preview steps inside editor, without entering presenter mode or changing the PPD.
+  const beforePreview=await model();
+  await page.locator('.animation-panel').getByRole('button',{name:'Förhandsvisa från aktuell bild'}).click();
+  const preview=page.getByRole('dialog',{name:'Förhandsvisa animationer'});
+  assert.equal(await preview.isVisible(),true,viewport.name+' editor preview opens');
+  assert.equal(await page.locator('.presenter').count(),0,viewport.name+' no presenter mode');
+  assert.equal(await preview.locator('[data-preview-step]').getAttribute('data-preview-step'),'0');
+  await preview.getByRole('button',{name:'Nästa steg'}).click();
+  assert.equal(await preview.locator('[data-preview-step]').getAttribute('data-preview-step'),'1');
+  await preview.getByRole('button',{name:'Föregående steg'}).click();
+  assert.equal(await preview.locator('[data-preview-step]').getAttribute('data-preview-step'),'0');
+  await preview.getByRole('button',{name:'Stäng animationsförhandsvisning'}).click();
+  assert.equal(await preview.count(),0,viewport.name+' preview closes');
+  assert.deepEqual(await model(),beforePreview,viewport.name+' preview is read only');
   console.log('PASS directional effects and bullet animation UI '+viewport.name);
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),viewport.name+': no horizontal overflow');
   assert.deepEqual(errors,[],viewport.name+': no browser errors');
