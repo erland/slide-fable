@@ -21,9 +21,9 @@ export async function pptxExport(doc:D,slides:D[],profile='editable-first',inclu
    if(e.type==='vectorPath'&&!complex&&!mirrored&&e.style?.opacity!==0){
     const points=nativeIconPoints(e,position.w,position.h);
     if(points){
-     page.addShape(pptx.ShapeType.custGeom,{...position,objectName:e.accessibility?.altText??'Slide Fable-ikon',points,fill:{color:'FFFFFF',transparency:100},line:{color:(readOutline(e.style).paint?.color??'#183641').slice(1,7),width:(readOutline(e.style).width??5)*factor,...(strokeStyle(e)!=='solid'?{dashType:strokeStyle(e)==='dotted'?'sysDot':strokeStyle(e)==='dashdot'?'dashDot':'dash'}:{})}});
+     page.addShape(pptx.shapes.CUSTOM_GEOMETRY,{...position,objectName:e.accessibility?.altText??'Slide Fable-ikon',points,fill:{color:'FFFFFF',transparency:100},line:{color:(readOutline(e.style).paint?.color??'#183641').slice(1,7),width:(readOutline(e.style).width??5)*factor,...(strokeStyle(e)!=='solid'?{dashType:strokeStyle(e)==='dotted'?'sysDot':strokeStyle(e)==='dashdot'?'dashDot':'dash'}:{})}});
      const item=report.objects.find(o=>o.slideId===slide.id&&o.elementId===e.id);
-     if(item){item.status='editable';item.reason='Native redigerbar PowerPoint-friform.';}
+     if(item){item.status='native';item.reason='Native redigerbar PowerPoint-friform.';}
      continue;
     }
    }
