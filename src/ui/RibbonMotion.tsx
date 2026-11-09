@@ -1,4 +1,4 @@
-import type {D} from '../core/model';
+import {textOf,type D} from '../core/model';
 
 type MotionTab='Övergångar'|'Animeringar'|'Bildspel';
 export function RibbonMotion({mode,doc,slide,selected,disabled,onTransition,onAdd,onDetails,onPreview,onStart}: {
@@ -8,6 +8,8 @@ export function RibbonMotion({mode,doc,slide,selected,disabled,onTransition,onAd
 }){
  const transition=slide.delivery?.transition??{type:'none',durationMs:400};
  const target=slide.view.elements.find((item:D)=>selected.includes(item.id)&&!item.locked&&item.visible!==false);
+ const rich=target&&['text','shape'].includes(target.type)?textOf(slide,target):null;
+ const listCount=typeof rich==='object'?(rich?.paragraphs??[]).filter((p:D)=>p.paragraphStyle?.listType&&p.paragraphStyle.listType!=='none').length:0;
  const animations=slide.animations??[];
  if(mode==='Övergångar')return <div className="ribbon-motion" role="group" aria-label="Bildövergångar">
   <span className="ribbon-motion-title">Bildövergång</span>
@@ -22,6 +24,9 @@ export function RibbonMotion({mode,doc,slide,selected,disabled,onTransition,onAd
    <button type="button" disabled={disabled||!target} onClick={()=>{if(target)onAdd(target.id,'appear');}}>Visa</button>
    <button type="button" disabled={disabled||!target} onClick={()=>{if(target)onAdd(target.id,'fade');}}>Tona in</button>
    <button type="button" disabled={disabled||!target} onClick={()=>{if(target)onAdd(target.id,'exit');}}>Försvinn</button>
+   <button type="button" disabled={disabled||!target} onClick={()=>{if(target)onAdd(target.id,'fly-in');}}>Flyg in</button>
+   <button type="button" disabled={disabled||!target} onClick={()=>{if(target)onAdd(target.id,'fly-out');}}>Flyg ut</button>
+   <button type="button" disabled={disabled||!target||listCount<2} onClick={()=>{if(target)onAdd(target.id,'bullet-steps');}}>Punkter stegvis</button>
   </>:<span className="ribbon-motion-hint">Objektanimeringar kräver PPD 0.4</span>}
   <button type="button" onClick={onDetails}>Ordna animeringar</button>
   <button type="button" onClick={onPreview}>Förhandsvisa animeringar</button>
