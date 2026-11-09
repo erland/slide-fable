@@ -15,6 +15,21 @@ function validateEditorDocument(doc:D){
   if(!report.ready)throw Error('PPD_040_INVALID: '+(report.issues[0]?.code??'UNKNOWN'));
  }else validateCore(doc);
 }
+/** Follow stable paragraph identities when rich text is reordered. Stale steps are dropped rather than animating another paragraph. */
+function reconcileParagraphAnimations(slide:D,elementId:string,before:D|string,after:D|string){
+ const oldParagraphs=typeof before==='string'?[]:before?.paragraphs??[];
+ const newParagraphs=typeof after==='string'?[]:after?.paragraphs??[];
+ if(!oldParagraphs.length||!slide.animations?.length)return;
+ const positions=new Map<string,number>();
+ newParagraphs.forEach((p:D,i:number)=>{if(typeof p.id==='string'&&p.paragraphStyle?.listType&&p.paragraphStyle.listType!=='none')positions.set(p.id,i);});
+ slide.animations=slide.animations.flatMap((a:D)=>{
+  const index=a.from?.paragraph?.x;
+  if(a.targetId!==elementId||!Number.isInteger(index))return [a];
+  const oldId=oldParagraphs[index]?.id;
+  if(typeof oldId!=='string'||!positions.has(oldId))return [];
+  return [{...a,from:{...a.from,paragraph:{...a.from.paragraph,x:positions.get(oldId)}}}];
+ });
+}
 export class EditorStore{
  private state:EditorState;private listeners=new Set<()=>void>();private past:D[]=[];private future:D[]=[];
  constructor(doc=createDocument()){validateEditorDocument(doc);this.state={doc,slideId:doc.slides[0].id,selected:[],dirty:false,exportedRevision:null,readOnly:false,original:'',warnings:[],undo:0,redo:0};}
@@ -87,7 +102,10 @@ export class EditorStore{
  updateSlide(patch:D){this.transaction((_d,s)=>Object.assign(s,patch));}
  updateElement(id:string,patch:D){this.transaction((d,s)=>{const e=s.view.elements.find((e:D)=>e.id===id);if(!e)return;const adjusted=copy(patch);
  if(d.schemaVersion==='0.4.0'&&adjusted.style)adjusted.style=toOutline(adjusted.style);
- Object.assign(e,adjusted);const binding=s.placeholderBindings?.find((b:D)=>b.elementId===id);if(binding){binding.overrides={...binding.overrides};for(const k of ['geometry','style'])if(adjusted[k])binding.overrides[k]=copy(adjusted[k]);}});}
+ const previousText='text' in adjusted?copy(textOf(s,e)):null;
+ Object.assign(e,adjusted);
+ if(previousText!==null)reconcileParagraphAnimations(s,id,previousText,textOf(s,e));
+ const binding=s.placeholderBindings?.find((b:D)=>b.elementId===id);if(binding){binding.overrides={...binding.overrides};for(const k of ['geometry','style'])if(adjusted[k])binding.overrides[k]=copy(adjusted[k]);}});}
  formatSelected(change:SelectionFormatChange){
   validateFormatChange(change);
   const ids=new Set(this.state.selected);
@@ -117,7 +135,7 @@ export class EditorStore{
    }
   });
  }
- editText(id:string,value:D|string){this.transaction((_d,s)=>{const e=s.view.elements.find((e:D)=>e.id===id);if(e)setText(s,e,copy(value));});}
+ editText(id:string,value:D|string){this.transaction((_d,s)=>{const e=s.view.elements.find((e:D)=>e.id===id);if(e){const previous=copy(textOf(s,e));setText(s,e,copy(value));reconcileParagraphAnimations(s,id,previous,textOf(s,e));}});}
  insert(element:D){this.transaction((d,s)=>s.view.elements.push(d.schemaVersion==='0.4.0'&&element.style?{...element,style:toOutline(element.style)}:element));this.select([element.id]);}
  add(type:string,shapeType='rect'){const g=box(180+this.slide.view.elements.length*12,220,600,240),base:D={id:uid(type),type,geometry:g,style:{}};
  if(type==='text'){base.text=rich('Ny text');base.style={fontSize:40,color:'#183641'};}
