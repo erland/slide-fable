@@ -60,6 +60,15 @@ try{
   const dir=page.locator('.animation-panel').getByLabel('Riktning 2');
   await dir.selectOption('Uppifrån');
   assert.deepEqual((await model()).slides[0].animations.at(-1).from.offset,{x:0,y:-1},viewport.name+' direction saved');
+  // SF-ANIM-05: timing overview reflects the shared playback scheduler and live editing.
+  const timing=page.locator('.animation-panel .animation-timing');
+  assert.equal(await timing.count(),2,viewport.name+' two scheduled effects');
+  assert.match(await timing.nth(1).innerText(),/Klick 2 · Start 0 ms · Varaktighet 400 ms/);
+  await page.locator('.animation-panel').getByLabel('Fördröjning 2').fill('150');
+  await page.locator('.animation-panel').getByLabel('Fördröjning 2').press('Tab');
+  assert.match(await timing.nth(1).innerText(),/Klick 2 · Start 150 ms · Varaktighet 400 ms/,viewport.name+' delay updates displayed start');
+  await page.locator('.animation-panel').getByLabel('Start 2').selectOption('with-previous');
+  assert.match(await timing.nth(1).innerText(),/Klick 1 · Start 150 ms · Varaktighet 400 ms/,viewport.name+' grouped timing follows trigger');
   const listId=await page.evaluate(async()=>{
    const store=(await import('/src/core/editor.ts')).editorStore;
    const id=store.add('text');
