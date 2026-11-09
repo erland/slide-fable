@@ -76,7 +76,7 @@ try{
   const {createDocument,newSlide}=await import('/src/core/model.ts');
   const {pptxExport}=await import('/src/export/office.ts');
   const doc=createDocument(),slide=newSlide(doc,'blank');doc.slides=[slide];
-  slide.view.elements=[{...el,legend:{visible:false,showValues:false},yAxis:{min:-5,max:120}}];
+  slide.view.elements=[{...el,legend:{visible:false,showValues:false,seriesColors:{[el.dataset.series[0].id]:'#1256ab'}},yAxis:{min:-5,max:120,title:'Antal per region'}}];
   return Array.from((await pptxExport(doc,[slide],'editable-first',false)).file);
  },chart);
  const formattedZip=await JSZip.loadAsync(Uint8Array.from(formattedPptx));
@@ -87,6 +87,8 @@ try{
  assert.match(formattedXml,/<c:min val="-5"/);
  assert.match(formattedXml,/<c:max val="120"/);
  assert.ok(!/<c:showVal val="1"/.test(formattedXml),'Hidden values must not reappear in PPTX');
+ assert.match(formattedXml,/1256AB/i,'Custom series color must be preserved in native chart XML');
+ assert.ok(formattedXml.includes('Antal per region'),'Y-axis title must be exported as editable chart text');
  console.log('PASS chart formatting options in native PPTX XML');
 
  const pdfPath=path.join(work,'data.pdf'),rasterBase=path.join(work,'page');await writeFile(pdfPath,Uint8Array.from(artifact.pdf));
