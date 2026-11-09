@@ -49,6 +49,31 @@ try{
   await slideshow.getByRole('button',{name:'Från början'}).click();
   await page.getByRole('button',{name:'Avsluta',exact:true}).click();
   assert.deepEqual(await model(),animated,'Start slideshow must not modify document');
+  // SF-ANIM-02: directional effects and list builds must be usable in all viewports.
+  await page.getByRole('tab',{name:'Animeringar',exact:true}).click();
+  const advanced=page.getByRole('group',{name:'Objektanimeringar'});
+  await advanced.getByRole('button',{name:'Flyg in',exact:true}).click();
+  const fly=(await model()).slides[0].animations.at(-1);
+  assert.equal(fly.effect,'fly-in',viewport.name+' fly in created');
+  await advanced.getByRole('button',{name:'Ordna animeringar'}).click();
+  const dir=page.locator('.animation-panel').getByLabel('Riktning 2');
+  await dir.selectOption('Uppifrån');
+  assert.deepEqual((await model()).slides[0].animations.at(-1).from.offset,{x:0,y:-1},viewport.name+' direction saved');
+  const listId=await page.evaluate(async()=>{
+   const store=(await import('/src/core/editor.ts')).editorStore;
+   const id=store.add('text');
+   store.updateElement(id,{text:{paragraphs:[
+    {id:'b0',runs:[{text:'Punkt ett'}],paragraphStyle:{listType:'bullet'}},
+    {id:'b1',runs:[{text:'Punkt två'}],paragraphStyle:{listType:'bullet'}},
+    {id:'b2',runs:[{text:'Punkt tre'}],paragraphStyle:{listType:'bullet'}}
+   ]}});
+   store.select([id]);return id;
+  });
+  assert.equal(await advanced.getByRole('button',{name:'Punkter stegvis'}).isEnabled(),true);
+  await advanced.getByRole('button',{name:'Punkter stegvis'}).click();
+  const listAnimations=(await model()).slides[0].animations.filter(a=>a.targetId===listId);
+  assert.deepEqual(listAnimations.map(a=>a.from.paragraph.x),[0,1,2],viewport.name+' sequential bullet model');
+  console.log('PASS directional effects and bullet animation UI '+viewport.name);
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),viewport.name+': no horizontal overflow');
   assert.deepEqual(errors,[],viewport.name+': no browser errors');
   console.log('PASS motion ribbon '+viewport.name);
