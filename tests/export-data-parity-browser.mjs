@@ -80,7 +80,8 @@ try{
   return Array.from((await pptxExport(doc,[slide],'editable-first',false)).file);
  },chart);
  const formattedZip=await JSZip.loadAsync(Uint8Array.from(formattedPptx));
- const formattedXml=await formattedZip.file('ppt/charts/chart1.xml')?.async('string');
+ const formattedChartPath=Object.keys(formattedZip.files).find(name=>/^ppt\/charts\/chart\d+\.xml$/.test(name));
+ const formattedXml=formattedChartPath?await formattedZip.file(formattedChartPath)?.async('string'):undefined;
  assert.ok(formattedXml,'Native editable chart must remain present after formatting');
  assert.ok(!formattedXml.includes('<c:legend>'),'Hidden legend must not appear in PPTX chart');
  assert.match(formattedXml,/<c:min val="-5"/);
