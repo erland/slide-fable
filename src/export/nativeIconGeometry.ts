@@ -29,10 +29,8 @@ export function nativeIconPoints(element:D, widthInches:number,heightInches:numb
    case SVGPathData.HORIZ_LINE_TO:{x=cmd.x;points.push(pt(x,y));break;}
    case SVGPathData.VERT_LINE_TO:{y=cmd.y;points.push(pt(x,y));break;}
    case SVGPathData.CURVE_TO:{
-    points.push({...pt(cmd.x,y=cmd.y),curve:{type:'cubic',...Object.fromEntries([])}} as FreeformPoint);
-    const last=points[points.length-1] as {curve:{type:'cubic';x1:number;y1:number;x2:number;y2:number}};
-    last.curve={type:'cubic',x1:cmd.x1*sx,y1:cmd.y1*sy,x2:cmd.x2*sx,y2:cmd.y2*sy};
-    x=cmd.x;break;
+    points.push({...pt(cmd.x,cmd.y),curve:{type:'cubic',x1:cmd.x1*sx,y1:cmd.y1*sy,x2:cmd.x2*sx,y2:cmd.y2*sy}});
+    x=cmd.x;y=cmd.y;break;
    }
    case SVGPathData.ARC:{
     // Sample only the catalog's elliptic arcs; native editable freeform paths
