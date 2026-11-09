@@ -61,6 +61,19 @@ try{
   assert.equal(formatted.yAxis.max,undefined);
   console.log('PASS chart formatting authoring and PPD persistence '+viewport.name);
 
+  // SF-GAP-02B: series colors use stable IDs and Y-axis title is part of the PPD.
+  const firstSeries=(await doc()).slides[0].view.elements.find(e=>e.id===chartId).dataset.series[0];
+  await chartPanel.getByRole('textbox',{name:'Y-axelns rubrik'}).fill('Timmar');
+  await chartPanel.getByLabel('Serie 1 färg').fill('#1256ab');
+  const colored=(await doc()).slides[0].view.elements.find(e=>e.id===chartId);
+  assert.equal(colored.yAxis.title,'Timmar');
+  assert.equal(colored.legend.seriesColors[firstSeries.id],'#1256ab');
+  const preview=page.locator('[data-element-id="'+chartId+'"] svg[aria-label="Linjediagram"]');
+  assert.equal(await preview.locator('polyline').first().getAttribute('stroke'),'#1256ab');
+  assert.ok(await preview.getByText('Timmar').count()>=1,'Y-axis title must be present in the rendered SVG preview');
+  console.log('PASS stable series color and axis title '+viewport.name);
+
+
   const originalCategory=(await doc()).slides[0].view.elements.find(e=>e.type==='chart').dataset.categories[0];
   const oldSeriesName=(await doc()).slides[0].view.elements.find(e=>e.type==='chart').dataset.series[0].name;
   await chartPanel.getByRole('textbox',{name:'Kategori 1'}).fill('Försäljning');
@@ -89,6 +102,7 @@ try{
   await chartPanel.getByRole('button',{name:'Flytta serie 2 uppåt'}).click();
   ds=(await doc()).slides[0].view.elements.find(e=>e.type==='chart').dataset;
   assert.deepEqual(ds.series.map(s=>s.id),[beforeMoves.series[1].id,beforeMoves.series[0].id]);
+  assert.equal((await doc()).slides[0].view.elements.find(e=>e.id===chartId).legend.seriesColors[firstSeries.id],'#1256ab','Series color must survive reordering');
   assert.deepEqual(ds.series.map(s=>s.values),[beforeMoves.series[1].values.map((v,i,a)=>i===0?a[1]:i===1?a[0]:v),beforeMoves.series[0].values.map((v,i,a)=>i===0?a[1]:i===1?a[0]:v)]);
   // Moving back via the UI preserves the original data and series identities.
   await chartPanel.getByRole('button',{name:'Flytta serie 1 nedåt'}).click();

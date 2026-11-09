@@ -27,10 +27,12 @@ export function ChartEditor({element,onChange}:{element:D;onChange:(p:D)=>void})
   <fieldset><legend>Diagramformatering</legend>
    <label><input type="checkbox" aria-label="Visa teckenförklaring" checked={element.legend?.visible!==false} onChange={e=>onChange({legend:{...element.legend,visible:e.target.checked}})}/> Visa teckenförklaring</label>
    <label><input type="checkbox" aria-label="Visa värdeetiketter" checked={element.legend?.showValues!==false} onChange={e=>onChange({legend:{...element.legend,showValues:e.target.checked}})}/> Visa värdeetiketter</label>
+   {element.chartType!=='pie'&&<label>Y-axelns rubrik<input aria-label="Y-axelns rubrik" maxLength={100} value={element.yAxis?.title??''} onChange={event=>onChange({yAxis:{...element.yAxis,title:event.target.value}})}/></label>}
    {element.chartType!=='pie'&&<div className="button-row">{(['min','max'] as const).map(key=><label key={key}>{key==='min'?'Y-axel minimum':'Y-axel maximum'}<input type="number" aria-label={key==='min'?'Y-axel minimum':'Y-axel maximum'} value={element.yAxis?.[key]??''} onChange={event=>{const raw=event.target.value;const axis={...element.yAxis};if(raw==='')delete axis[key];else{const num=Number(raw);if(!Number.isFinite(num))return;if(key==='min'&&axis.max!==undefined&&num>=axis.max)return;if(key==='max'&&axis.min!==undefined&&num<=axis.min)return;axis[key]=num;}onChange({yAxis:axis});}}/></label>)}</div>}
   </fieldset>
   <div className="button-row">{ds.series.map((series:D,i:number)=><div key={series.id} className="button-row">
    <label>Serie {i+1} namn<input aria-label={`Serie ${i+1} namn`} value={series.name??''} onChange={e=>edit(d=>d.series[i].name=e.target.value)}/></label>
+   {element.chartType!=='pie'&&<label>Serie {i+1} färg<input type="color" aria-label={`Serie ${i+1} färg`} value={element.legend?.seriesColors?.[series.id]??['#cf694c','#387f89','#d5af60','#697cbd','#6c9467','#bc7496'][i%6]} onChange={e=>onChange({legend:{...element.legend,seriesColors:{...element.legend?.seriesColors,[series.id]:e.target.value}}})}/></label>}
    <button type="button" aria-label={`Flytta serie ${i+1} uppåt`} disabled={i===0} onClick={()=>moveSeries(i,-1)}>Uppåt</button>
    <button type="button" aria-label={`Flytta serie ${i+1} nedåt`} disabled={i===ds.series.length-1} onClick={()=>moveSeries(i,1)}>Nedåt</button>
    <button type="button" aria-label={`Ta bort serie ${i+1}`} disabled={ds.series.length<=1} onClick={()=>edit(d=>{d.series.splice(i,1);})}>Ta bort serie</button>
