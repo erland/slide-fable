@@ -51,8 +51,9 @@ try{
   await page.getByRole('tab',{name:'Infoga'}).click();
   await page.locator('.insert-gallery-group').getByRole('button',{name:'Bilder'}).click();
   await fileInput.setInputFiles({name:'original.png',mimeType:'image/png',buffer:picture});
-  const imageHandle=await page.waitForFunction(async()=>{const s=(await import('/src/core/editor.ts')).editorStore.getSnapshot();const e=s.doc.slides[0].view.elements.find(e=>e.type==='image');return e?{id:e.id,assetRef:e.assetRef}:null;});
+  const imageHandle=await page.waitForFunction(async()=>{const [{editorStore:store},{updateSafety}]=await Promise.all([import('/src/core/editor.ts'),import('/src/pwa/safety.ts')]);const s=store.getSnapshot();const e=s.doc.slides[0].view.elements.find(e=>e.type==='image');return !updateSafety.getSnapshot().busy&&e&&s.selected.includes(e.id)?{id:e.id,assetRef:e.assetRef}:null;});
   const image=await imageHandle.jsonValue();
+  assert.equal((await snapshot(page)).selected[0],image.id,view.name+': original import completed before replacement');
   if(view.name!=='desktop')await nav.getByRole('button',{name:'Egenskaper'}).click();
   await pane.getByRole('button',{name:'Ersätt bild'}).click();
   await fileInput.setInputFiles({name:'replacement.png',mimeType:'image/png',buffer:replacementPicture});
