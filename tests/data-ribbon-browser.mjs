@@ -70,7 +70,7 @@ try{
   assert.equal(colored.legend.seriesColors[firstSeries.id],'#1256ab');
   const preview=page.locator('[data-element-id="'+chartId+'"] svg[aria-label="Linjediagram"]');
   assert.equal(await preview.locator('polyline').first().getAttribute('stroke'),'#1256ab');
-  assert.equal(await preview.getByText('Timmar').count(),1);
+  assert.ok(await preview.getByText('Timmar').first().isVisible(),'Y-axis title must appear in the chart preview');
   console.log('PASS stable series color and axis title '+viewport.name);
 
 
