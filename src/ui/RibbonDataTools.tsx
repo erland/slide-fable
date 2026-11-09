@@ -12,6 +12,7 @@ export function RibbonDataTools({element,disabled,onChange,onDetails}:Props){
   <details className="ribbon-data-disclosure" key={element.id}>
    <summary>{table?'Redigera tabell':'Redigera diagramdata'}</summary>
    <div className="ribbon-data-popover" role="region" aria-label={table?'Redigera tabellinnehåll':'Redigera diagraminnehåll'}>
+    <button type="button" onClick={event=>event.currentTarget.closest('details')?.removeAttribute('open')}>Stäng redigering</button>
     <p>{table?'Redigera cellerna direkt. Ändringar syns direkt på bilden.':'Redigera kategorier, serier och värden direkt. Ändringar syns direkt på bilden.'}</p>
     <fieldset disabled={disabled}>{table?<TableEditor element={element} onChange={onChange}/>:<ChartEditor element={element} onChange={onChange}/>}</fieldset>
    </div>
