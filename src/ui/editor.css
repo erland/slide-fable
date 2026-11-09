@@ -506,3 +506,14 @@
 .icon-category-filter button[aria-pressed="true"]{border-color:#387f89;background:#d5e5df;color:#183641;font-weight:700}
 .icon-picker-items .icon-filter-status{font-size:11px;color:var(--muted,#667)}
 .icon-picker-items .icon-empty-state{margin:4px 0;font-size:12px}
+
+/* SF-ANIM-04: bounded slide preview within the editing workspace. */
+.animation-preview-backdrop{position:fixed;inset:0;z-index:105;display:flex;align-items:center;justify-content:center;padding:12px;background:rgba(12,24,31,.65)}
+.animation-preview-dialog{width:min(940px,100%);max-height:calc(100dvh - 24px);overflow:auto;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--text);box-shadow:0 16px 60px #0006}
+.animation-preview-heading,.animation-preview-controls{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.animation-preview-heading{margin-bottom:10px}
+.animation-preview-stage{container-type:inline-size;position:relative;overflow:hidden;width:100%;background:#fff;border:1px solid var(--line)}
+.animation-preview-stage .playback-slide{position:relative}
+.animation-preview-controls{margin-top:10px}
+.animation-preview-controls button{min-height:38px}
+@media(max-width:520px){.animation-preview-dialog{padding:8px}.animation-preview-controls{justify-content:center}.animation-preview-controls span{flex:1 0 100%;text-align:center;order:-1}}
