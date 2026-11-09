@@ -70,6 +70,24 @@ try{
  assert.ok(chartXml.includes('<c:barChart>')||chartXml.includes('<c:barChart '),'Native bar chart expected');
  for(const term of ['Norr','Söder','Antal','42','73'])assert.ok(chartXml.includes(term),`Native chart series/category value missing: ${term}`);
  console.log('PASS PPTX native chart data and editable series');
+
+ // SF-GAP-02: verify that chart display options reach native editable chart OOXML.
+ const formattedPptx=await page.evaluate(async el=>{
+  const {createDocument,newSlide}=await import('/src/core/model.ts');
+  const {pptxExport}=await import('/src/export/office.ts');
+  const doc=createDocument(),slide=newSlide(doc,'blank');doc.slides=[slide];
+  slide.view.elements=[{...el,legend:{visible:false,showValues:false},yAxis:{min:-5,max:120}}];
+  return Array.from((await pptxExport(doc,[slide],'editable-first',false)).file);
+ },chart);
+ const formattedZip=await JSZip.loadAsync(Uint8Array.from(formattedPptx));
+ const formattedXml=await formattedZip.file('ppt/charts/chart1.xml')?.async('string');
+ assert.ok(formattedXml,'Native editable chart must remain present after formatting');
+ assert.ok(!formattedXml.includes('<c:legend>'),'Hidden legend must not appear in PPTX chart');
+ assert.match(formattedXml,/<c:min val="-5"/);
+ assert.match(formattedXml,/<c:max val="120"/);
+ assert.ok(!/<c:showVal val="1"/.test(formattedXml),'Hidden values must not reappear in PPTX');
+ console.log('PASS chart formatting options in native PPTX XML');
+
  const pdfPath=path.join(work,'data.pdf'),rasterBase=path.join(work,'page');await writeFile(pdfPath,Uint8Array.from(artifact.pdf));
  await execFileAsync('pdftoppm',['-f','1','-l','1','-singlefile','-png','-scale-to-x','1600','-scale-to-y','900',pdfPath,rasterBase]);
  const img=await sharp(rasterBase+'.png').removeAlpha().raw().toBuffer({resolveWithObject:true});
