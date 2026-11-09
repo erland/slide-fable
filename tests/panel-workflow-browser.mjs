@@ -64,6 +64,29 @@ try{
   assert.equal(after.doc.slides[0].view.elements.filter(e=>e.type==='image').length,1);
   assert.deepEqual(after.selected,[image.id],view.name+': replaced image remains selected');
   assert.equal(await pane.isVisible(),true,view.name+': properties stay accessible');
+  if(view.name==='desktop'){
+   // Force an intervening user edit while image decoding is pending.
+   await page.evaluate(()=>{
+    const original=FileReader.prototype.readAsDataURL;
+    FileReader.prototype.readAsDataURL=function(blob){
+     FileReader.prototype.readAsDataURL=original;
+     window.__releaseImageRead=()=>original.call(this,blob);
+    };
+   });
+   await page.getByRole('tab',{name:'Infoga'}).click();
+   await page.locator('.insert-gallery-group').getByRole('button',{name:'Bilder'}).click();
+   await fileInput.setInputFiles({name:'concurrent.png',mimeType:'image/png',buffer:picture});
+   await page.waitForFunction(()=>typeof window.__releaseImageRead==='function');
+   const concurrentId=await page.evaluate(async()=>(await import('/src/core/editor.ts')).editorStore.add('shape'));
+   await page.evaluate(()=>{window.__releaseImageRead();delete window.__releaseImageRead;});
+   await page.waitForFunction(async()=>{
+    const [{editorStore:store},{updateSafety}]=await Promise.all([import('/src/core/editor.ts'),import('/src/pwa/safety.ts')]);
+    const s=store.getSnapshot();return !updateSafety.getSnapshot().busy&&s.doc.slides[0].view.elements.filter(e=>e.type==='image').length===2;
+   });
+   const concurrent=await snapshot(page);
+   assert.ok(concurrent.doc.slides[0].view.elements.some(e=>e.id===concurrentId),'An intervening edit must survive async image import');
+   assert.equal(concurrent.doc.slides[0].view.elements.filter(e=>e.type==='image').length,2,'The import adds exactly one image');
+  }
   assert.deepEqual(errors,[],view.name+': no page errors');
   console.log('PASS panel-workflow '+view.name);
   await context.close();
