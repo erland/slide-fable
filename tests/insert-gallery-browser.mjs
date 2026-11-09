@@ -10,7 +10,7 @@ try{
  for(const v of [{name:'desktop',width:1440,height:900},{name:'ipad',width:820,height:1180},{name:'phone',width:390,height:844}]){
   const context=await browser.newContext({viewport:{width:v.width,height:v.height}});const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('http://127.0.0.1:5191/');
   await page.getByRole('tab',{name:'Infoga'}).click();const panel=page.getByRole('tabpanel',{name:'Infoga'});
-  for(const name of ['Text och bild','Former och linjer','Tabeller och diagram','Fler objekt']) assert.equal(await panel.getByRole('group',{name}).count(),1,v.name+': group '+name);
+  for(const name of ['Text och bild','Former och linjer','Tabeller och diagram','Ikoner','Fler objekt']) assert.equal(await panel.getByRole('group',{name}).count(),1,v.name+': group '+name);
   const count=()=>page.evaluate(async()=>{const m=await import('/src/core/editor.ts');return m.editorStore.slide.view.elements.length});
   const old=await count();await panel.getByRole('button',{name:'Textfält'}).click();assert.equal(await count(),old+1,v.name+': text');
   await panel.getByRole('button',{name:'Tabell',exact:true}).click();assert.equal(await count(),old+2,v.name+': table');
@@ -35,7 +35,21 @@ try{
   assert.ok(slideXml,v.name+': PPTX slide must exist');
   for(const name of ['diamond','hexagon','pentagon','chevron'])assert.ok(slideXml.includes(`prst="${name}"`),v.name+': native PPTX shape '+name);
   console.log('PASS native flowchart shapes and editable PowerPoint '+v.name);
-  await panel.getByText('Fler objekt ▾').click();await panel.getByRole('button',{name:'Process'}).click();assert.equal(await count(),old+9,v.name+': process');
+
+  await panel.getByText('Ikoner ▾').click();
+  await panel.getByRole('button',{name:'Databas',exact:true}).click();
+  const icon=await page.evaluate(async()=>{const {editorStore}=await import('/src/core/editor.ts');return editorStore.slide.view.elements.at(-1);});
+  assert.equal(icon.type,'vectorPath',v.name+': icon must be editable vector path');
+  assert.equal(icon.vectorPath.closed,false);
+  assert.equal(icon.vectorPath.format,'svg-path');
+  assert.equal(icon.accessibility.altText,'Databas');
+  const vector=page.locator(`[data-element-id="${icon.id}"] svg path`).first();
+  await vector.waitFor({state:'attached'});
+  assert.equal(await vector.getAttribute('fill'),'none',v.name+': no accidental fill');
+  const validated=await page.evaluate(async()=>{const {validateFull}=await import('/src/core/contract.ts');const {editorStore}=await import('/src/core/editor.ts');await validateFull(editorStore.getSnapshot().doc);return true;});
+  assert.ok(validated,v.name+': icon PPD must be valid');
+  console.log('PASS local icon gallery '+v.name);
+  await panel.getByText('Fler objekt ▾').click();await panel.getByRole('button',{name:'Process'}).click();assert.equal(await count(),old+10,v.name+': process');
   assert.deepEqual(errors,[],v.name+': console errors');console.log('PASS insert gallery '+v.name);await context.close();
  }
 }finally{await browser.close();server.kill('SIGTERM');}
