@@ -445,7 +445,7 @@
 .ribbon-data-popover{position:absolute;z-index:60;top:calc(100% + 6px);left:0;width:min(620px,calc(100vw - 28px));max-height:min(70vh,600px);overflow:auto;padding:16px;border:1px solid var(--line);border-radius:10px;background:var(--surface,#fff);box-shadow:0 12px 30px #0003;white-space:normal}
 .ribbon-data-popover fieldset{border:0;margin:0;padding:0;min-width:0}
 .ribbon-data-popover .table-grid,.ribbon-data-popover .chart-editor{max-width:100%;overflow-x:auto}
-@media(max-width:900px){.ribbon-data-popover{left:auto;right:0}}
+@media(max-width:900px){.ribbon-data-popover{position:fixed;top:min(22vh,180px);left:12px;right:12px;width:auto;max-height:calc(100dvh - min(22vh,180px) - 16px);overflow:auto}}
 
 /* Step 19: dedicated animation and slideshow ribbons. Stable height avoids moving the canvas. */
 .ribbon-motion{display:flex;align-items:center;gap:9px;box-sizing:border-box;min-height:72px;max-height:72px;overflow-x:auto;overflow-y:hidden;padding:6px 12px;white-space:nowrap;scrollbar-width:thin}

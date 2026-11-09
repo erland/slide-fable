@@ -23,6 +23,7 @@ try{
   const original=(await doc()).slides[0].view.elements.find(e=>e.type==='table').cells[0][0].text;
   await tablePanel.getByRole('textbox',{name:'Cell 1 1'}).fill('Kvartal 1');
   assert.equal((await doc()).slides[0].view.elements.find(e=>e.type==='table').cells[0][0].text,'Kvartal 1');
+  await tablePanel.getByRole('button',{name:'Stäng redigering'}).click();
   await page.getByRole('tab',{name:'Formatera',exact:true}).click();
   const format=page.getByRole('tabpanel',{name:'Formatera'});
   await format.getByRole('group',{name:'Tabellverktyg'}).waitFor();
@@ -34,6 +35,32 @@ try{
   await chartTools.locator('summary',{hasText:'Redigera diagramdata'}).click();
   const chartPanel=chartTools.getByRole('region',{name:'Redigera diagraminnehåll'});
   await chartPanel.waitFor();
+  // SF-GAP-02: authoring controls persist as PPD properties and change the chart preview.
+  const chartId=(await doc()).slides[0].view.elements.find(e=>e.type==='chart').id;
+  await chartPanel.getByRole('checkbox',{name:'Visa teckenförklaring'}).uncheck();
+  await chartPanel.getByRole('checkbox',{name:'Visa värdeetiketter'}).uncheck();
+  await chartPanel.getByRole('spinbutton',{name:'Y-axel minimum'}).fill('-5');
+  await chartPanel.getByRole('spinbutton',{name:'Y-axel maximum'}).fill('120');
+  let formatted=(await doc()).slides[0].view.elements.find(e=>e.id===chartId);
+  assert.deepEqual(formatted.legend,{visible:false,showValues:false});
+  assert.equal(formatted.yAxis.min,-5);
+  assert.equal(formatted.yAxis.max,120);
+  const geometry=await page.evaluate(async id=>{
+    const {chartGeometry}=await import('/src/editor/Renderer.tsx');
+    const {editorStore}=await import('/src/core/editor.ts');
+    return chartGeometry(editorStore.getSnapshot().doc.slides[0].view.elements.find(e=>e.id===id));
+  },chartId);
+  assert.equal(geometry.min,-5);assert.equal(geometry.max,120);
+  await chartPanel.getByRole('checkbox',{name:'Visa teckenförklaring'}).check();
+  await chartPanel.getByRole('checkbox',{name:'Visa värdeetiketter'}).check();
+  await chartPanel.getByRole('spinbutton',{name:'Y-axel minimum'}).fill('');
+  await chartPanel.getByRole('spinbutton',{name:'Y-axel maximum'}).fill('');
+  formatted=(await doc()).slides[0].view.elements.find(e=>e.id===chartId);
+  assert.deepEqual(formatted.legend,{visible:true,showValues:true});
+  assert.equal(formatted.yAxis.min,undefined);
+  assert.equal(formatted.yAxis.max,undefined);
+  console.log('PASS chart formatting authoring and PPD persistence '+viewport.name);
+
   const originalCategory=(await doc()).slides[0].view.elements.find(e=>e.type==='chart').dataset.categories[0];
   const oldSeriesName=(await doc()).slides[0].view.elements.find(e=>e.type==='chart').dataset.series[0].name;
   await chartPanel.getByRole('textbox',{name:'Kategori 1'}).fill('Försäljning');
@@ -74,6 +101,7 @@ try{
   assert.equal(ds.series.length,1);
   assert.deepEqual(ds.categories,[originalData.categories[0],originalData.categories[2],'Ny kategori']);
   assert.deepEqual(ds.series[0].values,[originalData.series[0].values[0],originalData.series[0].values[2],0]);
+  await chartPanel.getByRole('button',{name:'Stäng redigering'}).click();
   await chartTools.getByRole('button',{name:'Fler egenskaper'}).click();
   assert.equal(await page.getByRole('heading',{name:'Objektegenskaper'}).isVisible(),true);
   for(let i=0;i<8;i++)await page.evaluate(async()=>{(await import('/src/core/editor.ts')).editorStore.undo();});

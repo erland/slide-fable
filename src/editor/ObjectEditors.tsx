@@ -24,6 +24,11 @@ export function ChartEditor({element,onChange}:{element:D;onChange:(p:D)=>void})
  const moveCategory=(index:number,delta:number)=>edit(d=>{swap(d.categories,index,index+delta);d.series.forEach((series:D)=>swap(series.values,index,index+delta));});
  return <div className="chart-editor">
   <p>Redigera serienamn, kategorier och tal. Tomma värden behandlas som noll.</p>
+  <fieldset><legend>Diagramformatering</legend>
+   <label><input type="checkbox" aria-label="Visa teckenförklaring" checked={element.legend?.visible!==false} onChange={e=>onChange({legend:{...element.legend,visible:e.target.checked}})}/> Visa teckenförklaring</label>
+   <label><input type="checkbox" aria-label="Visa värdeetiketter" checked={element.legend?.showValues!==false} onChange={e=>onChange({legend:{...element.legend,showValues:e.target.checked}})}/> Visa värdeetiketter</label>
+   {element.chartType!=='pie'&&<div className="button-row">{(['min','max'] as const).map(key=><label key={key}>{key==='min'?'Y-axel minimum':'Y-axel maximum'}<input type="number" aria-label={key==='min'?'Y-axel minimum':'Y-axel maximum'} value={element.yAxis?.[key]??''} onChange={event=>{const raw=event.target.value;const axis={...element.yAxis};if(raw==='')delete axis[key];else{const num=Number(raw);if(!Number.isFinite(num))return;if(key==='min'&&axis.max!==undefined&&num>=axis.max)return;if(key==='max'&&axis.min!==undefined&&num<=axis.min)return;axis[key]=num;}onChange({yAxis:axis});}}/></label>)}</div>}
+  </fieldset>
   <div className="button-row">{ds.series.map((series:D,i:number)=><div key={series.id} className="button-row">
    <label>Serie {i+1} namn<input aria-label={`Serie ${i+1} namn`} value={series.name??''} onChange={e=>edit(d=>d.series[i].name=e.target.value)}/></label>
    <button type="button" aria-label={`Flytta serie ${i+1} uppåt`} disabled={i===0} onClick={()=>moveSeries(i,-1)}>Uppåt</button>
