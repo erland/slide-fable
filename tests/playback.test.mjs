@@ -32,3 +32,50 @@ test('DOM playback reconstructs visibility, reduced motion and cancels animation
  clean=applyPlayback(root,slide,2,true);assert.equal(node.style.visibility,'hidden');clean();
  clean=applyPlayback(root,slide,1,true,false);assert.equal(node.style.visibility,'visible');clean();
 });
+
+test('with-previous anchors to prior start instead of accumulating delays',()=>{
+ const animations=[
+  {id:'a',targetId:'a',effect:'fade',trigger:'on-click',durationMs:500,delayMs:100},
+  {id:'b',targetId:'b',effect:'fade',trigger:'with-previous',durationMs:200,delayMs:50},
+  {id:'c',targetId:'c',effect:'fade',trigger:'with-previous',durationMs:100,delayMs:25},
+  {id:'d',targetId:'d',effect:'fade',trigger:'after-previous',durationMs:90,delayMs:10},
+  {id:'e',targetId:'e',effect:'appear',trigger:'on-click',durationMs:0,delayMs:0}
+ ];
+ const result=animationSchedule({animations});
+ assert.deepEqual(result.map(a=>[a.group,a.start,a.duration]),[
+  [1,100,500],[1,150,200],[1,175,100],[1,285,90],[2,0,0]
+ ]);
+ assert.equal(playbackSteps({animations}),2);
+ assert.deepEqual(animations.map(a=>a.delayMs),[100,50,25,10,0],'Scheduling must not mutate PPD');
+});
+test('same-target effects use one composed WAAPI animation with deterministic cleanup and replay',()=>{
+ globalThis.CSS={escape:s=>s};
+ const calls=[],node={style:{visibility:'',opacity:'0.8'},animate:(frames,options)=>{
+  const animation={frames,options,cancelled:false,cancel(){this.cancelled=true;}};
+  calls.push(animation);return animation;
+ }};
+ const root={querySelector:selector=>selector.includes('item')?node:null};
+ const slide={animations:[
+  {id:'a',targetId:'item',effect:'fade',phase:'entrance',trigger:'on-click',durationMs:200,delayMs:100},
+  {id:'b',targetId:'item',effect:'fade',phase:'exit',trigger:'after-previous',durationMs:150,delayMs:50},
+  {id:'c',targetId:'item',effect:'appear',phase:'entrance',trigger:'on-click',durationMs:0,delayMs:0}
+ ]};
+ const initial=applyPlayback(root,slide,0);
+ assert.equal(node.style.visibility,'hidden');assert.equal(calls.length,0);initial();
+ const first=applyPlayback(root,slide,1);
+ assert.equal(calls.length,1,'Effects on one target must not fight over fill-forwards');
+ assert.deepEqual(calls[0].options,{duration:500,delay:0,fill:'forwards',easing:'linear'});
+ assert.equal(calls[0].frames[0].opacity,0);
+ assert.equal(calls[0].frames.at(-1).opacity,0,'Exit must finish hidden');
+ assert.equal(calls[0].frames.at(-1).visibility,'hidden');
+ first();assert.equal(calls[0].cancelled,true);assert.equal(node.style.visibility,'');assert.equal(node.style.opacity,'0.8');
+ const jump=applyPlayback(root,slide,2,false,false);
+ assert.equal(node.style.visibility,'visible','Jump to next group applies all prior effects without replay');
+ assert.equal(node.style.opacity,'0.8');jump();
+ const backward=applyPlayback(root,slide,1,true,false);
+ assert.equal(node.style.visibility,'hidden','Backward navigation reconstructs completed group');
+ backward();
+ const replay=applyPlayback(root,slide,1);
+ assert.equal(calls.length,2,'Replay creates only the new timeline');
+ replay();assert.equal(calls[1].cancelled,true);
+});
