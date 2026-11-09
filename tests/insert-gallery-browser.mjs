@@ -37,7 +37,18 @@ try{
   console.log('PASS native flowchart shapes and editable PowerPoint '+v.name);
 
   await panel.getByText('Ikoner ▾').click();
-  await panel.getByRole('button',{name:'Databas',exact:true}).click();
+  const picker=panel.locator('.icon-picker');
+  const search=picker.getByRole('searchbox',{name:'Sök ikoner'});
+  await search.fill('sakerhet');
+  assert.equal(await picker.getByRole('button',{name:'Säkerhet',exact:true}).count(),1,v.name+': accent-insensitive search');
+  assert.equal(await picker.getByRole('button',{name:'Databas',exact:true}).count(),0,v.name+': filtered catalogue');
+  await search.fill('databas');
+  await picker.getByRole('button',{name:'Verksamhet',exact:true}).click();
+  assert.equal(await picker.getByText('Inga ikoner matchar sökningen.').count(),1,v.name+': empty results');
+  await picker.getByRole('button',{name:'IT',exact:true}).click();
+  assert.equal(await picker.getByRole('button',{name:'Databas',exact:true}).count(),1,v.name+': category selection');
+  assert.equal(await picker.getByRole('button',{name:'IT',exact:true}).getAttribute('aria-pressed'),'true');
+  await picker.getByRole('button',{name:'Databas',exact:true}).click();
   const icon=await page.evaluate(async()=>{const {editorStore}=await import('/src/core/editor.ts');return editorStore.slide.view.elements.at(-1);});
   assert.equal(icon.type,'vectorPath',v.name+': icon must be editable vector path');
   assert.equal(icon.vectorPath.closed,false);
