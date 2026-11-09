@@ -35,7 +35,7 @@ try{
   assert.ok(slideXml,v.name+': PPTX slide must exist');
   for(const name of ['diamond','hexagon','pentagon','chevron'])assert.ok(slideXml.includes(`prst="${name}"`),v.name+': native PPTX shape '+name);
   console.log('PASS native flowchart shapes and editable PowerPoint '+v.name);
-  await panel.getByText('Fler objekt ▾').click();await panel.getByRole('button',{name:'Process'}).click();assert.equal(await count(),old+5,v.name+': process');
+  await panel.getByText('Fler objekt ▾').click();await panel.getByRole('button',{name:'Process'}).click();assert.equal(await count(),old+9,v.name+': process');
   assert.deepEqual(errors,[],v.name+': console errors');console.log('PASS insert gallery '+v.name);await context.close();
  }
 }finally{await browser.close();server.kill('SIGTERM');}
