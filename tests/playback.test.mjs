@@ -155,3 +155,35 @@ test('SF-ANIM-02B reapplying bullet steps replaces rather than duplicates existi
  assert.equal(store.slide.animations.length,3,'Redo retains replacement');
  validateCore(store.getSnapshot().doc);
 });
+
+test('SF-ANIM-03 keeps paragraph animation attached when list paragraphs are reordered',()=>{
+ const store=new EditorStore(),id=store.add('text');
+ const paragraphs=[
+  {id:'stable-a',runs:[{text:'A'}],paragraphStyle:{listType:'bullet'}},
+  {id:'stable-b',runs:[{text:'B'}],paragraphStyle:{listType:'bullet'}},
+  {id:'stable-c',runs:[{text:'C'}],paragraphStyle:{listType:'bullet'}}
+ ];
+ store.editText(id,{paragraphs});
+ store.addAnimation(id,'bullet-steps');
+ const ids=store.slide.animations.map(a=>a.id);
+ store.editText(id,{paragraphs:[paragraphs[2],paragraphs[0],paragraphs[1]]});
+ assert.deepEqual(store.slide.animations.map(a=>a.id),ids,'Animation identity/order is unchanged');
+ assert.deepEqual(store.slide.animations.map(a=>a.from.paragraph.x),[1,2,0],'Steps follow paragraph identities');
+ validateCore(store.getSnapshot().doc);
+ store.undo();assert.deepEqual(store.slide.animations.map(a=>a.from.paragraph.x),[0,1,2]);
+ store.redo();assert.deepEqual(store.slide.animations.map(a=>a.from.paragraph.x),[1,2,0]);
+});
+test('SF-ANIM-03 removes obsolete bullet steps without disturbing ordinary effects',()=>{
+ const store=new EditorStore(),id=store.add('text');
+ const a={id:'stable-a',runs:[{text:'A'}],paragraphStyle:{listType:'bullet'}};
+ const b={id:'stable-b',runs:[{text:'B'}],paragraphStyle:{listType:'bullet'}};
+ store.updateElement(id,{text:{paragraphs:[a,b]}});
+ store.addAnimation(id,'fade');
+ store.addAnimation(id,'bullet-steps');
+ const ordinary=store.slide.animations[0].id;
+ store.updateElement(id,{text:{paragraphs:[{...a,paragraphStyle:{listType:'none'}}]}});
+ assert.equal(store.slide.animations.length,1,'Removed/non-list paragraphs lose their steps');
+ assert.equal(store.slide.animations[0].id,ordinary);
+ store.undo();assert.equal(store.slide.animations.length,3);
+ validateCore(store.getSnapshot().doc);
+});
