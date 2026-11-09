@@ -22,6 +22,13 @@ try{
   await page.evaluate(()=>{const data=new DataTransfer();data.setData('text/plain','Släppt text');document.querySelector('.canvas-scroll').dispatchEvent(new DragEvent('drop',{dataTransfer:data,bubbles:true,cancelable:true}));});
   await page.waitForFunction(async before=>{const m=await import('/src/core/editor.ts');return m.editorStore.slide.view.elements.filter(e=>e.type==='text').length===before+3;},before);
   assert.ok((await getTexts()).includes('Släppt text'));
+
+  const imagesBefore=await page.evaluate(async()=>{const m=await import('/src/core/editor.ts');return m.editorStore.slide.view.elements.filter(e=>e.type==='image').length;});
+  await page.evaluate(async()=>{const blob=await(await fetch('/icons/icon-192.png')).blob();const file=new File([blob],'icon.png',{type:'image/png'});const data=new DataTransfer();data.items.add(file);document.querySelector('.canvas-scroll').dispatchEvent(new DragEvent('drop',{dataTransfer:data,bubbles:true,cancelable:true}));});
+  await page.waitForFunction(async before=>{const m=await import('/src/core/editor.ts');return m.editorStore.slide.view.elements.filter(e=>e.type==='image').length===before+1;},imagesBefore);
+  const prevented=await page.evaluate(()=>{const data=new DataTransfer();data.items.add(new File(['invalid'],'unsafe.svg',{type:'image/svg+xml'}));const event=new DragEvent('drop',{dataTransfer:data,bubbles:true,cancelable:true});document.querySelector('.canvas-scroll').dispatchEvent(event);return event.defaultPrevented;});
+  assert.equal(prevented,true,view.name+': unsupported file must not navigate browser');
+
   assert.deepEqual(errors,[],view.name+': no JS errors');console.log('PASS external transfer '+view.name);await context.close();
  }
 }finally{await browser.close();server.kill('SIGTERM');}
