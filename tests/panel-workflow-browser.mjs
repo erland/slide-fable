@@ -57,7 +57,7 @@ try{
   await pane.getByRole('button',{name:'Ersätt bild'}).click();
   await fileInput.setInputFiles({name:'replacement.png',mimeType:'image/png',buffer:replacementPicture});
   // Wait for the asynchronous replacement transaction, not the already-embedded source image.
-  await page.waitForFunction(async ({id,previousAssetRef})=>{const s=(await import('/src/core/editor.ts')).editorStore.getSnapshot();const e=s.doc.slides[0].view.elements.find(e=>e.id===id);return e&&e.assetRef!==previousAssetRef&&s.doc.assets[e.assetRef]?.uri?.startsWith('data:image/png');},{id:image.id,previousAssetRef:image.assetRef});
+  await page.waitForFunction(async ({id,previousAssetRef})=>{const [{editorStore:store},{updateSafety}]=await Promise.all([import('/src/core/editor.ts'),import('/src/pwa/safety.ts')]);const s=store.getSnapshot();const e=s.doc.slides[0].view.elements.find(e=>e.id===id);return !updateSafety.getSnapshot().busy&&e&&e.assetRef!==previousAssetRef&&s.doc.assets[e.assetRef]?.uri?.startsWith('data:image/png');},{id:image.id,previousAssetRef:image.assetRef});
   const after=await snapshot(page),current=after.doc.slides[0].view.elements.find(e=>e.id===image.id);
   assert.notEqual(current.assetRef,image.assetRef,view.name+': image is replaced, not duplicated');
   assert.equal(after.doc.slides[0].view.elements.filter(e=>e.type==='image').length,1);
