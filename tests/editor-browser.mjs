@@ -282,10 +282,21 @@ try{
  const commonEditable=textEditor.locator('.ProseMirror');
  await commonEditable.click();await page.keyboard.press('ControlOrMeta+A');
  await textEditor.getByLabel('Typsnitt för markering',{exact:true}).selectOption('Georgia');
+ // Each paragraph operation must explicitly target all paragraphs; toolbar focus can change the selection.
+ await commonEditable.click();await page.keyboard.press('ControlOrMeta+A');
  await textEditor.getByLabel('Radavstånd',{exact:true}).fill('1.8');
  await textEditor.getByLabel('Radavstånd',{exact:true}).press('Enter');
+ await page.waitForFunction(async id=>{
+  const {editorStore}=await import('/src/core/editor.ts');
+  return editorStore.slide.view.elements.find(e=>e.id===id)?.text?.paragraphs?.every(p=>p.paragraphStyle?.lineSpacing===1.8);
+ },commonTextId);
+ await commonEditable.click();await page.keyboard.press('ControlOrMeta+A');
  await textEditor.getByLabel('Avstånd efter stycke',{exact:true}).fill('12');
  await textEditor.getByLabel('Avstånd efter stycke',{exact:true}).press('Enter');
+ await page.waitForFunction(async id=>{
+  const {editorStore}=await import('/src/core/editor.ts');
+  return editorStore.slide.view.elements.find(e=>e.id===id)?.text?.paragraphs?.every(p=>p.paragraphStyle?.lineSpacing===1.8&&p.paragraphStyle?.marginAfter===12);
+ },commonTextId);
  const commonText=await api("return store.slide.view.elements.find(e=>e.id===arg).text;",commonTextId);
  assert.ok(commonText.paragraphs.every(p=>p.paragraphStyle.lineSpacing===1.8&&p.paragraphStyle.marginAfter===12));
  assert.ok(commonText.paragraphs.every(p=>p.runs.every(r=>r.fontFamily==='Georgia')));
