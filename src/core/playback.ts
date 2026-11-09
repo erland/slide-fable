@@ -46,17 +46,22 @@ export function applyPlayback(root:HTMLElement,slide:D,step:number,reduced=false
   // If two effects overlap on the same target, the latest started effect takes precedence.
   const ordered=current.map((a:D,index:number)=>({...a,index})).sort((a:D,b:D)=>a.start-b.start||a.index-b.index);
   const end=Math.max(1,...ordered.map((a:D)=>a.start+Math.max(a.effect==='appear'?1:a.duration,1)));
-  const times=new Set<number>([0,end]);
-  for(const a of ordered){times.add(a.start);times.add(Math.min(end,a.start+Math.max(a.effect==='appear'?1:a.duration,1)));}
-  const keyframes=[...times].sort((a,b)=>a-b).map(t=>{
-   const active=[...ordered].reverse().find((a:D)=>a.start<=t);
-   if(!active)return {offset:t/end,opacity:visible?base:0,visibility:visible?'visible':'hidden'};
-   const entrance=active.phase==='entrance',from=entrance?0:base,to=entrance?base:0;
-   const duration=Math.max(active.effect==='appear'?1:active.duration,1);
-   const progress=Math.max(0,Math.min(1,(t-active.start)/duration));
-   const opacity=active.effect==='fade'?from+(to-from)*progress:to;
-   return {offset:t/end,opacity,visibility:entrance||progress<1?'visible':'hidden'};
-  });
+  const keyframes:{offset:number;opacity:number;visibility:string}[]=[{offset:0,opacity:visible?base:0,visibility:visible?'visible':'hidden'}];
+  let priorEnd=0,priorVisible=visible;
+  for(let i=0;i<ordered.length;i++){
+   const a=ordered[i],entrance=a.phase==='entrance',from=entrance?0:base,to=entrance?base:0;
+   const start=a.start,finish=Math.min(end,start+Math.max(a.effect==='appear'?1:a.duration,1));
+   // Explicit duplicate keyframes at the boundary prevent a delayed entrance
+   // from becoming visible before its trigger time.
+   if(start>priorEnd)keyframes.push({offset:start/end,opacity:priorVisible?base:0,visibility:priorVisible?'visible':'hidden'});
+   const startOpacity=a.effect==='appear'?to:from;
+   keyframes.push({offset:start/end,opacity:startOpacity,visibility:entrance||a.effect==='fade'?'visible':'hidden'});
+   const stop=Math.min(finish,ordered[i+1]?.start??finish),progress=Math.max(0,Math.min(1,(stop-start)/Math.max(a.effect==='appear'?1:a.duration,1)));
+   const endOpacity=a.effect==='fade'?from+(to-from)*progress:to;
+   keyframes.push({offset:stop/end,opacity:endOpacity,visibility:entrance||progress<1&&a.effect==='fade'?'visible':'hidden'});
+   priorEnd=stop;priorVisible=entrance;
+  }
+  if(priorEnd<end)keyframes.push({offset:1,opacity:priorVisible?base:0,visibility:priorVisible?'visible':'hidden'});
   running.push(node.animate(keyframes,{duration:end,delay:0,fill:'forwards',easing:'linear'}));
  }
  return ()=>{for(const a of running)a.cancel();for(const [node,style] of original){node.style.visibility=style.visibility;node.style.opacity=style.opacity;}};
