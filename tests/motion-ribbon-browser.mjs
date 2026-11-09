@@ -64,11 +64,26 @@ try{
   const timing=page.locator('.animation-panel .animation-timing');
   assert.equal(await timing.count(),2,viewport.name+' two scheduled effects');
   assert.match(await timing.nth(1).innerText(),/Klick 2 · Start 0 ms · Varaktighet 400 ms/);
-  await page.locator('.animation-panel').getByLabel('Fördröjning 2').fill('150');
-  await page.locator('.animation-panel').getByLabel('Fördröjning 2').press('Tab');
+  await page.locator('.animation-panel').getByRole('spinbutton',{name:'Fördröjning 2',exact:true}).fill('150');
+  await page.locator('.animation-panel').getByRole('spinbutton',{name:'Fördröjning 2',exact:true}).press('Tab');
   assert.match(await timing.nth(1).innerText(),/Klick 2 · Start 150 ms · Varaktighet 400 ms/,viewport.name+' delay updates displayed start');
   await page.locator('.animation-panel').getByLabel('Start 2').selectOption('with-previous');
   assert.match(await timing.nth(1).innerText(),/Klick 1 · Start 150 ms · Varaktighet 400 ms/,viewport.name+' grouped timing follows trigger');
+  // SF-ANIM-06: adjust PPD timing directly from the overview; every click is undoable.
+  const adjust=page.locator('.animation-panel').getByRole('group',{name:'Justera timing 2'});
+  await adjust.getByRole('button',{name:'Öka fördröjning 2'}).click();
+  assert.match(await timing.nth(1).innerText(),/Klick 1 · Start 250 ms · Varaktighet 400 ms/,viewport.name+' direct delay increase');
+  await adjust.getByRole('button',{name:'Minska fördröjning 2'}).click();
+  assert.match(await timing.nth(1).innerText(),/Klick 1 · Start 150 ms · Varaktighet 400 ms/,viewport.name+' direct delay decrease');
+  await adjust.getByRole('button',{name:'Öka varaktighet 2'}).click();
+  assert.match(await timing.nth(1).innerText(),/Varaktighet 500 ms/,viewport.name+' direct duration increase');
+  const editedTiming=(await model()).slides[0].animations[1];
+  assert.equal(editedTiming.delayMs,150);
+  assert.equal(editedTiming.durationMs,500);
+  await page.evaluate(async()=>(await import('/src/core/editor.ts')).editorStore.undo());
+  assert.match(await timing.nth(1).innerText(),/Varaktighet 400 ms/,viewport.name+' direct edit can be undone');
+  await page.evaluate(async()=>(await import('/src/core/editor.ts')).editorStore.redo());
+  assert.match(await timing.nth(1).innerText(),/Varaktighet 500 ms/,viewport.name+' direct edit can be redone');
   const listId=await page.evaluate(async()=>{
    const store=(await import('/src/core/editor.ts')).editorStore;
    const id=store.add('text');
