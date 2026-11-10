@@ -68,6 +68,16 @@ try{
   assert.match(await groupHeaders.nth(0).innerText(),/Klicksteg 1[\s\S]*1 animation/);
   assert.match(await groupHeaders.nth(1).innerText(),/Klicksteg 2[\s\S]*1 animation/);
   assert.equal(await page.locator('.animation-panel .animation-start-kind').nth(1).innerText(),'Vid klick');
+  // SF-ANIM-10: collapsing one step is display-only and leaves other steps editable.
+  const listItems=page.locator('.animation-panel .animation-list > li');
+  const beforeCollapse=await model();
+  await groupHeaders.nth(0).getByRole('button',{name:'Fäll ihop klicksteg 1'}).click();
+  assert.equal(await groupHeaders.nth(0).getByRole('button',{name:'Visa klicksteg 1'}).getAttribute('aria-expanded'),'false',viewport.name+' group collapsed');
+  assert.equal(await listItems.nth(0).locator('.animation-entry-content').isVisible(),false,viewport.name+' collapsed controls hidden');
+  assert.equal(await listItems.nth(1).isVisible(),true,viewport.name+' second group still visible');
+  assert.deepEqual(await model(),beforeCollapse,viewport.name+' collapsing group does not change PPD');
+  await groupHeaders.nth(0).getByRole('button',{name:'Visa klicksteg 1'}).click();
+  assert.equal(await listItems.nth(0).locator('.animation-entry-content').isVisible(),true,viewport.name+' group reexpanded');
   assert.match(await timing.nth(1).innerText(),/Klick 2 · Start 0 ms · Varaktighet 400 ms/);
   await page.locator('.animation-panel').getByRole('spinbutton',{name:'Fördröjning 2',exact:true}).fill('150');
   await page.locator('.animation-panel').getByRole('spinbutton',{name:'Fördröjning 2',exact:true}).press('Tab');
@@ -77,6 +87,13 @@ try{
   assert.equal(await groupHeaders.count(),1,viewport.name+' effects grouped into one click step');
   assert.match(await groupHeaders.first().innerText(),/Klicksteg 1[\s\S]*2 animationer/);
   assert.equal(await page.locator('.animation-panel .animation-start-kind').nth(1).innerText(),'Med föregående');
+  const groupedBeforeCollapse=await model();
+  await groupHeaders.first().getByRole('button',{name:'Fäll ihop klicksteg 1'}).click();
+  assert.equal(await listItems.nth(1).isVisible(),false,viewport.name+' grouped subsequent animation hidden');
+  assert.equal(await listItems.nth(0).isVisible(),true,viewport.name+' group heading remains visible');
+  assert.deepEqual(await model(),groupedBeforeCollapse,viewport.name+' grouped collapse read-only');
+  await groupHeaders.first().getByRole('button',{name:'Visa klicksteg 1'}).click();
+  assert.equal(await listItems.nth(1).isVisible(),true,viewport.name+' grouped animation restored');
   // SF-ANIM-06: adjust PPD timing directly from the overview; every click is undoable.
   const adjust=page.locator('.animation-panel').getByRole('group',{name:'Justera timing 2'});
   await adjust.getByRole('button',{name:'Öka fördröjning 2'}).click();
