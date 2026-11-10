@@ -549,3 +549,11 @@
 .animation-group-summary{font-size:11px;font-weight:500;color:var(--muted);font-variant-numeric:tabular-nums}
 .animation-start-kind{display:inline-block;margin:0 0 5px;padding:2px 7px;border-radius:5px;border:1px solid var(--line);font-size:11px;color:var(--muted)}
 @media(max-width:520px){.animation-click-group-header{margin-left:-8px;padding:8px}.animation-group-summary{flex-basis:100%}}
+
+/* SF-ANIM-10: collapse click groups without modifying document order or timing. */
+.animation-list>li[hidden],.animation-entry-content[hidden]{display:none}
+.animation-group-toggle{display:inline-flex;align-items:center;gap:5px;max-width:100%;min-height:36px;padding:4px 6px;border:1px solid transparent;border-radius:5px;background:transparent;font:inherit;font-weight:700;color:inherit;text-align:left;cursor:pointer}
+.animation-group-toggle:hover,.animation-group-toggle:focus-visible{border-color:var(--line);background:var(--line)}
+.animation-group-toggle span{font-size:13px}
+.animation-group-toggle[aria-expanded="false"] span{transform:translateX(1px)}
+.animation-list li.animation-group-start:has(.animation-group-toggle[aria-expanded="false"]){padding-bottom:0}

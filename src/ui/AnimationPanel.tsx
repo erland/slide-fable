@@ -55,7 +55,10 @@ export function AnimationPanel({doc,slide,selected,disabled,onTransition,onAdd,o
  const timedById=new Map<string,D>(timeline.map((a:D)=>[a.id,a]));
  const groupEnd=new Map<number,number>();
  const groupCounts=new Map<number,number>();
+ const groupKeys=new Map<number,string>();
+ const [collapsedGroups,setCollapsedGroups]=useState<Set<string>>(()=>new Set());
  for(const a of timeline){
+  if(!groupKeys.has(a.group))groupKeys.set(a.group,a.id);
   groupEnd.set(a.group,Math.max(groupEnd.get(a.group)??0,a.start+a.duration));
   groupCounts.set(a.group,(groupCounts.get(a.group)??0)+1);
  }
@@ -70,11 +73,16 @@ export function AnimationPanel({doc,slide,selected,disabled,onTransition,onAdd,o
  const previousTiming=i>0?timedById.get(animations[i-1].id):undefined;
  const startsGroup=timing?!previousTiming||previousTiming.group!==timing.group:!!previousTiming||i===0;
  const triggerLabel=a.trigger==='with-previous'?'Med föregående':a.trigger==='after-previous'?'Efter föregående':'Vid klick';
- return <li key={a.id} className={startsGroup?'animation-group-start':undefined}>
+ const groupKey=timing?groupKeys.get(timing.group):undefined;
+ const collapsed=!!groupKey&&collapsedGroups.has(groupKey);
+ return <li key={a.id} className={startsGroup?'animation-group-start':undefined} hidden={collapsed&&!startsGroup}>
  {startsGroup&&<div className="animation-click-group-header" role="heading" aria-level={4}>
-  <span>{timing?'Klicksteg '+timing.group:'Importerad animation'}</span>
+  {timing&&groupKey?<button type="button" className="animation-group-toggle" aria-expanded={!collapsed} aria-label={(collapsed?'Visa':'Fäll ihop')+' klicksteg '+timing.group} onClick={()=>{
+   setCollapsedGroups(current=>{const next=new Set(current);if(next.has(groupKey))next.delete(groupKey);else next.add(groupKey);return next;});
+  }}>Klicksteg {timing.group}<span aria-hidden="true">{collapsed?' ▸':' ▾'}</span></button>:<span>Importerad animation</span>}
   {timing&&<span className="animation-group-summary">{groupCounts.get(timing.group)} {groupCounts.get(timing.group)===1?'animation':'animationer'} · {end} ms</span>}
  </div>}
+ <div className="animation-entry-content" hidden={collapsed}>
  <strong>{el?.name??el?.accessibility?.altText??({shape:'Form',text:'Text',image:'Bild',group:'Grupp'}[el?.type as string]??el?.type??a.targetId)} · {a.from?.paragraph?.x!==undefined?'Punkt '+(a.from.paragraph.x+1):a.phase==='exit'&&a.effect==='appear'?'Försvinn':names[a.effect]??a.effect}</strong>
  <span className="animation-start-kind">{timing?triggerLabel:'Ej uppspelad'}</span>
  {timing&&<div className="animation-timing" aria-label={'Klicksteg '+timing.group+', start '+timing.start+' millisekunder, varaktighet '+timing.duration+' millisekunder'}>
@@ -89,7 +97,8 @@ export function AnimationPanel({doc,slide,selected,disabled,onTransition,onAdd,o
   </div>
  </div>}
  {!supported?<p>Importerad effekt bevaras men spelas inte av denna version.</p>:<><label>Start<select aria-label={'Start '+(i+1)} value={a.trigger} onChange={e=>onUpdate(a.id,{trigger:e.target.value})}><option value="on-click">Vid klick</option><option value="with-previous">Med föregående</option><option value="after-previous">Efter föregående</option></select></label>{['fly-in','fly-out'].includes(a.effect)&&<label>Riktning<select aria-label={'Riktning '+(i+1)} value={directions.find(d=>d.x===(a.effect==='fly-in'?a.from?.offset?.x:a.to?.x)&&d.y===(a.effect==='fly-in'?a.from?.offset?.y:a.to?.y))?.label??'Från vänster'} onChange={e=>{const d=directions.find(d=>d.label===e.target.value)!;onUpdate(a.id,a.effect==='fly-in'?{from:{offset:{x:d.x,y:d.y}}}:{to:{x:d.x,y:d.y}});}}>{directions.map(d=><option key={d.label} value={d.label}>{a.effect==='fly-out'?d.label.replace('Från vänster','Åt vänster').replace('Från höger','Åt höger').replace('Uppifrån','Uppåt').replace('Nedifrån','Nedåt'):d.label}</option>)}</select></label>}{['durationMs','delayMs'].map((key)=><label key={key}>{key==='durationMs'?'Varaktighet':'Fördröjning'} (ms)<input aria-label={(key==='durationMs'?'Varaktighet':'Fördröjning')+' '+(i+1)} type="number" min="0" max="60000" defaultValue={a[key]??0} key={a[key]} onBlur={e=>{const n=Number(e.target.value);if(Number.isInteger(n)&&n>=0&&n<=60000)onUpdate(a.id,{[key]:n});}}/></label>)}</>}
- <div className="button-row"><button aria-label={'Flytta animering '+(i+1)+' upp'} disabled={i===0} onClick={()=>onMove(a.id,-1)}>↑</button><button aria-label={'Flytta animering '+(i+1)+' ned'} disabled={i===animations.length-1} onClick={()=>onMove(a.id,1)}>↓</button><button aria-label={'Ta bort animering '+(i+1)} onClick={()=>onRemove(a.id)}>Ta bort</button></div></li>;})}</ol></>}
+ <div className="button-row"><button aria-label={'Flytta animering '+(i+1)+' upp'} disabled={i===0} onClick={()=>onMove(a.id,-1)}>↑</button><button aria-label={'Flytta animering '+(i+1)+' ned'} disabled={i===animations.length-1} onClick={()=>onMove(a.id,1)}>↓</button><button aria-label={'Ta bort animering '+(i+1)} onClick={()=>onRemove(a.id)}>Ta bort</button></div>
+ </div></li>;})}</ol></>}
  <button onClick={onPreview}>Förhandsvisa från aktuell bild</button><p>Spelas i presentation och HTML. PDF, PPTX och bildexport är statiska. Inställningen minskad rörelse respekteras.</p>
  </fieldset>;
 }
