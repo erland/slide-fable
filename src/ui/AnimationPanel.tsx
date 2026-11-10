@@ -14,6 +14,7 @@ function TimingBar({index,animation,start,duration,end,disabled,onUpdate}:{index
  const shownStart=start+delay-(animation.delayMs??0);
  const left=Math.min(99.4,Math.max(0,shownStart/scale*100));
  const width=Math.min(Math.max(length/scale*100,0.6),100-left);
+ const dragging=preview!==null;
  const move=(event:PointerEvent<HTMLDivElement>)=>{
   const active=drag.current;
   if(!active||event.pointerId!==active.pointerId)return;
@@ -30,7 +31,9 @@ function TimingBar({index,animation,start,duration,end,disabled,onUpdate}:{index
   if(track.current?.hasPointerCapture(event.pointerId))track.current.releasePointerCapture(event.pointerId);
   if(commit&&value!==active.initial)onUpdate(animation.id,{[active.field]:value});
  };
- return <div ref={track} className="animation-timing-track animation-timing-draggable" data-timing-index={index} aria-label={'Dra animation '+index+' för fördröjning eller dess högra kant för varaktighet'}
+ return <div className="animation-timing-visual" data-timing-preview={dragging?'true':'false'}>
+  <span className="animation-timing-label" aria-live="off">{dragging?'Justerar · ':''}Start {shownStart} ms · Varaktighet {length} ms{dragging?' (släpp för att spara)':''}</span>
+  <div ref={track} className="animation-timing-track animation-timing-draggable" data-timing-index={index} aria-label={'Dra animation '+index+' för fördröjning eller dess högra kant för varaktighet'}
   onPointerDown={event=>{
    if(disabled||event.button!==0||!(event.target instanceof HTMLElement))return;
    const field=event.target.dataset.timingHandle==='duration'?'durationMs':event.target.closest('.animation-timing-bar')?'delayMs':null;
@@ -43,6 +46,7 @@ function TimingBar({index,animation,start,duration,end,disabled,onUpdate}:{index
   }}
   onPointerMove={move} onPointerUp={event=>stop(event,true)} onPointerCancel={event=>stop(event,false)}>
   <span className="animation-timing-bar" style={{left:left+'%',width:width+'%'}}><span data-timing-handle="duration" className="animation-timing-resize" aria-hidden="true"/></span>
+  </div>
  </div>;
 }
 export function AnimationPanel({doc,slide,selected,disabled,onTransition,onAdd,onUpdate,onRemove,onMove,onPreview}:{doc:D;slide:D;selected:string[];disabled:boolean;onTransition:(type:string,duration:number)=>void;onAdd:(id:string,effect:string)=>void;onUpdate:(id:string,patch:D)=>void;onRemove:(id:string)=>void;onMove:(id:string,delta:number)=>void;onPreview:()=>void}){
@@ -61,7 +65,7 @@ export function AnimationPanel({doc,slide,selected,disabled,onTransition,onAdd,o
  <ol className="animation-list">{animations.map((a:D,i:number)=>{const supported=['appear','fade','fly-in','fly-out'].includes(a.effect)&&['entrance','exit'].includes(a.phase??'entrance');const el=slide.view.elements.find((e:D)=>e.id===a.targetId);const timing=timedById.get(a.id),end=timing?groupEnd.get(timing.group)??0:0;
  return <li key={a.id}><strong>{el?.name??el?.accessibility?.altText??({shape:'Form',text:'Text',image:'Bild',group:'Grupp'}[el?.type as string]??el?.type??a.targetId)} · {a.from?.paragraph?.x!==undefined?'Punkt '+(a.from.paragraph.x+1):a.phase==='exit'&&a.effect==='appear'?'Försvinn':names[a.effect]??a.effect}</strong>
  {timing&&<div className="animation-timing" aria-label={'Klicksteg '+timing.group+', start '+timing.start+' millisekunder, varaktighet '+timing.duration+' millisekunder'}>
-  <span className="animation-timing-label">Klick {timing.group} · Start {timing.start} ms · Varaktighet {timing.duration} ms</span>
+  <span className="animation-timing-group">Klick {timing.group}</span>
   <TimingBar index={i+1} animation={a} start={timing.start} duration={timing.duration} end={end} disabled={disabled} onUpdate={onUpdate}/>
   <div className="animation-timing-actions" role="group" aria-label={'Justera timing '+(i+1)}>
    <span>Fördröjning</span>
