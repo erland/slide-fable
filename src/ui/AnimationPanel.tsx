@@ -54,7 +54,11 @@ export function AnimationPanel({doc,slide,selected,disabled,onTransition,onAdd,o
  const timeline=animationSchedule(slide);
  const timedById=new Map<string,D>(timeline.map((a:D)=>[a.id,a]));
  const groupEnd=new Map<number,number>();
- for(const a of timeline)groupEnd.set(a.group,Math.max(groupEnd.get(a.group)??0,a.start+a.duration));
+ const groupCounts=new Map<number,number>();
+ for(const a of timeline){
+  groupEnd.set(a.group,Math.max(groupEnd.get(a.group)??0,a.start+a.duration));
+  groupCounts.set(a.group,(groupCounts.get(a.group)??0)+1);
+ }
  const target=slide.view.elements.find((e:D)=>selected.includes(e.id)&&!e.locked&&e.visible!==false);
  const value=target&&['text','shape'].includes(target.type)?textOf(slide,target):null;
  const listCount=typeof value==='object'?(value?.paragraphs??[]).filter((p:D)=>p.paragraphStyle?.listType&&p.paragraphStyle.listType!=='none').length:0;
@@ -63,7 +67,16 @@ export function AnimationPanel({doc,slide,selected,disabled,onTransition,onAdd,o
  <label>Övergångstid (ms)<input aria-label="Övergångstid (ms)" type="number" min="0" max="60000" key={transition.durationMs} defaultValue={transition.durationMs??400} onBlur={e=>{const n=Number(e.target.value);if(Number.isInteger(n)&&n>=0&&n<=60000)onTransition(transition.type,n);}}/></label>
  {doc.schemaVersion!=='0.4.0'?<p>Objektanimeringar kräver PPD 0.4. Befintliga fragment bevaras.</p>:<><p>Markera ett objekt och välj effekt. Första klicket spelar steg 1. Med/föregående spelas automatiskt inom samma steg.</p><div className="button-row">{['appear','fade','exit','fly-in','fly-out'].map(effect=><button key={effect} disabled={!target} onClick={()=>onAdd(target!.id,effect)}>{names[effect]}</button>)}<button disabled={!target||listCount<2} onClick={()=>onAdd(target!.id,'bullet-steps')}>Visa punktlista stegvis</button></div>
  <ol className="animation-list">{animations.map((a:D,i:number)=>{const supported=['appear','fade','fly-in','fly-out'].includes(a.effect)&&['entrance','exit'].includes(a.phase??'entrance');const el=slide.view.elements.find((e:D)=>e.id===a.targetId);const timing=timedById.get(a.id),end=timing?groupEnd.get(timing.group)??0:0;
- return <li key={a.id}><strong>{el?.name??el?.accessibility?.altText??({shape:'Form',text:'Text',image:'Bild',group:'Grupp'}[el?.type as string]??el?.type??a.targetId)} · {a.from?.paragraph?.x!==undefined?'Punkt '+(a.from.paragraph.x+1):a.phase==='exit'&&a.effect==='appear'?'Försvinn':names[a.effect]??a.effect}</strong>
+ const previousTiming=i>0?timedById.get(animations[i-1].id):undefined;
+ const startsGroup=timing?!previousTiming||previousTiming.group!==timing.group:!!previousTiming||i===0;
+ const triggerLabel=a.trigger==='with-previous'?'Med föregående':a.trigger==='after-previous'?'Efter föregående':'Vid klick';
+ return <li key={a.id} className={startsGroup?'animation-group-start':undefined}>
+ {startsGroup&&<div className="animation-click-group-header" role="heading" aria-level={4}>
+  <span>{timing?'Klicksteg '+timing.group:'Importerad animation'}</span>
+  {timing&&<span className="animation-group-summary">{groupCounts.get(timing.group)} {groupCounts.get(timing.group)===1?'animation':'animationer'} · {end} ms</span>}
+ </div>}
+ <strong>{el?.name??el?.accessibility?.altText??({shape:'Form',text:'Text',image:'Bild',group:'Grupp'}[el?.type as string]??el?.type??a.targetId)} · {a.from?.paragraph?.x!==undefined?'Punkt '+(a.from.paragraph.x+1):a.phase==='exit'&&a.effect==='appear'?'Försvinn':names[a.effect]??a.effect}</strong>
+ <span className="animation-start-kind">{timing?triggerLabel:'Ej uppspelad'}</span>
  {timing&&<div className="animation-timing" aria-label={'Klicksteg '+timing.group+', start '+timing.start+' millisekunder, varaktighet '+timing.duration+' millisekunder'}>
   <TimingBar index={i+1} group={timing.group} animation={a} start={timing.start} duration={timing.duration} end={end} disabled={disabled} onUpdate={onUpdate}/>
   <div className="animation-timing-actions" role="group" aria-label={'Justera timing '+(i+1)}>

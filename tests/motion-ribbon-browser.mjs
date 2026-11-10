@@ -63,12 +63,20 @@ try{
   // SF-ANIM-05: timing overview reflects the shared playback scheduler and live editing.
   const timing=page.locator('.animation-panel .animation-timing');
   assert.equal(await timing.count(),2,viewport.name+' two scheduled effects');
+  const groupHeaders=page.locator('.animation-panel .animation-click-group-header');
+  assert.equal(await groupHeaders.count(),2,viewport.name+' separate click groups');
+  assert.match(await groupHeaders.nth(0).innerText(),/Klicksteg 1[\s\S]*1 animation/);
+  assert.match(await groupHeaders.nth(1).innerText(),/Klicksteg 2[\s\S]*1 animation/);
+  assert.equal(await page.locator('.animation-panel .animation-start-kind').nth(1).innerText(),'Vid klick');
   assert.match(await timing.nth(1).innerText(),/Klick 2 · Start 0 ms · Varaktighet 400 ms/);
   await page.locator('.animation-panel').getByRole('spinbutton',{name:'Fördröjning 2',exact:true}).fill('150');
   await page.locator('.animation-panel').getByRole('spinbutton',{name:'Fördröjning 2',exact:true}).press('Tab');
   assert.match(await timing.nth(1).innerText(),/Klick 2 · Start 150 ms · Varaktighet 400 ms/,viewport.name+' delay updates displayed start');
   await page.locator('.animation-panel').getByLabel('Start 2').selectOption('with-previous');
   assert.match(await timing.nth(1).innerText(),/Klick 1 · Start 150 ms · Varaktighet 400 ms/,viewport.name+' grouped timing follows trigger');
+  assert.equal(await groupHeaders.count(),1,viewport.name+' effects grouped into one click step');
+  assert.match(await groupHeaders.first().innerText(),/Klicksteg 1[\s\S]*2 animationer/);
+  assert.equal(await page.locator('.animation-panel .animation-start-kind').nth(1).innerText(),'Med föregående');
   // SF-ANIM-06: adjust PPD timing directly from the overview; every click is undoable.
   const adjust=page.locator('.animation-panel').getByRole('group',{name:'Justera timing 2'});
   await adjust.getByRole('button',{name:'Öka fördröjning 2'}).click();

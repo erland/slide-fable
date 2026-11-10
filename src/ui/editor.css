@@ -542,3 +542,10 @@
 .animation-timing-visual{display:grid;gap:4px;min-width:0}
 .animation-timing-visual[data-timing-preview="true"] .animation-timing-label{font-weight:700;color:var(--text)}
 .animation-timing-visual[data-timing-preview="true"] .animation-timing-track{outline:2px solid #37878d;outline-offset:2px}
+
+/* SF-ANIM-09: click-step sections without changing the underlying animation order. */
+.animation-list li.animation-group-start{margin-top:14px;padding-top:0;border-top:2px solid var(--line)}
+.animation-click-group-header{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:4px 10px;margin:0 0 10px -12px;padding:9px 10px;border-radius:0 0 6px 6px;background:var(--panel);font-weight:700;font-size:13px}
+.animation-group-summary{font-size:11px;font-weight:500;color:var(--muted);font-variant-numeric:tabular-nums}
+.animation-start-kind{display:inline-block;margin:0 0 5px;padding:2px 7px;border-radius:5px;border:1px solid var(--line);font-size:11px;color:var(--muted)}
+@media(max-width:520px){.animation-click-group-header{margin-left:-8px;padding:8px}.animation-group-summary{flex-basis:100%}}
