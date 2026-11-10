@@ -530,3 +530,10 @@
 .animation-timing-actions span:not(:first-child){margin-left:7px}
 .editor-app .animation-timing-actions button{min-height:34px;min-width:48px;padding:5px 8px;font-size:12px;font-variant-numeric:tabular-nums}
 @media(max-width:520px){.animation-timing-actions{gap:6px}.animation-timing-actions span:not(:first-child){margin-left:0}}
+
+/* SF-ANIM-07: drag the bar to change delay, or its right grip to change duration. */
+.animation-timing-draggable{height:18px;touch-action:none;overflow:visible;cursor:default}
+.animation-timing-draggable .animation-timing-bar{top:4px;bottom:4px;cursor:grab;min-width:5px}
+.animation-timing-draggable .animation-timing-bar:active{cursor:grabbing}
+.animation-timing-resize{position:absolute;right:0;top:-4px;bottom:-4px;width:12px;min-width:12px;border-radius:4px;background:#205e67;cursor:ew-resize;touch-action:none}
+.animation-timing-draggable:has(.animation-timing-bar:active){outline:1px solid #37878d}
