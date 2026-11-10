@@ -55,12 +55,25 @@ try{
   const image=await imageHandle.jsonValue();
   assert.equal((await snapshot(page)).selected[0],image.id,view.name+': original import completed before replacement');
   if(view.name!=='desktop')await nav.getByRole('button',{name:'Egenskaper'}).click();
+  // Record document revisions to diagnose any post-import rollback (not only a transient success).
+  await page.evaluate(async()=>{
+   window.__imageReplaceTrace=[];
+   const store=window.__imageTraceStore=(await import('/src/core/editor.ts')).editorStore;
+   window.__imageTraceUnsub=store.subscribe(()=>{
+    const s=store.getSnapshot(),el=s.doc.slides[0].view.elements.find(e=>e.type==='image');
+    window.__imageReplaceTrace.push({revision:s.doc.document.revision,assetRef:el?.assetRef,selected:s.selected});
+   });
+  });
   await pane.getByRole('button',{name:'Ersätt bild'}).click();
   await fileInput.setInputFiles({name:'replacement.png',mimeType:'image/png',buffer:replacementPicture});
   // Wait for the asynchronous replacement transaction, not the already-embedded source image.
   await page.waitForFunction(async ({id,previousAssetRef})=>{const [{editorStore:store},{updateSafety}]=await Promise.all([import('/src/core/editor.ts'),import('/src/pwa/safety.ts')]);const s=store.getSnapshot();const e=s.doc.slides[0].view.elements.find(e=>e.id===id);return !updateSafety.getSnapshot().busy&&e&&e.assetRef!==previousAssetRef&&s.doc.assets[e.assetRef]?.uri?.startsWith('data:image/png');},{id:image.id,previousAssetRef:image.assetRef});
   const after=await snapshot(page),current=after.doc.slides[0].view.elements.find(e=>e.id===image.id);
-  assert.notEqual(current.assetRef,image.assetRef,view.name+': image is replaced, not duplicated');
+  if(current.assetRef===image.assetRef){
+   const debug=await page.evaluate(()=>({trace:window.__imageReplaceTrace,errors:document.querySelector('[role="alert"]')?.textContent}));
+   throw Error(view.name+': image replacement reverted; trace='+JSON.stringify(debug));
+  }
+  await page.evaluate(()=>{window.__imageTraceUnsub?.();delete window.__imageTraceUnsub;delete window.__imageTraceStore;});
   assert.equal(after.doc.slides[0].view.elements.filter(e=>e.type==='image').length,1);
   assert.deepEqual(after.selected,[image.id],view.name+': replaced image remains selected');
   assert.equal(await pane.isVisible(),true,view.name+': properties stay accessible');

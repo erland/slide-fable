@@ -84,6 +84,30 @@ try{
   assert.match(await timing.nth(1).innerText(),/Varaktighet 400 ms/,viewport.name+' direct edit can be undone');
   await page.evaluate(async()=>(await import('/src/core/editor.ts')).editorStore.redo());
   assert.match(await timing.nth(1).innerText(),/Varaktighet 500 ms/,viewport.name+' direct edit can be redone');
+  // SF-ANIM-07: drag the bar and right grip, then verify one document change on release.
+  const timelineTrack=page.locator('.animation-timing-track[data-timing-index="2"]');
+  const bar=timelineTrack.locator('.animation-timing-bar');
+  const beforeDrag=(await model()).slides[0].animations[1];
+  const barRect=await bar.boundingBox(),trackRect=await timelineTrack.boundingBox();
+  assert.ok(barRect&&trackRect,viewport.name+' timeline geometry');
+  const x=barRect.x+Math.min(15,barRect.width/2),y=barRect.y+barRect.height/2;
+  await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x+trackRect.width*.2,y,{steps:4});
+  assert.equal((await model()).slides[0].animations[1].delayMs,beforeDrag.delayMs,viewport.name+' drag is preview only');
+  await page.mouse.up();
+  const afterMove=(await model()).slides[0].animations[1];
+  assert.ok(afterMove.delayMs>beforeDrag.delayMs,viewport.name+' bar drag changes delay');
+  const grip=timelineTrack.locator('[data-timing-handle="duration"]'),gripRect=await grip.boundingBox();
+  assert.ok(gripRect,viewport.name+' resize handle geometry');
+  const gx=gripRect.x+gripRect.width/2,gy=gripRect.y+gripRect.height/2;
+  await page.mouse.move(gx,gy);await page.mouse.down();await page.mouse.move(gx+trackRect.width*.15,gy,{steps:4});
+  assert.equal((await model()).slides[0].animations[1].durationMs,afterMove.durationMs,viewport.name+' resize is preview only');
+  await page.mouse.up();
+  const afterResize=(await model()).slides[0].animations[1];
+  assert.ok(afterResize.durationMs>afterMove.durationMs,viewport.name+' grip changes duration');
+  await page.evaluate(async()=>(await import('/src/core/editor.ts')).editorStore.undo());
+  assert.equal((await model()).slides[0].animations[1].durationMs,afterMove.durationMs,viewport.name+' drag resize undo');
+  await page.evaluate(async()=>(await import('/src/core/editor.ts')).editorStore.redo());
+  assert.equal((await model()).slides[0].animations[1].durationMs,afterResize.durationMs,viewport.name+' drag resize redo');
   const listId=await page.evaluate(async()=>{
    const store=(await import('/src/core/editor.ts')).editorStore;
    const id=store.add('text');
