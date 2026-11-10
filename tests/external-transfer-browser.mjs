@@ -33,6 +33,8 @@ try{
    const [{updateSafety},{editorStore}]=await Promise.all([import('/src/pwa/safety.ts'),import('/src/core/editor.ts')]);
    const end=updateSafety.beginOperation();
    try{
+    // Let React commit its disabled/busy state before dispatching the events.
+    await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
     const canvas=document.querySelector('.canvas-scroll');
     const before=editorStore.slide.view.elements.length;
     const results=[];
