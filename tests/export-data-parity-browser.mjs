@@ -7,6 +7,7 @@ import {tmpdir} from 'node:os';
 import path from 'node:path';
 import assert from 'node:assert/strict';
 import JSZip from 'jszip';
+import {PDFDocument} from 'pdf-lib';
 import sharp from 'sharp';
 const execFileAsync=promisify(execFile);
 const work=await mkdtemp(path.join(tmpdir(),'sf-export-data-'));
@@ -37,6 +38,35 @@ try{
   return {pptx:Array.from(pptx.file),pdf:Array.from(pdf.file),geometry:slide.view.elements.map(e=>({id:e.id,geometry:e.geometry}))};
  },[table,chart]);
  assert.deepEqual(artifact.geometry,[table,chart].map(e=>({id:e.id,geometry:e.geometry})),'PPD geometry unchanged');
+ // SF-QUAL-03: exercise the same slide selection used by the UI before writing real files.
+ const selectionArtifacts=await page.evaluate(async()=>{
+  const {createDocument,newSlide}=await import('/src/core/model.ts');
+  const {selectExportSlides}=await import('/src/export/slideSelection.ts');
+  const {pdfExport,pptxExport}=await import('/src/export/office.ts');
+  const doc=createDocument();
+  const first=doc.slides[0],hidden=newSlide(doc,'blank'),last=newSlide(doc,'blank');
+  first.title='Synlig A';hidden.title='Hemlig';hidden.hidden=true;last.title='Synlig B';
+  doc.slides=[first,hidden,last];
+  const build=async selected=>({
+   pdf:Array.from((await pdfExport(doc,selected,'editable-first',false)).file),
+   pptx:Array.from((await pptxExport(doc,selected,'editable-first',false)).file)
+  });
+  const all=await build(selectExportSlides(doc,first.id,'all'));
+  const current=await build(selectExportSlides(doc,last.id,'current'));
+  let blocked=false;
+  try{selectExportSlides(doc,hidden.id,'current');}catch{blocked=true;}
+  return {all,current,blocked};
+ });
+ assert.equal(selectionArtifacts.blocked,true,'Hidden current slide must not export');
+ for(const [scope,files,expectedCount] of [['all',selectionArtifacts.all,2],['current',selectionArtifacts.current,1]]){
+  const pdf=await PDFDocument.load(Uint8Array.from(files.pdf));
+  assert.equal(pdf.getPageCount(),expectedCount,scope+': PDF must contain only selected visible slides');
+  const zip=await JSZip.loadAsync(Uint8Array.from(files.pptx));
+  const pptxSlideNames=Object.keys(zip.files).filter(name=>/^ppt\\/slides\\/slide\\d+\\.xml$/.test(name));
+  assert.equal(pptxSlideNames.length,expectedCount,scope+': PPTX must contain only selected visible slides');
+ }
+ console.log('PASS PDF/PPTX multi-slide selection and hidden slide exclusion');
+
  const geometry=await page.evaluate(()=>{
   const s=document.querySelector('.stage .slide-render');if(!s)throw Error('Slide canvas unavailable');
   const base=s.getBoundingClientRect();return ['parity-table','parity-chart'].map(id=>{const e=s.querySelector(`[data-element-id="${id}"]`);if(!e)throw Error('Missing '+id);const r=e.getBoundingClientRect();return {id,x:(r.x-base.x)/base.width,y:(r.y-base.y)/base.height,w:r.width/base.width,h:r.height/base.height};});
