@@ -5,7 +5,7 @@ const names:Record<string,string>={appear:'Visa',fade:'Tona in',exit:'Försvinn'
 const adjustMs=(current:number|undefined,delta:number)=>Math.max(0,Math.min(60000,(Number(current)||0)+delta));
 const directions=[{label:'Från vänster',x:-1,y:0},{label:'Från höger',x:1,y:0},{label:'Uppifrån',x:0,y:-1},{label:'Nedifrån',x:0,y:1}];
 /** Pointer adjustments are preview-only until release: one undoable transaction per drag. */
-function TimingBar({index,animation,start,duration,end,disabled,onUpdate}:{index:number;animation:D;start:number;duration:number;end:number;disabled:boolean;onUpdate:(id:string,patch:D)=>void}){
+function TimingBar({index,group,animation,start,duration,end,disabled,onUpdate}:{index:number;group:number;animation:D;start:number;duration:number;end:number;disabled:boolean;onUpdate:(id:string,patch:D)=>void}){
  const track=useRef<HTMLDivElement>(null);
  const drag=useRef<{pointerId:number;clientX:number;pixels:number;field:'delayMs'|'durationMs';initial:number}|null>(null);
  const [preview,setPreview]=useState<{delayMs:number;durationMs:number}|null>(null);
@@ -32,7 +32,7 @@ function TimingBar({index,animation,start,duration,end,disabled,onUpdate}:{index
   if(commit&&value!==active.initial)onUpdate(animation.id,{[active.field]:value});
  };
  return <div className="animation-timing-visual" data-timing-preview={dragging?'true':'false'}>
-  <span className="animation-timing-label" aria-live="off">{dragging?'Justerar · ':''}Start {shownStart} ms · Varaktighet {length} ms{dragging?' (släpp för att spara)':''}</span>
+  <span className="animation-timing-label" aria-live="off">Klick {group} · {dragging?'Justerar · ':''}Start {shownStart} ms · Varaktighet {length} ms{dragging?' (släpp för att spara)':''}</span>
   <div ref={track} className="animation-timing-track animation-timing-draggable" data-timing-index={index} aria-label={'Dra animation '+index+' för fördröjning eller dess högra kant för varaktighet'}
   onPointerDown={event=>{
    if(disabled||event.button!==0||!(event.target instanceof HTMLElement))return;
@@ -65,8 +65,7 @@ export function AnimationPanel({doc,slide,selected,disabled,onTransition,onAdd,o
  <ol className="animation-list">{animations.map((a:D,i:number)=>{const supported=['appear','fade','fly-in','fly-out'].includes(a.effect)&&['entrance','exit'].includes(a.phase??'entrance');const el=slide.view.elements.find((e:D)=>e.id===a.targetId);const timing=timedById.get(a.id),end=timing?groupEnd.get(timing.group)??0:0;
  return <li key={a.id}><strong>{el?.name??el?.accessibility?.altText??({shape:'Form',text:'Text',image:'Bild',group:'Grupp'}[el?.type as string]??el?.type??a.targetId)} · {a.from?.paragraph?.x!==undefined?'Punkt '+(a.from.paragraph.x+1):a.phase==='exit'&&a.effect==='appear'?'Försvinn':names[a.effect]??a.effect}</strong>
  {timing&&<div className="animation-timing" aria-label={'Klicksteg '+timing.group+', start '+timing.start+' millisekunder, varaktighet '+timing.duration+' millisekunder'}>
-  <span className="animation-timing-group">Klick {timing.group}</span>
-  <TimingBar index={i+1} animation={a} start={timing.start} duration={timing.duration} end={end} disabled={disabled} onUpdate={onUpdate}/>
+  <TimingBar index={i+1} group={timing.group} animation={a} start={timing.start} duration={timing.duration} end={end} disabled={disabled} onUpdate={onUpdate}/>
   <div className="animation-timing-actions" role="group" aria-label={'Justera timing '+(i+1)}>
    <span>Fördröjning</span>
    <button type="button" aria-label={'Minska fördröjning '+(i+1)} disabled={disabled||(a.delayMs??0)<=0} onClick={()=>onUpdate(a.id,{delayMs:adjustMs(a.delayMs,-100)})}>−100</button>
