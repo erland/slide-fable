@@ -93,7 +93,11 @@ try{
   const x=barRect.x+Math.min(15,barRect.width/2),y=barRect.y+barRect.height/2;
   await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x+trackRect.width*.2,y,{steps:4});
   assert.equal((await model()).slides[0].animations[1].delayMs,beforeDrag.delayMs,viewport.name+' drag is preview only');
+  const visual=page.locator('.animation-timing').nth(1).locator('.animation-timing-visual');
+  assert.equal(await visual.getAttribute('data-timing-preview'),'true',viewport.name+' active drag preview');
+  assert.match(await visual.innerText(),/Justerar · Start .*släpp för att spara/,viewport.name+' live timing label');
   await page.mouse.up();
+  assert.equal(await visual.getAttribute('data-timing-preview'),'false',viewport.name+' preview ends on release');
   const afterMove=(await model()).slides[0].animations[1];
   assert.ok(afterMove.delayMs>beforeDrag.delayMs,viewport.name+' bar drag changes delay');
   const grip=timelineTrack.locator('[data-timing-handle="duration"]'),gripRect=await grip.boundingBox();
@@ -108,6 +112,21 @@ try{
   assert.equal((await model()).slides[0].animations[1].durationMs,afterMove.durationMs,viewport.name+' drag resize undo');
   await page.evaluate(async()=>(await import('/src/core/editor.ts')).editorStore.redo());
   assert.equal((await model()).slides[0].animations[1].durationMs,afterResize.durationMs,viewport.name+' drag resize redo');
+  // SF-ANIM-08: pointer cancellation discards a pending drag and restores the timeline label.
+  const unchanged=(await model()).slides[0].animations[1].delayMs;
+  const barAfter=await timelineTrack.locator('.animation-timing-bar').boundingBox();
+  assert.ok(barAfter,viewport.name+' bar is visible before cancellation');
+  await page.mouse.move(barAfter.x+Math.min(14,barAfter.width/2),barAfter.y+barAfter.height/2);
+  await page.mouse.down();
+  await page.mouse.move(barAfter.x+Math.min(14,barAfter.width/2)+trackRect.width*.1,barAfter.y+barAfter.height/2,{steps:3});
+  assert.equal(await visual.getAttribute('data-timing-preview'),'true');
+  await page.evaluate(()=>{
+   const track=document.querySelector('.animation-timing-track[data-timing-index="2"]');
+   track.dispatchEvent(new PointerEvent('pointercancel',{bubbles:true,pointerId:1}));
+  });
+  await page.mouse.up();
+  assert.equal(await visual.getAttribute('data-timing-preview'),'false',viewport.name+' cancelled drag returns to idle');
+  assert.equal((await model()).slides[0].animations[1].delayMs,unchanged,viewport.name+' cancelled drag must not commit');
   const listId=await page.evaluate(async()=>{
    const store=(await import('/src/core/editor.ts')).editorStore;
    const id=store.add('text');

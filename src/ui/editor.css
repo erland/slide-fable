@@ -537,3 +537,8 @@
 .animation-timing-draggable .animation-timing-bar:active{cursor:grabbing}
 .animation-timing-resize{position:absolute;right:0;top:-4px;bottom:-4px;width:12px;min-width:12px;border-radius:4px;background:#205e67;cursor:ew-resize;touch-action:none}
 .animation-timing-draggable:has(.animation-timing-bar:active){outline:1px solid #37878d}
+
+/* SF-ANIM-08: show pending timing values while dragging without shifting the timeline. */
+.animation-timing-visual{display:grid;gap:4px;min-width:0}
+.animation-timing-visual[data-timing-preview="true"] .animation-timing-label{font-weight:700;color:var(--text)}
+.animation-timing-visual[data-timing-preview="true"] .animation-timing-track{outline:2px solid #37878d;outline-offset:2px}
