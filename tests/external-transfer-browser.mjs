@@ -28,6 +28,28 @@ try{
   await page.waitForFunction(async before=>{const m=await import('/src/core/editor.ts');return m.editorStore.slide.view.elements.filter(e=>e.type==='image').length===before+1;},imagesBefore);
   const prevented=await page.evaluate(()=>{const data=new DataTransfer();data.items.add(new File(['invalid'],'unsafe.svg',{type:'image/svg+xml'}));const event=new DragEvent('drop',{dataTransfer:data,bubbles:true,cancelable:true});document.querySelector('.canvas-scroll').dispatchEvent(event);return event.defaultPrevented;});
   assert.equal(prevented,true,view.name+': unsupported file must not navigate browser');
+  // SF-QUAL-01: a pending image import must never allow dropped files to navigate the tab.
+  const blocked=await page.evaluate(async()=>{
+   const [{updateSafety},{editorStore}]=await Promise.all([import('/src/pwa/safety.ts'),import('/src/core/editor.ts')]);
+   const end=updateSafety.beginOperation();
+   try{
+    const canvas=document.querySelector('.canvas-scroll');
+    const before=editorStore.slide.view.elements.length;
+    const results=[];
+    for(const [name,type] of [['unsafe.svg','image/svg+xml'],['valid.png','image/png']]){
+     const data=new DataTransfer();
+     data.items.add(new File(['not a real image'],name,{type}));
+     const over=new DragEvent('dragover',{dataTransfer:data,bubbles:true,cancelable:true});
+     canvas.dispatchEvent(over);
+     const drop=new DragEvent('drop',{dataTransfer:data,bubbles:true,cancelable:true});
+     canvas.dispatchEvent(drop);
+     results.push({type,overPrevented:over.defaultPrevented,dropPrevented:drop.defaultPrevented});
+    }
+    return {results,unchanged:editorStore.slide.view.elements.length===before};
+   }finally{end();}
+  });
+  assert.ok(blocked.results.every(result=>result.overPrevented&&result.dropPrevented),view.name+': all file drops are suppressed while busy');
+  assert.equal(blocked.unchanged,true,view.name+': busy file drops must not mutate the document');
 
   assert.deepEqual(errors,[],view.name+': no JS errors');console.log('PASS external transfer '+view.name);await context.close();
  }
