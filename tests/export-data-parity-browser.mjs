@@ -62,7 +62,7 @@ try{
   const pdf=await PDFDocument.load(Uint8Array.from(files.pdf));
   assert.equal(pdf.getPageCount(),expectedCount,scope+': PDF must contain only selected visible slides');
   const zip=await JSZip.loadAsync(Uint8Array.from(files.pptx));
-  const pptxSlideNames=Object.keys(zip.files).filter(name=>new RegExp('^ppt/slides/slide[0-9]+[.]xml
+  const pptxSlideNames=Object.keys(zip.files).filter(name=>name.startsWith('ppt/slides/slide') && name.endsWith('.xml') && /^slide[0-9]+[.]xml$/.test(name.slice('ppt/slides/'.length)));
   assert.equal(pptxSlideNames.length,expectedCount,scope+': PPTX must contain only selected visible slides');
  }
  console.log('PASS PDF/PPTX multi-slide selection and hidden slide exclusion');
