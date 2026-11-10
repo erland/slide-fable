@@ -119,7 +119,43 @@ export function App(){
  function runSlideAction<T>(fn:()=>T,fallback:T):T{setReuseError('');try{return fn();}catch(e){setReuseError(String(e));return fallback;}}
  async function prepareReuse(f:File){setReuseError('');const end=updateSafety.beginOperation();try{if(f.size>50*1024*1024)throw Error('Filen är större än 50 MB.');const result=await importDocument(await f.text());if(result.readOnly)throw Error('Filen kan bara visas och kan inte återanvändas i redigeraren.');setReuseSource(result.doc);show('reuse');}catch(e){setReuseError('Bilderna kunde inte läsas: '+String(e));setMessage('Bilderna kunde inte läsas: '+String(e));}finally{end();}}
  async function insertReused(ids:string[]){if(!reuseSource)return;setReuseError('');const end=updateSafety.beginOperation();try{const result=await store.reuseSlides(reuseSource,ids);modal.current?.close();setMessage(result.ids.length+' bilder infogade.'+(result.removedLinks?' '+result.removedLinks+' länkar eller animationer till ej valda mål togs bort.':''));}catch(e){setReuseError('Bilderna kunde inte infogas: '+String(e));}finally{end();}}
- async function addImage(f:File){const end=updateSafety.beginOperation();try{if(!['image/png','image/jpeg','image/webp','image/svg+xml'].includes(f.type)||f.size>10*1024*1024)throw Error('Välj PNG, JPEG, WebP eller säker SVG, högst 10 MB.');const bytes=new Uint8Array(await f.arrayBuffer());const uri=await new Promise<string>((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result));reader.onerror=reject;reader.readAsDataURL(f);});const id=uid('asset'),eid=uid('image'),next=copy(doc);next.assets[id]={kind:'image',storage:'embedded',mimeType:f.type,uri,sha256:await bytesHash(bytes)};const elements=next.slides.find((s:D)=>s.id===slide.id).view.elements;const replacing=replaceImage.current&&element?.type==='image'?elements.find((e:D)=>e.id===element.id):undefined;if(replacing)replacing.assetRef=id;else elements.push({id:eid,type:'image',geometry:box(200,200,800,500),assetRef:id,fit:'cover',accessibility:{altText:f.name}});await validateFull(next);const probe=new Image();probe.src=uri;await probe.decode();if(probe.naturalWidth*probe.naturalHeight>40000000)throw Error('Bilden överskrider 40 megapixlar.');store.transaction(d=>{d.assets=next.assets;d.slides=next.slides;});store.select([replacing?.id??eid]);replaceImage.current=false;}catch(e){setMessage(String(e));}finally{end();}}
+ async function addImage(f:File){
+  const slideId=slide.id;
+  const replaceTargetId=replaceImage.current&&element?.type==='image'?element.id:null;
+  replaceImage.current=false;
+  const end=updateSafety.beginOperation();
+  try{
+   if(!['image/png','image/jpeg','image/webp','image/svg+xml'].includes(f.type)||f.size>10*1024*1024)throw Error('Välj PNG, JPEG, WebP eller säker SVG, högst 10 MB.');
+   const bytes=new Uint8Array(await f.arrayBuffer());
+   const uri=await new Promise<string>((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result));reader.onerror=reject;reader.readAsDataURL(f);});
+   const assetId=uid('asset'),newElementId=uid('image');
+   const asset={kind:'image',storage:'embedded',mimeType:f.type,uri,sha256:await bytesHash(bytes)};
+   const probe=new Image();probe.src=uri;await probe.decode();
+   if(probe.naturalWidth*probe.naturalHeight>40000000)throw Error('Bilden överskrider 40 megapixlar.');
+   // Validate the candidate without committing a stale copy of the document.
+   const candidate=copy(store.getSnapshot().doc);
+   const candidateSlide=candidate.slides.find((s:D)=>s.id===slideId);
+   if(!candidateSlide)throw Error('Bilden finns inte längre i presentationen.');
+   candidate.assets[assetId]=asset;
+   const candidateTarget=replaceTargetId?candidateSlide.view.elements.find((e:D)=>e.id===replaceTargetId&&e.type==='image'):null;
+   if(replaceTargetId&&!candidateTarget)throw Error('Bilden som ska ersättas finns inte längre.');
+   if(candidateTarget)candidateTarget.assetRef=assetId;
+   else candidateSlide.view.elements.push({id:newElementId,type:'image',geometry:box(200,200,800,500),assetRef:assetId,fit:'cover',accessibility:{altText:f.name}});
+   await validateFull(candidate);
+   // Apply only the new asset and intended element to the latest state, preserving intervening edits.
+   store.transaction(d=>{
+    const currentSlide=d.slides.find((s:D)=>s.id===slideId);
+    if(!currentSlide)throw Error('Bilden finns inte längre i presentationen.');
+    const currentTarget=replaceTargetId?currentSlide.view.elements.find((e:D)=>e.id===replaceTargetId&&e.type==='image'):null;
+    if(replaceTargetId&&!currentTarget)throw Error('Bilden som ska ersättas finns inte längre.');
+    d.assets[assetId]=asset;
+    if(currentTarget)currentTarget.assetRef=assetId;
+    else currentSlide.view.elements.push({id:newElementId,type:'image',geometry:box(200,200,800,500),assetRef:assetId,fit:'cover',accessibility:{altText:f.name}});
+   });
+   store.select([replaceTargetId??newElementId]);
+  }catch(e){setMessage(String(e));}
+  finally{end();}
+ }
  async function importTransfer(data:Pick<DataTransfer,'getData'|'files'>,fallback=false){
   if(state.readOnly||safety.locked||safety.busy||modal.current?.open||present)return;
   const picture=transferableImage(data.files);
