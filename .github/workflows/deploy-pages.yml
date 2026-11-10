@@ -1,9 +1,12 @@
 name: Deploy Slide Fable to GitHub Pages
 
+# Only a successful verification of main can trigger a deployment. Pull-request
+# verification runs are deliberately excluded, even when they pass.
 on:
-  push:
+  workflow_run:
+    workflows: ["Verify Slide Fable candidate"]
+    types: [completed]
     branches: [main]
-  workflow_dispatch:
 
 permissions:
   contents: read
@@ -14,15 +17,40 @@ concurrency:
 
 jobs:
   build:
+    if: >-
+      ${{ github.event.workflow_run.conclusion == 'success' &&
+          github.event.workflow_run.head_branch == 'main' &&
+          github.event.workflow_run.head_repository.full_name == github.repository &&
+          (github.event.workflow_run.event == 'push' || github.event.workflow_run.event == 'workflow_dispatch') }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
       pages: write
     steps:
-      - name: Checkout main
+      - name: Checkout the exact verified revision
         uses: actions/checkout@v4
         with:
+          ref: ${{ github.event.workflow_run.head_sha }}
           persist-credentials: false
+          fetch-depth: 1
+      - name: Refuse stale or unverified revisions
+        env:
+          VERIFIED_SHA: ${{ github.event.workflow_run.head_sha }}
+          VERIFIED_RUN_ID: ${{ github.event.workflow_run.id }}
+          GH_REPO: ${{ github.repository }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$VERIFIED_SHA"
+          MAIN_SHA="$(git ls-remote origin refs/heads/main | cut -f1)"
+          if [ "$MAIN_SHA" != "$VERIFIED_SHA" ]; then
+            echo "Verified revision is no longer main; skipping stale deployment."
+            echo "Expected $VERIFIED_SHA but main is $MAIN_SHA"
+            exit 1
+          fi
+          gh api "repos/$GH_REPO/actions/runs/$VERIFIED_RUN_ID" \
+            --jq '.conclusion + "|" + .head_sha + "|" + .head_branch + "|" + .event' \
+            | grep -Fx "success|$VERIFIED_SHA|main|$([ "${{ github.event.workflow_run.event }}" = workflow_dispatch ] && echo workflow_dispatch || echo push)"
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -31,23 +59,12 @@ jobs:
           cache-dependency-path: package-lock.json
       - name: Install dependencies
         run: npm ci
-      - name: Install Playwright Chromium
-        run: npx playwright install --with-deps chromium
-      # PDF export regression tests rasterize PDFs via pdftoppm.
-      # Keep this dependency aligned with verify.yml's candidate runner.
-      - name: Install PDF rasterizer
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq poppler-utils
-          command -v pdftoppm
-          pdftoppm -v
-      - name: Run lint and unit tests
-        run: |
-          npm run lint
-          npm test
-      - name: Build main
+      # Browser tests already passed in the successful verification workflow.
+      # Do not repeat npm test here: the second run was timing-sensitive and
+      # could fail independently of an already verified candidate.
+      - name: Build the verified revision
         env:
-          SF_BUILD_ID: ${{ github.sha }}
+          SF_BUILD_ID: ${{ github.event.workflow_run.head_sha }}
         run: npm run build
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
