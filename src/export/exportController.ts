@@ -6,6 +6,7 @@ import {preflight} from './plan.ts';
 import {writePdf} from './adapters/pdf.ts';
 import {writePptx} from './adapters/pptx.ts';
 import {updateSafety} from '../pwa/safety.ts';
+import {selectExportSlides} from './slideSelection.ts';
 
 export type ExportFormat='html'|'png'|'jpg'|'pdf'|'pptx';
 export type ExportOptions={doc:D;slideId:string;scope:string;format:string;profile:string;includePrivate:boolean;imageWidth:number};
@@ -26,8 +27,7 @@ export async function exportPresentation(options:ExportOptions):Promise<D>{
  try{
   const {slideId,scope,format,profile,includePrivate,imageWidth}=options;
   const source=copy(options.doc);
-  const slides=source.slides.filter((s:D)=>!s.hidden&&(scope==='all'||s.id===slideId));
-  if(!slides.length)throw Error('Minst en synlig bild behövs.');
+  const slides=selectExportSlides(source,slideId,scope);
   await validateFull(source);
   let result:D;
   if(format==='html'){

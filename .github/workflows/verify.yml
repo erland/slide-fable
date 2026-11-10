@@ -25,6 +25,7 @@ jobs:
       - name: Fast source checks before browser setup
         run: |
           npm run lint
+          node --check tests/export-data-parity-browser.mjs
           node --experimental-strip-types --test tests/*.test.mjs
           npm run build
       - name: Install Chromium or use runner Chrome
