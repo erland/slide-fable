@@ -12,6 +12,7 @@ Efter godkänd kandidatverifiering: öppna GitHub Actions-körningen för **Veri
 - `pdf-reference-1.png`, `pdf-reference-2.png`, `pdf-reference-3.png` – PDF-sidor rasteriserade med Poppler i 1280 × 720
 - `editor-reference-1.png`, `editor-reference-2.png`, `editor-reference-3.png` – **oberoende skärmbilder från Slide Fables faktiska redigerarvy i Chromium**, för samma PPD-dokument; dessa är inte PDF-raster eller PowerPoint-bilder
 - `manifest.json` – SHA-256, filstorlekar, commit och resultat av begränsade strukturkontroller
+- `difference-report.md`, `difference-report.json`, `difference-1.png`–`difference-3.png` – diagnostisk bildjämförelse mellan redigerare och PDF enligt [SF-QUAL-10](sf-qual-10-editor-pdf-difference-report.md), **ingen automatisk Office-acceptans**
 - `REVIEW-PROTOCOL.md` – manuellt provprotokoll med öppna RG-006 och RG-008
 
 För lokal generering i en miljö där Node-beroenden och Playwright Chromium finns installerade:
