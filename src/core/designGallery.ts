@@ -36,23 +36,56 @@ export function designTemplate(source:D):D{
  return doc;
 }
 
+/** Keep layout-managed text identities reusable across layout switches.
+ * Only objects previously attached to a placeholder are eligible for reattachment;
+ * ordinary user-inserted text and shapes are never appropriated by the layout.
+ */
 export function applySlideLayout(d:D,s:D,layoutId:string){
-   const master=d.masters.find((m:D)=>m.id===(s.masterId??d.document.defaultMasterId))??d.masters[0];
-   const old=layoutOf(d,s),next=master?.layouts.find((l:D)=>l.id===layoutId);
-   if(!next)throw Error('Layouten saknas');
-   const used=new Set<string>(),bindings:D[]=[];
-   for(const binding of s.placeholderBindings??[]){
-    const e=s.view.elements.find((e:D)=>e.id===binding.elementId);if(!e)continue;
-    const rendered=effective(d,s,e),previous=old?.placeholders?.find((p:D)=>p.id===binding.placeholderId);
-    const target=next.placeholders?.find((p:D)=>p.role===previous?.role&&!used.has(p.id));
-    if(target){const b=copy(binding);b.placeholderId=target.id;if(b.overrides)delete b.overrides.geometry;bindings.push(b);used.add(target.id);}
-    else{e.geometry=copy(rendered.geometry);e.style=copy(rendered.style);}
-   }
-   for(const placeholder of next.placeholders??[]){
-    if(used.has(placeholder.id)||placeholder.role==='image')continue;
-    const blockId=uid('block'),id=uid('text');s.content.blocks.push({id:blockId,kind:'text',text:rich(placeholder.role==='title'?'Din rubrik':'Ditt innehåll')});
-    s.view.elements.push({id,type:'text',geometry:copy(placeholder.geometry),contentRef:blockId+'#text'});
-    bindings.push({placeholderId:placeholder.id,elementId:id});
-   }
-   s.masterId=master.id;s.layoutId=layoutId;s.placeholderBindings=bindings;
+ const master=d.masters.find((m:D)=>m.id===(s.masterId??d.document.defaultMasterId))??d.masters[0];
+ const old=layoutOf(d,s),next=master?.layouts.find((l:D)=>l.id===layoutId);
+ if(!next)throw Error('Layouten saknas');
+ const used=new Set<string>(),bindings:D[]=[];
+ const activeElements=new Set<string>();
+ const remember=(element:D,placeholder:D)=>{
+  element.extensions={...element.extensions,slideFableLayoutRole:placeholder.role,slideFableLayoutSlot:placeholder.id};
+ };
+ for(const binding of s.placeholderBindings??[]){
+  const e=s.view.elements.find((item:D)=>item.id===binding.elementId);
+  if(!e)continue;
+  const rendered=effective(d,s,e);
+  const previous=old?.placeholders?.find((p:D)=>p.id===binding.placeholderId);
+  const target=next.placeholders?.find((p:D)=>p.role===previous?.role&&!used.has(p.id));
+  if(target){
+   const b=copy(binding);b.placeholderId=target.id;
+   if(b.overrides)delete b.overrides.geometry;
+   bindings.push(b);used.add(target.id);activeElements.add(e.id);
+   remember(e,target);
+  }else{
+   // Detach rather than delete an unmatched object. Retain its last layout
+   // role and slot for later reattachment, even after a blank layout.
+   e.geometry=copy(rendered.geometry);e.style=copy(rendered.style);
+   if(previous)remember(e,previous);
+  }
+ }
+ for(const placeholder of next.placeholders??[]){
+  if(used.has(placeholder.id)||placeholder.role==='image')continue;
+  // Prefer the exact prior slot over a generic role match. This restores
+  // the right-hand column rather than creating another empty text box.
+  const candidates=s.view.elements.filter((e:D)=>e.type==='text'&&!activeElements.has(e.id)&&
+   e.extensions?.slideFableLayoutRole===placeholder.role);
+  const existing=candidates.find((e:D)=>e.extensions?.slideFableLayoutSlot===placeholder.id)??candidates[0];
+  if(existing){
+   bindings.push({placeholderId:placeholder.id,elementId:existing.id});
+   used.add(placeholder.id);activeElements.add(existing.id);
+   remember(existing,placeholder);
+   continue;
+  }
+  const blockId=uid('block'),id=uid('text');
+  s.content.blocks.push({id:blockId,kind:'text',text:rich(placeholder.role==='title'?'Din rubrik':'Ditt innehåll')});
+  s.view.elements.push({id,type:'text',geometry:copy(placeholder.geometry),contentRef:blockId+'#text',
+   extensions:{slideFableLayoutRole:placeholder.role,slideFableLayoutSlot:placeholder.id}});
+  bindings.push({placeholderId:placeholder.id,elementId:id});
+  used.add(placeholder.id);activeElements.add(id);
+ }
+ s.masterId=master.id;s.layoutId=layoutId;s.placeholderBindings=bindings;
 }
