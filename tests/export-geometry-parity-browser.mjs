@@ -119,6 +119,40 @@ try{
  await writeFile(pdfPath,Uint8Array.from(data.pdf));
  await execFileAsync('pdftoppm',['-f','1','-l','1','-singlefile','-png','-scale-to-x','1600','-scale-to-y','900',pdfPath,pngBase]);
  const raster=await sharp(pngBase+'.png').removeAlpha().raw().toBuffer({resolveWithObject:true});
+
+ // SF-QUAL-04: compare the actual editor image with the exported PDF at fixed
+ // interior points, not just each output independently against PPD coordinates.
+ const stage=page.locator('.stage .slide-render').first();
+ await stage.locator('[data-element-id="parity-image-element"]').waitFor();
+ await page.evaluate(async()=>{
+  const slide=document.querySelector('.stage .slide-render');
+  await Promise.all(Array.from(slide.querySelectorAll('img')).map(img=>img.decode().catch(()=>{})));
+ });
+ const editorScreenshot=await stage.screenshot({animations:'disabled',caret:'hide'});
+ const editorRaster=await sharp(editorScreenshot).resize(1600,900,{fit:'fill'}).removeAlpha().raw().toBuffer({resolveWithObject:true});
+ const pdfComparable=await sharp(pngBase+'.png').resize(1600,900,{fit:'fill'}).removeAlpha().raw().toBuffer({resolveWithObject:true});
+ const sample=(image,x,y)=>{
+  const index=(Math.floor(y)*image.info.width+Math.floor(x))*image.info.channels;
+  return Array.from(image.data.subarray(index,index+3));
+ };
+ const points=[
+  {name:'coral shape',x:340,y:270},
+  {name:'blue shape',x:1140,y:575},
+  {name:'rotated shape center',x:810,y:260},
+  {name:'embedded image',x:395,y:595},
+  {name:'empty background',x:750,y:430}
+ ];
+ const colorDifference=(a,b)=>Math.max(...a.map((v,i)=>Math.abs(v-b[i])));
+ const comparison=points.map(point=>{
+  const editor=sample(editorRaster,point.x,point.y),pdf=sample(pdfComparable,point.x,point.y);
+  return {...point,editor,pdf,maxChannelError:colorDifference(editor,pdf)};
+ });
+ for(const point of comparison){
+  assert.ok(point.maxChannelError<=22,
+   'Editor/PDF color mismatch at '+point.name+': '+JSON.stringify(point));
+ }
+ console.log('PASS editor/PDF rendered colors at shape, image and background reference points');
+
  const {width,height,channels}=raster.info;
  const pixel=(x,y)=>{const p=(Math.floor(y)*width+Math.floor(x))*channels;return [...raster.data.subarray(p,p+3)];};
  for(const shape of shapes){
