@@ -28,7 +28,17 @@ try{
  const rev3=await edit();await delay(1000);state=await read();assert.equal(state.draft?.model.document.revision,rev3,'Post-export edit must persist');
  console.log('PASS post-export autosave');
  // Restored copy should be the last persisted revision after a reload.
- await page.reload();await page.getByRole('button',{name:'Lägg till bild',exact:true}).waitFor();const recovery=page.getByRole('button',{name:/Livscykel/}).first();await recovery.click();state=await read();assert.equal(state.revision,rev3,'Reload must restore last saved revision');
+ await page.reload();await page.getByRole('button',{name:'Lägg till bild',exact:true}).waitFor();
+ assert.equal(await page.locator('section.recovery').filter({hasText:'Återställ en arbetskopia'}).count(),0,'Recovery list must not occupy workspace');
+ await page.locator('.editor-header .editor-menu-disclosure > summary').click();
+ await page.getByRole('navigation',{name:'Arkiv och redigering'}).getByRole('button',{name:'Arbetskopior…'}).click();
+ const recoveryDialog=page.getByRole('dialog');
+ await recoveryDialog.getByRole('heading',{name:'Lokala arbetskopior'}).waitFor();
+ await recoveryDialog.getByText(/Livscykel/).first().waitFor();
+ await recoveryDialog.getByRole('button',{name:'Öppna'}).first().click();
+ assert.equal((await read()).revision!==rev3,true,'Selecting draft must not restore before confirmation');
+ await recoveryDialog.getByRole('button',{name:'Bekräfta öppning'}).click();
+ state=await read();assert.equal(state.revision,rev3,'Reload must restore last saved revision');
  console.log('PASS reload and restore');
  // Compare-and-swap: stale writer cannot overwrite the saved revision.
  const conflict=await page.evaluate(async()=>{const store=(await import('/src/core/editor.ts')).editorStore,p=await import('/src/core/persistence.ts');try{await p.saveDraft(store.getSnapshot().doc,null,'second-tab');return false;}catch(e){return String(e).includes('CONFLICT');}});assert.ok(conflict,'Stale tab CAS must reject');
