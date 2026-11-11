@@ -6,6 +6,14 @@ Detta protokoll följer referenspaketet med `acceptance.ppd.json`, `acceptance.p
 
 Anteckna prövningsdatum, testare, operativsystem och version, applikation/version (PowerPoint Mac/Windows, PDF-läsare), käll-commit och SHA-256 från manifestet. Bevara originalfilerna oförändrade. Gör varje redigeringsprov på en **kopia** av PPTX och bevara den omsparade filen tillsammans med skärmbilder.
 
+## Referensbilder för jämförelse
+
+Paketet innehåller `pdf-reference-1.png`, `pdf-reference-2.png` och `pdf-reference-3.png` i 1280 × 720 pixlar. Bilderna är **rasteriseringar av samma PDF som levereras i paketet**, inte oberoende skärmbilder från Slide Fables redigerare eller från PowerPoint.
+
+Använd dem som snabb översikt när du granskar PPTX i PowerPoint. Jämför sidornas layout, färger, bildinnehåll och eventuella textförskjutningar. Dokumentera skillnader mot både PDF-referensen och originalets PPD-innehåll. Om PDF och PowerPoint visar samma fel är det inte bevis för att Slide Fables redigerare visar rätt – felet kan finnas i exporten.
+
+Kontrollera också filernas SHA-256 i `manifest.json` så att granskningen gäller samma referenspaket.
+
 ## Testobjekt
 
 | Bild | Objekt | Kontroll |
