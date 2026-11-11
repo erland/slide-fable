@@ -52,9 +52,19 @@ try{
   await page.locator('.insert-gallery-group').getByRole('button',{name:'Bilder'}).click();
   await fileInput.setInputFiles({name:'original.png',mimeType:'image/png',buffer:picture});
   const imageHandle=await page.waitForFunction(async()=>{const [{editorStore:store},{updateSafety}]=await Promise.all([import('/src/core/editor.ts'),import('/src/pwa/safety.ts')]);const s=store.getSnapshot();const e=s.doc.slides[0].view.elements.find(e=>e.type==='image');return !updateSafety.getSnapshot().busy&&e&&s.selected.includes(e.id)?{id:e.id,assetRef:e.assetRef,revision:s.doc.document.revision}:null;});
-  const image=await imageHandle.jsonValue();
+  let image=await imageHandle.jsonValue();
   assert.equal((await snapshot(page)).selected[0],image.id,view.name+': original import completed before replacement');
   if(view.name!=='desktop')await nav.getByRole('button',{name:'Egenskaper'}).click();
+  // Navigation and draft synchronization may finish after the original import.
+  // Establish the replacement baseline from the settled UI immediately before clicking.
+  await page.waitForFunction(async id=>{
+   const [{editorStore:store},{updateSafety}]=await Promise.all([import('/src/core/editor.ts'),import('/src/pwa/safety.ts')]);
+   const s=store.getSnapshot(),e=s.doc.slides[0].view.elements.find(el=>el.id===id);
+   return !updateSafety.getSnapshot().busy&&e&&s.selected.includes(id)&&s.doc.assets[e.assetRef]?.uri?.startsWith('data:image/png');
+  },image.id);
+  const baseline=await snapshot(page);
+  const baselineElement=baseline.doc.slides[0].view.elements.find(e=>e.id===image.id);
+  image={id:image.id,assetRef:baselineElement.assetRef,revision:baseline.doc.document.revision};
   // Record document revisions to diagnose any post-import rollback (not only a transient success).
   await page.evaluate(async()=>{
    window.__imageReplaceTrace=[];
@@ -77,11 +87,15 @@ try{
    const settled=store.getSnapshot(),current=settled.doc.slides[0].view.elements.find(el=>el.id===id);
    return !updateSafety.getSnapshot().busy&&current?.assetRef===e.assetRef&&settled.doc.document.revision>=s.doc.document.revision;
   },{id:image.id,previousAssetRef:image.assetRef,previousRevision:image.revision});
+  // Verify the commit remains observable after UI settlement. If it genuinely
+  // reverts, keep the failure and emit both the previous and final asset IDs.
+  await page.waitForTimeout(300);
   const after=await snapshot(page),current=after.doc.slides[0].view.elements.find(e=>e.id===image.id);
-  if(current.assetRef===image.assetRef){
+  if(current?.assetRef===image.assetRef){
    const debug=await page.evaluate(()=>({trace:window.__imageReplaceTrace,errors:document.querySelector('[role="alert"]')?.textContent}));
-   throw Error(view.name+': image replacement reverted; trace='+JSON.stringify(debug));
+   throw Error(view.name+': image replacement reverted; baseline='+JSON.stringify(image)+'; final='+JSON.stringify({revision:after.doc.document.revision,assetRef:current?.assetRef,selected:after.selected})+'; trace='+JSON.stringify(debug));
   }
+  assert.ok(current&&after.doc.assets[current.assetRef]?.uri?.startsWith('data:image/png'),view.name+': replacement must retain embedded PNG asset');
   await page.evaluate(()=>{window.__imageTraceUnsub?.();delete window.__imageTraceUnsub;delete window.__imageTraceStore;});
   assert.equal(after.doc.slides[0].view.elements.filter(e=>e.type==='image').length,1);
   assert.deepEqual(after.selected,[image.id],view.name+': replaced image remains selected');
