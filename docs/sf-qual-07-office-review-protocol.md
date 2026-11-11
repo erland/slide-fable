@@ -16,6 +16,12 @@ Det finns också `editor-reference-1.png` till `editor-reference-3.png` – tagn
 
 Kontrollera också filernas SHA-256 i `manifest.json` så att granskningen gäller samma referenspaket.
 
+## Automatisk avvikelserapport (SF-QUAL-10)
+
+Paketet innehåller också `difference-report.md`, `difference-report.json` och `difference-1.png` till `difference-3.png`. Rapporterna jämför de självständigt renderade redigerar- och PDF-bilderna, med färgskillnader per bild. Röda områden visar pixlar där någon färgkanal avviker med **mer än 24 av 255**; grått ligger inom toleransen.
+
+**Rapporten är diagnostisk.** Skillnader i typsnittsrasterisering och kantutjämning räknas också, och ingen acceptansgräns för hela bilden har beslutats. Öppna originalbilderna sida vid sida och ange konkreta layout- eller innehållsfel i protokollet. Rapporten representerar inte PowerPoints egen rendering.
+
 ## Testobjekt
 
 | Bild | Objekt | Kontroll |

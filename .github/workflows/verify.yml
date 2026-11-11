@@ -29,6 +29,7 @@ jobs:
           node --check tests/export-geometry-parity-browser.mjs
           node --check tests/text-export-parity-browser.mjs
           node --check scripts/generate_export_acceptance.mjs
+          node --check scripts/report_export_fidelity.mjs
           node --experimental-strip-types --test tests/*.test.mjs
           npm run build
       - name: Install Chromium or use runner Chrome
@@ -49,6 +50,10 @@ jobs:
         run: sudo apt-get update -qq && sudo apt-get install -y -qq poppler-utils
       - name: Generate portable export acceptance package
         run: npm run acceptance:export
+        env:
+          EDITOR_OUTPUT: ${{ runner.temp }}/slide-fable-editor-evidence
+      - name: Compare editor and PDF reference renders
+        run: npm run acceptance:compare
         env:
           EDITOR_OUTPUT: ${{ runner.temp }}/slide-fable-editor-evidence
       

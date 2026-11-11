@@ -17,6 +17,7 @@
     "test:text-overflow": "node tests/text-overflow-browser.mjs",
     "test:text-export": "node tests/text-export-parity-browser.mjs",
     "acceptance:export": "node scripts/generate_export_acceptance.mjs",
+    "acceptance:compare": "node scripts/report_export_fidelity.mjs",
     "test:lifecycle": "node tests/lifecycle-browser.mjs",
     "profile:history": "node --experimental-strip-types scripts/profile-history.mjs",
     "test:common-workflows": "node tests/common-workflows-browser.mjs",
