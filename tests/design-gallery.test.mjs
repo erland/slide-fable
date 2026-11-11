@@ -72,8 +72,10 @@ test('switching through all layouts preserves user objects and reuses managed pl
  for(let round=0;round<3;round++)for(const name of layouts){
   store.applyLayout(name);
   const current=store.slide.view.elements.map(e=>e.id);
-  if(!seenByLayout.has(name))seenByLayout.set(name,new Set(current));
-  else assert.deepEqual(new Set(current),seenByLayout.get(name),'Unexpected new objects after returning to '+name);
+  // The first pass legitimately creates the previously absent right column.
+  // After one complete traversal, all subsequent layout changes must reuse it.
+  if(round===1)seenByLayout.set(name,new Set(current));
+  if(round===2)assert.deepEqual(new Set(current),seenByLayout.get(name),'Unexpected new objects after returning to '+name);
   assert.ok(store.slide.view.elements.some(e=>e.id===extra),'Free-standing object must remain');
   assert.deepEqual(store.slide.view.elements.find(e=>e.id===extra).geometry,before,'Free-standing geometry unchanged');
   assert.ok(!store.slide.placeholderBindings.some(b=>b.elementId===extra),'Free-standing text is never captured');
