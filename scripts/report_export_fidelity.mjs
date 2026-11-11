@@ -11,7 +11,7 @@ import {createHash} from 'node:crypto';
 import sharp from 'sharp';
 import {compareRgb} from './export_fidelity_metrics.mjs';
 const checksum=buffer=>createHash('sha256').update(buffer).digest('hex');
-const localPath=path.resolve(process.argv[2]??process.env.EDITOR_OUTPUT&&path.join(process.env.EDITOR_OUTPUT,'export-acceptance')??'export-acceptance');
+const localPath=path.resolve(process.argv[2]??(process.env.EDITOR_OUTPUT?path.join(process.env.EDITOR_OUTPUT,'export-acceptance'):'export-acceptance'));
 export async function makeExportFidelityReport(folder=localPath){
  const root=path.resolve(folder);
  const manifest=JSON.parse(await readFile(path.join(root,'manifest.json'),'utf8'));
