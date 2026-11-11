@@ -47,17 +47,17 @@ jobs:
           fi
       - name: Install PDF rasterizer
         run: sudo apt-get update -qq && sudo apt-get install -y -qq poppler-utils
+      - name: Generate portable export acceptance package
+        run: npm run acceptance:export
+        env:
+          EDITOR_OUTPUT: ${{ runner.temp }}/slide-fable-editor-evidence
+      
       - name: Verify candidate and capture visual evidence
         run: python scripts/verify_release_candidate.py
         env:
           EDITOR_OUTPUT: ${{ runner.temp }}/slide-fable-editor-evidence
           PWA_OUTPUT: ${{ runner.temp }}/slide-fable-pwa-evidence
           RELEASE_EVIDENCE_OUTPUT: ${{ runner.temp }}/slide-fable-release-evidence.json
-      - name: Generate portable export acceptance package
-        run: npm run acceptance:export
-        env:
-          EDITOR_OUTPUT: ${{ runner.temp }}/slide-fable-editor-evidence
-      
       - name: Archive editor screenshots and test reports
         if: always()
         uses: actions/upload-artifact@v4
