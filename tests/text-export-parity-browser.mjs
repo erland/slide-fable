@@ -29,16 +29,20 @@ try{
  await page.getByRole('button',{name:'Lägg till bild',exact:true}).waitFor();
  const data=await page.evaluate(async()=>{
   const {createDocument}=await import('/src/core/model.ts');
+  const {normalizePpd040Styles}=await import('/src/core/ppd040Staging.ts');
   const {editorStore}=await import('/src/core/editor.ts');
   const {measure,flatten}=await import('/src/export/officeShared.ts');
   const {pdfExport,pptxExport}=await import('/src/export/office.ts');
   const doc=createDocument(),slide=doc.slides[0];
   slide.view.elements=[
+   // SF-QUAL-05: a native colored shape behind wrapped rich text.
+   {id:'export-text-background',type:'shape',shapeType:'rect',geometry:{x:95,y:95,width:575,height:325,rotation:0,unit:'logical'},style:{fill:{color:'#E7EEE9'},stroke:{color:'#387F89'},strokeWidth:4}},
    {id:'export-text-fit',type:'text',geometry:{x:150,y:140,width:400,height:95},style:{fontSize:50,color:'#183641',fontFamily:'Fable'},text:{overflow:'shrink-to-fit',paragraphs:[
     {id:'p-one',runs:[{text:'Lång rubrik ÅÄÖ och test av radbrytning med flera ord',marks:{bold:true}}]},
     {id:'p-two',runs:[{text:'Andra raden med kursiv text och fortsatt radbrytning',marks:{italic:true}}]}
    ]}}
   ];
+  normalizePpd040Styles(doc);
   editorStore.load(doc);
   const element=flatten(doc,slide).find(e=>e.id==='export-text-fit');
   const fragments=await measure(doc,slide,element);
@@ -61,6 +65,22 @@ try{
  await execFileAsync('pdftoppm',['-f','1','-l','1','-singlefile','-png','-r','120',pdfPath,prefix]);
  const editor=await sharp(screenshot).removeAlpha().raw().toBuffer({resolveWithObject:true});
  const rendered=await sharp(prefix+'.png').resize(editor.info.width,editor.info.height,{fit:'fill'}).removeAlpha().raw().toBuffer({resolveWithObject:true});
+
+ // Compare the visible background of the text composition in the editor and
+ // native PDF, using an interior pixel well outside the text and shape border.
+ const sample=(image,x,y)=>{
+  const px=Math.floor(x/1600*image.info.width),py=Math.floor(y/900*image.info.height);
+  const i=(py*image.info.width+px)*image.info.channels;
+  return Array.from(image.data.subarray(i,i+3));
+ };
+ const expected=[231,238,233],editorBg=sample(editor,630,365),pdfBg=sample(rendered,630,365);
+ for(const [label,values] of [['editor',editorBg],['PDF',pdfBg]]){
+  assert.ok(values.every((v,i)=>Math.abs(v-expected[i])<=22),
+   label+' text-background fill mismatch: '+JSON.stringify(values));
+ }
+ assert.ok(editorBg.every((v,i)=>Math.abs(v-pdfBg[i])<=14),
+  'Text/background composition differs between editor and PDF: '+JSON.stringify({editorBg,pdfBg}));
+ console.log('PASS editor/PDF: rich text preserves colored background composition');
  // Ink is segmented only in the fixture text zone; the comparison tolerates
  // font-rasterizer antialiasing but catches missing, oversized or displaced text.
  function bounds(data,width,height){
@@ -89,6 +109,9 @@ try{
  const xml=await zip.file('ppt/slides/slide1.xml').async('string');
  assert.ok(xml.includes('ÅÄÖ')||xml.includes('&#'),'PPTX must contain editable Swedish text runs');
  assert.ok(xml.includes('Lång rubrik')&&xml.includes('Andra raden'),'PPTX must preserve text as native runs');
+ 
+ assert.match(xml,/<a:srgbClr val="E7EEE9"\s*\/>/i,'PPTX must preserve the native background shape fill');
+ assert.ok((xml.match(/<p:sp>/g)??[]).length>=1,'PPTX must retain the background as an editable shape');
  const sizeAttributes=[...xml.matchAll(/\bsz="(\d+)"/g)].map(m=>Number(m[1])/100);
  const units=1600/13.3333333333,factor=72/units;
  assert.ok(data.fragments.some(f=>sizeAttributes.some(n=>Math.abs(n-f.size*factor)<.6)),'PPTX native font size must match measured scaled text');

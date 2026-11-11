@@ -27,6 +27,7 @@ jobs:
           npm run lint
           node --check tests/export-data-parity-browser.mjs
           node --check tests/export-geometry-parity-browser.mjs
+          node --check tests/text-export-parity-browser.mjs
           node --experimental-strip-types --test tests/*.test.mjs
           npm run build
       - name: Install Chromium or use runner Chrome
