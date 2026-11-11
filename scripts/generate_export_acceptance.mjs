@@ -6,14 +6,17 @@
  * Output: EDITOR_OUTPUT/export-acceptance/ or ./export-acceptance/
  */
 import {chromium} from 'playwright';
-import {spawn} from 'node:child_process';
+import {spawn,execFile} from 'node:child_process';
+import {promisify} from 'node:util';
 import {mkdir,readFile,writeFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import path from 'node:path';
 import assert from 'node:assert/strict';
 import JSZip from 'jszip';
 import {PDFDocument} from 'pdf-lib';
+import sharp from 'sharp';
 
+const execFileAsync=promisify(execFile);
 const port=5237;
 const output=path.resolve(process.env.EDITOR_OUTPUT??'.','export-acceptance');
 const server=spawn('node',['node_modules/vite/bin/vite.js','--host','127.0.0.1','--port',String(port),'--strictPort'],{stdio:['ignore','pipe','pipe']});
@@ -115,6 +118,22 @@ try{
  await mkdir(output,{recursive:true});
  const files={'acceptance.ppd.json':source,'acceptance.pdf':pdf,'acceptance.pptx':pptx};
  for(const [name,bytes] of Object.entries(files))await writeFile(path.join(output,name),bytes);
+ // Derive fixed-size reference images from the exact PDF included in this pack.
+ // These aid manual comparison; they are not a second, independent renderer.
+ const rasterPrefix=path.join(output,'pdf-reference');
+ await execFileAsync('pdftoppm',['-f','1','-l','3','-png','-scale-to-x','1280','-scale-to-y','720',path.join(output,'acceptance.pdf'),rasterPrefix]);
+ const previews=[];
+ for(let number=1;number<=3;number++){
+  const name='pdf-reference-'+number+'.png';
+  const bytes=await readFile(path.join(output,name));
+  const raster=sharp(bytes),metadata=await raster.metadata();
+  assert.equal(metadata.width,1280,name+': width must match the reference canvas');
+  assert.equal(metadata.height,720,name+': height must match the reference canvas');
+  const stats=await raster.stats();
+  assert.ok(stats.channels.some(channel=>channel.stdev>3),name+': PDF page must contain visible content');
+  files[name]=bytes;
+  previews.push({slideId:result.doc.slides[number-1].id,file:name,derivedFrom:'acceptance.pdf'});
+ }
  const template=await readFile(new URL('../docs/sf-qual-07-office-review-protocol.md',import.meta.url));
  await writeFile(path.join(output,'REVIEW-PROTOCOL.md'),template);
  const manifest={
@@ -122,6 +141,8 @@ try{
   sourceCommit:process.env.GITHUB_SHA??null,
   generatedFrom:'Slide Fable native PDF/PPTX engines, editable-first',
   expectedSlides:3,
+  previewType:'PDF raster only; not a PowerPoint or editor screenshot',
+  previews,
   structuralChecks:{pdfPageCount:3,pptxSlideParts:3,nativeText:true,nativeTable:true,nativeChart:true,embeddedImage:true},
   files:Object.fromEntries(Object.entries(files).map(([name,bytes])=>[name,{sha256:sha256(bytes),size:bytes.length}])),
   manualChecks:['RG-006','RG-008']
