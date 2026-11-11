@@ -557,3 +557,10 @@
 .animation-group-toggle span{font-size:13px}
 .animation-group-toggle[aria-expanded="false"] span{transform:translateX(1px)}
 .animation-list li.animation-group-start:has(.animation-group-toggle[aria-expanded="false"]){padding-bottom:0}
+
+/* Draft recovery is an on-demand File-menu dialog, never a workspace banner. */
+.draft-recovery-list{display:flex;flex-direction:column;gap:.5rem;max-height:45vh;overflow:auto;margin:.8rem 0}
+.draft-recovery-entry{display:flex;align-items:center;flex-wrap:wrap;gap:.5rem;padding:.6rem;border:1px solid var(--border,#c8d1d2);border-radius:.5rem}
+.draft-recovery-entry>span{flex:1 1 14rem;overflow-wrap:anywhere}
+.draft-recovery-confirm{border-top:1px solid var(--border,#c8d1d2);padding-top:.7rem;margin-top:.8rem}
+.draft-recovery-confirm button{margin-right:.5rem;margin-bottom:.3rem}
