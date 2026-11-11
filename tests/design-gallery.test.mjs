@@ -40,3 +40,68 @@ test('portable design templates omit source slides, speaker notes and unreferenc
  assert.ok(!JSON.stringify(template).includes('En idé. En berättelse.'));
  assert.deepEqual(template.theme,source.theme);assert.deepEqual(template.masters,source.masters);
 });
+
+test('switching content and columns repeatedly reuses placeholder objects without duplication',()=>{
+ const store=new EditorStore();
+ store.applyLayout('content');
+ const initialIds=store.slide.view.elements.map(e=>e.id);
+ store.applyLayout('columns');
+ const columns=store.slide.view.elements.map(e=>e.id);
+ assert.equal(columns.length,3,'Only the missing right column is created');
+ const rightId=store.slide.placeholderBindings.find(binding=>binding.placeholderId==='right').elementId;
+ store.editText(rightId,'Innehåll i höger kolumn');
+ for(let n=0;n<5;n++){
+  store.applyLayout('content');
+  assert.equal(store.slide.view.elements.length,3,'No elements added when returning to content');
+  store.applyLayout('columns');
+  assert.deepEqual(store.slide.view.elements.map(e=>e.id),columns,'Object identities remain stable');
+  assert.equal(store.slide.placeholderBindings.find(binding=>binding.placeholderId==='right').elementId,rightId);
+  assert.equal(textOf(store.slide,store.slide.view.elements.find(e=>e.id===rightId)),'Innehåll i höger kolumn');
+ }
+ assert.ok(initialIds.every(id=>columns.includes(id)));
+ validateCore(store.getSnapshot().doc);
+});
+
+test('switching through all layouts preserves user objects and reuses managed placeholders',()=>{
+ const store=new EditorStore();
+ const extra=store.add('text');
+ store.editText(extra,'Eget fristående objekt');
+ const before=store.slide.view.elements.find(e=>e.id===extra).geometry;
+ const layouts=['content','columns','image-text','blank','title','content','columns'];
+ const seenByLayout=new Map();
+ for(let round=0;round<3;round++)for(const name of layouts){
+  store.applyLayout(name);
+  const current=store.slide.view.elements.map(e=>e.id);
+  // The first pass legitimately creates the previously absent right column.
+  // After one complete traversal, all subsequent layout changes must reuse it.
+  if(round===1)seenByLayout.set(name,new Set(current));
+  if(round===2)assert.deepEqual(new Set(current),seenByLayout.get(name),'Unexpected new objects after returning to '+name);
+  assert.ok(store.slide.view.elements.some(e=>e.id===extra),'Free-standing object must remain');
+  assert.deepEqual(store.slide.view.elements.find(e=>e.id===extra).geometry,before,'Free-standing geometry unchanged');
+  assert.ok(!store.slide.placeholderBindings.some(b=>b.elementId===extra),'Free-standing text is never captured');
+  validateCore(store.getSnapshot().doc);
+ }
+ const saved=structuredClone(store.getSnapshot().doc);
+ const savedIds=store.slide.view.elements.map(e=>e.id);
+ store.load(saved);
+ for(const name of ['blank','columns','content','columns'])store.applyLayout(name);
+ assert.deepEqual(store.slide.view.elements.map(e=>e.id),savedIds,'Saved placeholder affinity survives reload');
+});
+
+test('layout changes preserve undo and redo with original placeholder identities',()=>{
+ const store=new EditorStore();
+ store.applyLayout('content');
+ const baseline=structuredClone(store.getSnapshot().doc);
+ store.applyLayout('columns');
+ const columns=structuredClone(store.getSnapshot().doc);
+ store.applyLayout('content');
+ store.undo();
+ assert.deepEqual(store.getSnapshot().doc,columns);
+ store.undo();
+ assert.deepEqual(store.getSnapshot().doc,baseline);
+ store.redo();
+ assert.deepEqual(store.getSnapshot().doc,columns);
+ store.applyLayout('content');
+ store.applyLayout('columns');
+ assert.deepEqual(store.slide.view.elements.map(e=>e.id),columns.slides[0].view.elements.map(e=>e.id));
+});
