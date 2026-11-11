@@ -29,6 +29,7 @@ try{
  await page.getByRole('button',{name:'Lägg till bild',exact:true}).waitFor();
  const data=await page.evaluate(async()=>{
   const {createDocument}=await import('/src/core/model.ts');
+  const {normalizePpd040Styles}=await import('/src/core/ppd040Staging.ts');
   const {editorStore}=await import('/src/core/editor.ts');
   const {measure,flatten}=await import('/src/export/officeShared.ts');
   const {pdfExport,pptxExport}=await import('/src/export/office.ts');
@@ -41,6 +42,7 @@ try{
     {id:'p-two',runs:[{text:'Andra raden med kursiv text och fortsatt radbrytning',marks:{italic:true}}]}
    ]}}
   ];
+  normalizePpd040Styles(doc);
   editorStore.load(doc);
   const element=flatten(doc,slide).find(e=>e.id==='export-text-fit');
   const fragments=await measure(doc,slide,element);
