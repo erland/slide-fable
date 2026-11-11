@@ -44,6 +44,20 @@ try{
   await page.getByRole('tab',{name:'Bildspel',exact:true}).click();
   const slideshow=page.getByRole('group',{name:'Bildspelsverktyg'});
   await slideshow.getByRole('button',{name:'Från aktuell bild'}).click();
+  // Actual slide must occupy the visible presentation viewport, not just exist in DOM.
+  await page.waitForFunction(()=>{
+   const fit=document.querySelector('.presenter .presentation-fit');
+   const slide=fit?.querySelector('.playback-slide');
+   if(!fit||!slide)return false;
+   const frame=fit.getBoundingClientRect(),rendered=slide.getBoundingClientRect();
+   return frame.width>100&&frame.height>50&&rendered.width>100&&rendered.height>50&&
+    Math.abs(frame.width-rendered.width)<3&&Math.abs(frame.height-rendered.height)<3;
+  });
+  assert.ok(Number(await page.locator('.presenter .playback-slide').getAttribute('data-playback-scale'))>0,viewport.name+': slideshow must have a positive scale');
+  const rgb=await page.locator('.presenter .presentation-fit').screenshot({animations:'disabled'});
+  const {default:sharp}=await import('sharp');
+  const pixel=await sharp(rgb).extract({left:Math.floor((await sharp(rgb).metadata()).width/2),top:Math.floor((await sharp(rgb).metadata()).height/2),width:1,height:1}).raw().toBuffer();
+  assert.ok([...pixel.slice(0,3)].some(value=>value>90),viewport.name+': slideshow must not render as a black rectangle');
   await page.getByRole('button',{name:'Avsluta',exact:true}).click();
   assert.deepEqual(await model(),animated,'Preview must not modify document');
   await slideshow.getByRole('button',{name:'Från början'}).click();
