@@ -1,0 +1,260 @@
+{
+  "schemaVersion": 1,
+  "scope": "SF-QUAL-06; inventory of evidence, not assertions of completed acceptance",
+  "releaseReadiness": "NOT_READY",
+  "allowedEvidenceLevels": [
+    "automated_structural",
+    "automated_visual_scoped",
+    "automated_browser_flow",
+    "automated_unit_only",
+    "partial_automation",
+    "manual_pending"
+  ],
+  "rows": [
+    {
+      "id": "EXP-01",
+      "scenario": "Bildurval och dolda bilder",
+      "formats": [
+        "pdf",
+        "pptx"
+      ],
+      "evidenceLevel": "automated_structural",
+      "evidence": [
+        "tests/export-data-parity-browser.mjs"
+      ],
+      "verified": "Antal PDF-sidor och PPTX-bilddelar vid all/current; dolda bilder utelämnas",
+      "remaining": "Ej öppning och redigering i Office",
+      "priority": "P2",
+      "gate": "RG-003"
+    },
+    {
+      "id": "EXP-02",
+      "scenario": "Geometri, rotation och inbäddad bild",
+      "formats": [
+        "pdf",
+        "pptx"
+      ],
+      "evidenceLevel": "automated_structural",
+      "evidence": [
+        "tests/export-geometry-parity-browser.mjs"
+      ],
+      "verified": "Editor-bounds, native PPTX-geometri/rotation och inbäddat media; PDF-rasterpunkter",
+      "remaining": "Ej verklig PowerPoint-rendering, beskärningsvarianter eller avancerade transformationer",
+      "priority": "P1",
+      "gate": "RG-003"
+    },
+    {
+      "id": "EXP-03",
+      "scenario": "Editor jämfört med PDF – färgytor",
+      "formats": [
+        "pdf"
+      ],
+      "evidenceLevel": "automated_visual_scoped",
+      "evidence": [
+        "tests/export-geometry-parity-browser.mjs"
+      ],
+      "verified": "Fem homogena färgpunkter i redigerarbild/PDF",
+      "remaining": "Ej full pixeljämförelse eller komplexa bakgrunder",
+      "priority": "P2",
+      "gate": "RG-007"
+    },
+    {
+      "id": "EXP-04",
+      "scenario": "Svensk rik text och automatisk textanpassning",
+      "formats": [
+        "pdf",
+        "pptx"
+      ],
+      "evidenceLevel": "automated_visual_scoped",
+      "evidence": [
+        "tests/text-export-parity-browser.mjs"
+      ],
+      "verified": "Fet/kursiv, ÅÄÖ, native PPTX-runs och PDF textink/utbredning",
+      "remaining": "Ej generell Unicode, fontsubstitution eller faktisk Office-radbrytning",
+      "priority": "P1",
+      "gate": "RG-006"
+    },
+    {
+      "id": "EXP-05",
+      "scenario": "Text mot färgad bakgrund",
+      "formats": [
+        "pdf",
+        "pptx"
+      ],
+      "evidenceLevel": "automated_visual_scoped",
+      "evidence": [
+        "tests/text-export-parity-browser.mjs"
+      ],
+      "verified": "Färgyta jämförs editor/PDF; PPTX-formfärg och textobjekt i OOXML",
+      "remaining": "Ej alla former med text eller samtliga ramstilar",
+      "priority": "P2",
+      "gate": "RG-007"
+    },
+    {
+      "id": "EXP-06",
+      "scenario": "Tabeller och stapeldiagram",
+      "formats": [
+        "pdf",
+        "pptx"
+      ],
+      "evidenceLevel": "automated_structural",
+      "evidence": [
+        "tests/export-data-parity-browser.mjs"
+      ],
+      "verified": "Native PPTX-tabell/diagram med data; PDF-objekt synliga",
+      "remaining": "Ej kalkylbladsredigering i Office, alla kombinationer av cellstilar",
+      "priority": "P1",
+      "gate": "RG-006"
+    },
+    {
+      "id": "EXP-07",
+      "scenario": "Sammanfogade tabeller samt linje-/cirkeldiagram",
+      "formats": [
+        "pdf",
+        "pptx"
+      ],
+      "evidenceLevel": "automated_structural",
+      "evidence": [
+        "tests/export-advanced-data-browser.mjs"
+      ],
+      "verified": "GridSpan/fyllning, line/pie-series och synliga PDF-objekt",
+      "remaining": "Ej många datamängder, alla rowspan-varianter eller Office-omredigering",
+      "priority": "P1",
+      "gate": "RG-006"
+    },
+    {
+      "id": "EXP-08",
+      "scenario": "Redigerbara ikoner och vektorer",
+      "formats": [
+        "pptx"
+      ],
+      "evidenceLevel": "automated_structural",
+      "evidence": [
+        "tests/native-icons-pptx-browser.mjs"
+      ],
+      "verified": "Nio native freeform-ikoner och säker fallback för okänd vektor",
+      "remaining": "Ej Office-öppning/omredigering eller visuella toleranser",
+      "priority": "P2",
+      "gate": "RG-006"
+    },
+    {
+      "id": "EXP-09",
+      "scenario": "Export av dokument via användargränssnitt",
+      "formats": [
+        "html"
+      ],
+      "evidenceLevel": "automated_browser_flow",
+      "evidence": [
+        "tests/document-file-browser.mjs"
+      ],
+      "verified": "Spara/Spara som, separat HTML-kopia och öppning av exportdialog på tre skärmstorlekar",
+      "remaining": "Ej komplett UI-profilmatris för PDF/PPTX, olika fel och avbrutna nedladdningar",
+      "priority": "P1",
+      "gate": "RG-010"
+    },
+    {
+      "id": "EXP-10",
+      "scenario": "Bildbeskärning och fotobakgrund",
+      "formats": [
+        "pdf",
+        "pptx"
+      ],
+      "evidenceLevel": "automated_unit_only",
+      "evidence": [
+        "tests/image-crop.test.mjs"
+      ],
+      "verified": "Beräkningsregler för crop/zoom/pan",
+      "remaining": "Ej visuella PDF/PPTX-bevis för crop/mask/fotobakgrund",
+      "priority": "P1",
+      "gate": "RG-007"
+    },
+    {
+      "id": "EXP-11",
+      "scenario": "PPTX öppna–ändra–spara i PowerPoint Mac/Windows",
+      "formats": [
+        "pptx"
+      ],
+      "evidenceLevel": "manual_pending",
+      "evidence": [],
+      "verified": "Ingen verifierad faktisk Office-rundtur i automatiska tester",
+      "remaining": "Testa formatreparation, text, former, tabeller, diagram och fontsubstitution",
+      "priority": "P0",
+      "gate": "RG-006"
+    },
+    {
+      "id": "EXP-12",
+      "scenario": "PDF i oberoende läsare",
+      "formats": [
+        "pdf"
+      ],
+      "evidenceLevel": "manual_pending",
+      "evidence": [],
+      "verified": "Automatisk PDF-rasterisering och textextraktion finns i andra kontroller",
+      "remaining": "Kontrollera markerbar svensk text, sidformat och teckenuppsättning i Preview/Acrobat",
+      "priority": "P0",
+      "gate": "RG-008"
+    },
+    {
+      "id": "EXP-13",
+      "scenario": "Referenskorpus: mörkt, foto, diagramtungt, många bilder",
+      "formats": [
+        "pdf",
+        "pptx"
+      ],
+      "evidenceLevel": "manual_pending",
+      "evidence": [],
+      "verified": "Ingen samlad, godkänd visuell baslinjesvit",
+      "remaining": "Skapa källfixturer och jämför faktiskt Office/PDF med mått och avvikelselogg",
+      "priority": "P1",
+      "gate": "RG-007"
+    },
+    {
+      "id": "EXP-14",
+      "scenario": "Alla exportprofiler och förlustvarningar",
+      "formats": [
+        "pdf",
+        "pptx",
+        "png",
+        "jpg"
+      ],
+      "evidenceLevel": "partial_automation",
+      "evidence": [
+        "src/export/plan.ts"
+      ],
+      "verified": "Förlustklassificering och profilval finns i exportlogiken",
+      "remaining": "Ej full scenariomatris per profil och objekt eller konsekvent korrekt rapport i mottagarklient",
+      "priority": "P1",
+      "gate": "RG-010"
+    },
+    {
+      "id": "EXP-15",
+      "scenario": "Fristående HTML och offline-export",
+      "formats": [
+        "html"
+      ],
+      "evidenceLevel": "automated_browser_flow",
+      "evidence": [
+        "tests/lifecycle-browser.mjs"
+      ],
+      "verified": "Dokumentlivscykel och HTML-roundtrip täcks av testflödet",
+      "remaining": "Ej fysisk Safari-PWA och långvarig lagring",
+      "priority": "P1",
+      "gate": "RG-005"
+    },
+    {
+      "id": "EXP-16",
+      "scenario": "Diagramlinjer och riktningar",
+      "formats": [
+        "pptx"
+      ],
+      "evidenceLevel": "automated_unit_only",
+      "evidence": [
+        "tests/diagram-export.test.mjs"
+      ],
+      "verified": "Positiv linjegeometri i åtta riktningar",
+      "remaining": "Ej fullständig visuell layout av komplexa semantiska diagram i Office",
+      "priority": "P2",
+      "gate": "RG-006"
+    }
+  ]
+}
