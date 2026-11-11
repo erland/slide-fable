@@ -9,6 +9,7 @@ Efter godkänd kandidatverifiering: öppna GitHub Actions-körningen för **Veri
 - `acceptance.ppd.json` – ursprunglig PPD 0.4-presentationskälla
 - `acceptance.pdf` – PDF skapad med `editable-first`
 - `acceptance.pptx` – PPTX skapad med `editable-first`
+- `pdf-reference-1.png`, `pdf-reference-2.png`, `pdf-reference-3.png` – förhandsbilder (1280 × 720) av respektive PDF-sida, skapade med Poppler; **inte** skärmbilder från PowerPoint eller redigeraren
 - `manifest.json` – SHA-256, filstorlekar, commit och resultat av begränsade strukturkontroller
 - `REVIEW-PROTOCOL.md` – manuellt provprotokoll med öppna RG-006 och RG-008
 
@@ -19,6 +20,8 @@ npm ci
 npx playwright install chromium
 npm run acceptance:export
 ```
+
+Förhandsbilderna genereras med Poppler (`pdftoppm`), som också behöver vara installerat lokalt. På Ubuntu kan det installeras med `sudo apt-get install poppler-utils`; på macOS exempelvis med `brew install poppler`.
 
 Resultatet hamnar i `./export-acceptance/` när `EDITOR_OUTPUT` inte är satt. Använd gärna ett separat `EDITOR_OUTPUT` vid egna prov.
 
@@ -39,6 +42,7 @@ Generatorn använder den verkliga PDF-/PPTX-exporten och verifierar:
 - Att den svenska texten finns som PPTX-text.
 - Att en redigerbar tabell, ett native diagram och ett inbäddat bildobjekt finns i PPTX.
 - Att källan samt genererade filer sparas och kontrollerbara SHA-256-värden registreras.
+- Att PDF:ens samtliga tre sidor kan rasteriseras till PNG med rätt dimensioner och synligt innehåll. Även PNG-filerna ingår i filmanifestet med checksumma.
 
 En grön körning betyder **inte** att PowerPoint eller en fristående PDF-läsare har öppnat filerna. Det är medvetet inte en releaseattest.
 
