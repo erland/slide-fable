@@ -145,7 +145,7 @@ try{
  const editorPreviews=[];
  for(let number=1;number<=result.doc.slides.length;number++){
   const slide=result.doc.slides[number-1];
-  await page.evaluate(id=>window.__acceptanceEditorSelect=import('/src/core/editor.ts').then(({editorStore})=>editorStore.selectSlide(id)),slide.id);
+  await page.evaluate(async id=>{const {editorStore}=await import('/src/core/editor.ts');editorStore.selectSlide(id);},slide.id);
   await page.waitForFunction(async id=>{
    const {editorStore}=await import('/src/core/editor.ts');
    const stage=document.querySelector('.stage .slide-render');
