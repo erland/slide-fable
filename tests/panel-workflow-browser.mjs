@@ -51,7 +51,7 @@ try{
   await page.getByRole('tab',{name:'Infoga'}).click();
   await page.locator('.insert-gallery-group').getByRole('button',{name:'Bilder'}).click();
   await fileInput.setInputFiles({name:'original.png',mimeType:'image/png',buffer:picture});
-  const imageHandle=await page.waitForFunction(async()=>{const [{editorStore:store},{updateSafety}]=await Promise.all([import('/src/core/editor.ts'),import('/src/pwa/safety.ts')]);const s=store.getSnapshot();const e=s.doc.slides[0].view.elements.find(e=>e.type==='image');return !updateSafety.getSnapshot().busy&&e&&s.selected.includes(e.id)?{id:e.id,assetRef:e.assetRef}:null;});
+  const imageHandle=await page.waitForFunction(async()=>{const [{editorStore:store},{updateSafety}]=await Promise.all([import('/src/core/editor.ts'),import('/src/pwa/safety.ts')]);const s=store.getSnapshot();const e=s.doc.slides[0].view.elements.find(e=>e.type==='image');return !updateSafety.getSnapshot().busy&&e&&s.selected.includes(e.id)?{id:e.id,assetRef:e.assetRef,revision:s.doc.document.revision}:null;});
   const image=await imageHandle.jsonValue();
   assert.equal((await snapshot(page)).selected[0],image.id,view.name+': original import completed before replacement');
   if(view.name!=='desktop')await nav.getByRole('button',{name:'Egenskaper'}).click();
@@ -67,7 +67,16 @@ try{
   await pane.getByRole('button',{name:'Ersätt bild'}).click();
   await fileInput.setInputFiles({name:'replacement.png',mimeType:'image/png',buffer:replacementPicture});
   // Wait for the asynchronous replacement transaction, not the already-embedded source image.
-  await page.waitForFunction(async ({id,previousAssetRef})=>{const [{editorStore:store},{updateSafety}]=await Promise.all([import('/src/core/editor.ts'),import('/src/pwa/safety.ts')]);const s=store.getSnapshot();const e=s.doc.slides[0].view.elements.find(e=>e.id===id);return !updateSafety.getSnapshot().busy&&e&&e.assetRef!==previousAssetRef&&s.doc.assets[e.assetRef]?.uri?.startsWith('data:image/png');},{id:image.id,previousAssetRef:image.assetRef});
+  await page.waitForFunction(async ({id,previousAssetRef,previousRevision})=>{
+   const [{editorStore:store},{updateSafety}]=await Promise.all([import('/src/core/editor.ts'),import('/src/pwa/safety.ts')]);
+   const s=store.getSnapshot(),e=s.doc.slides[0].view.elements.find(e=>e.id===id);
+   if(updateSafety.getSnapshot().busy||!e||e.assetRef===previousAssetRef||s.doc.document.revision<=previousRevision||!s.doc.assets[e.assetRef]?.uri?.startsWith('data:image/png'))return false;
+   // An image replacement is committed as a new revision. Ensure we did not
+   // observe a transient intermediate snapshot while React is reconciling.
+   await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+   const settled=store.getSnapshot(),current=settled.doc.slides[0].view.elements.find(el=>el.id===id);
+   return !updateSafety.getSnapshot().busy&&current?.assetRef===e.assetRef&&settled.doc.document.revision>=s.doc.document.revision;
+  },{id:image.id,previousAssetRef:image.assetRef,previousRevision:image.revision});
   const after=await snapshot(page),current=after.doc.slides[0].view.elements.find(e=>e.id===image.id);
   if(current.assetRef===image.assetRef){
    const debug=await page.evaluate(()=>({trace:window.__imageReplaceTrace,errors:document.querySelector('[role="alert"]')?.textContent}));
