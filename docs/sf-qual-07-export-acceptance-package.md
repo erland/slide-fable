@@ -9,7 +9,8 @@ Efter godkänd kandidatverifiering: öppna GitHub Actions-körningen för **Veri
 - `acceptance.ppd.json` – ursprunglig PPD 0.4-presentationskälla
 - `acceptance.pdf` – PDF skapad med `editable-first`
 - `acceptance.pptx` – PPTX skapad med `editable-first`
-- `pdf-reference-1.png`, `pdf-reference-2.png`, `pdf-reference-3.png` – förhandsbilder (1280 × 720) av respektive PDF-sida, skapade med Poppler; **inte** skärmbilder från PowerPoint eller redigeraren
+- `pdf-reference-1.png`, `pdf-reference-2.png`, `pdf-reference-3.png` – PDF-sidor rasteriserade med Poppler i 1280 × 720
+- `editor-reference-1.png`, `editor-reference-2.png`, `editor-reference-3.png` – **oberoende skärmbilder från Slide Fables faktiska redigerarvy i Chromium**, för samma PPD-dokument; dessa är inte PDF-raster eller PowerPoint-bilder
 - `manifest.json` – SHA-256, filstorlekar, commit och resultat av begränsade strukturkontroller
 - `REVIEW-PROTOCOL.md` – manuellt provprotokoll med öppna RG-006 och RG-008
 
