@@ -32,7 +32,9 @@ try{
   server.on('exit',code=>{clearTimeout(timeout);reject(Error('Vite exited: '+code+' '+log));});
  });
  browser=await chromium.launch({headless:true,...(process.env.CHROMIUM_EXECUTABLE?{executablePath:process.env.CHROMIUM_EXECUTABLE,args:['--no-sandbox','--disable-dev-shm-usage']}:{})});
- const page=await browser.newPage();
+ const page=await browser.newPage({viewport:{width:1600,height:1100},deviceScaleFactor:1});
+ const pageErrors=[];
+ page.on('pageerror',error=>pageErrors.push(error.message));
  await page.goto('http://127.0.0.1:'+port+'/');
  await page.getByRole('button',{name:'Lägg till bild',exact:true}).waitFor();
  const result=await page.evaluate(async()=>{
@@ -40,6 +42,7 @@ try{
   const {normalizePpd040Styles}=await import('/src/core/ppd040Staging.ts');
   const {pdfExport,pptxExport}=await import('/src/export/office.ts');
   const {validateFull}=await import('/src/core/contract.ts');
+  const {editorStore}=await import('/src/core/editor.ts');
   const doc=createDocument();
   doc.document.id='sf-acceptance-07';
   doc.document.title='Slide Fable – exportacceptans';
@@ -100,6 +103,9 @@ try{
   await validateFull(doc);
   const pdf=await pdfExport(doc,doc.slides,'editable-first',false);
   const pptx=await pptxExport(doc,doc.slides,'editable-first',false);
+  // Load the same PPD into the real editor after both exports complete.
+  // Screenshots below are taken from the actual presentation canvas, not PDF.
+  editorStore.load(doc);
   return {doc,pdf:Array.from(pdf.file),pptx:Array.from(pptx.file)};
  });
  const source=Buffer.from(JSON.stringify(result.doc,null,2)+'\n');
@@ -134,6 +140,38 @@ try{
   files[name]=bytes;
   previews.push({slideId:result.doc.slides[number-1].id,file:name,derivedFrom:'acceptance.pdf'});
  }
+ // Capture independent editor renders of the exact source document in the package.
+ // No PDF image is reused here; only the live SlideView in Chromium is captured.
+ const editorPreviews=[];
+ for(let number=1;number<=result.doc.slides.length;number++){
+  const slide=result.doc.slides[number-1];
+  await page.evaluate(async id=>{const {editorStore}=await import('/src/core/editor.ts');editorStore.selectSlide(id);},slide.id);
+  await page.waitForFunction(async id=>{
+   const {editorStore}=await import('/src/core/editor.ts');
+   const stage=document.querySelector('.stage .slide-render');
+   return editorStore.getSnapshot().slideId===id&&stage&&
+    [...(editorStore.slide.view.elements??[])].every(el=>stage.querySelector('[data-element-id="'+el.id+'"]'));
+  },slide.id);
+  await page.evaluate(async()=>{
+   await document.fonts.ready;
+   const stage=document.querySelector('.stage .slide-render');
+   await Promise.all([...stage.querySelectorAll('img')].map(img=>img.decode().catch(()=>{})));
+   await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+  });
+  const stage=page.locator('.stage .slide-render').first();
+  const screenshot=await stage.screenshot({animations:'disabled',caret:'hide'});
+  const name='editor-reference-'+number+'.png';
+  const bytes=await sharp(screenshot).resize(1280,720,{fit:'fill'}).png().toBuffer();
+  const metadata=await sharp(bytes).metadata();
+  assert.equal(metadata.width,1280,name+': width');
+  assert.equal(metadata.height,720,name+': height');
+  const stats=await sharp(bytes).stats();
+  assert.ok(stats.channels.some(channel=>channel.stdev>3),name+': must show visible slide content');
+  await writeFile(path.join(output,name),bytes);
+  files[name]=bytes;
+  editorPreviews.push({slideId:slide.id,file:name,derivedFrom:'live Slide Fable editor canvas',size:{width:1280,height:720}});
+ }
+ assert.deepEqual(pageErrors,[],'No browser errors while capturing editor references');
  const template=await readFile(new URL('../docs/sf-qual-07-office-review-protocol.md',import.meta.url));
  await writeFile(path.join(output,'REVIEW-PROTOCOL.md'),template);
  const manifest={
@@ -141,8 +179,9 @@ try{
   sourceCommit:process.env.GITHUB_SHA??null,
   generatedFrom:'Slide Fable native PDF/PPTX engines, editable-first',
   expectedSlides:3,
-  previewType:'PDF raster only; not a PowerPoint or editor screenshot',
+  previewType:'PDF raster plus independent Chromium editor canvas captures; neither is PowerPoint',
   previews,
+  editorPreviews,
   structuralChecks:{pdfPageCount:3,pptxSlideParts:3,nativeText:true,nativeTable:true,nativeChart:true,embeddedImage:true},
   files:Object.fromEntries(Object.entries(files).map(([name,bytes])=>[name,{sha256:sha256(bytes),size:bytes.length}])),
   manualChecks:['RG-006','RG-008']

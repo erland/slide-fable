@@ -12,6 +12,8 @@ Paketet innehåller `pdf-reference-1.png`, `pdf-reference-2.png` och `pdf-refere
 
 Använd dem som snabb översikt när du granskar PPTX i PowerPoint. Jämför sidornas layout, färger, bildinnehåll och eventuella textförskjutningar. Dokumentera skillnader mot både PDF-referensen och originalets PPD-innehåll. Om PDF och PowerPoint visar samma fel är det inte bevis för att Slide Fables redigerare visar rätt – felet kan finnas i exporten.
 
+Det finns också `editor-reference-1.png` till `editor-reference-3.png` – tagna direkt från presentationsytan i Slide Fables Chromium-redigerare och normaliserade till samma 1280 × 720-upplösning. Dessa är **inte** skapade från PDF:n. Jämför först *redigerare mot PDF* för att hitta exportskillnader, och därefter *PDF och redigerare mot PowerPoint* för att se om Office introducerar en ytterligare skillnad. Verklig PowerPoint-skärmbild ska läggas till manuellt i granskningsprotokollet, aldrig simuleras.
+
 Kontrollera också filernas SHA-256 i `manifest.json` så att granskningen gäller samma referenspaket.
 
 ## Testobjekt
