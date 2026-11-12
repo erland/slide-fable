@@ -61,14 +61,33 @@ try {
       await target.press('ControlOrMeta+Shift+ArrowLeft');
       await size.fill('44');
       await color.fill('#0000cc');
-      // Select a character inside the run (not at a style boundary).
-      // DOM selection synchronizes through ProseMirror's selectionchange handler.
-      await target.locator('strong').first().click({position:{x:30,y:10}});
-      await page.waitForFunction(()=>document.querySelector('input[aria-label="Textstorlek i direktredigering"]')?.value==='32',{timeout:5000});
+      // Set the DOM caret inside each run, away from the style boundary. A
+      // pixel click can land on a resize handle or adjacent run in some
+      // Chromium renderings, causing an unrelated CI-only false failure.
+      // Assert the caret's actual text before checking the toolbar state.
+      const selectRun=async (index,expectedText)=>{
+        const selected=await target.evaluate((element,{index,expectedText})=>{
+          const run=element.querySelectorAll('strong')[index];
+          const text=run?.firstChild;
+          if(!text||text.nodeType!==Node.TEXT_NODE||!text.textContent?.includes(expectedText))return false;
+          element.focus();
+          const range=document.createRange();
+          range.setStart(text,Math.max(1,Math.floor(text.textContent.length/2)));
+          range.collapse(true);
+          const selection=window.getSelection();
+          selection?.removeAllRanges();
+          selection?.addRange(range);
+          document.dispatchEvent(new Event('selectionchange'));
+          return selection?.anchorNode===text;
+        },{index,expectedText});
+        assert.equal(selected,true,'caret must be inside '+expectedText);
+      };
+      await selectRun(0,'Alfa');
+      await page.waitForFunction(()=>document.querySelector('input[aria-label="Textstorlek i direktredigering"]')?.value==='32',null,{timeout:5000});
       assert.equal(await size.inputValue(),'32','first run size must follow the caret');
       assert.equal((await color.inputValue()).toLowerCase(),'#cc0000','first run color must follow the caret');
-      await target.locator('strong').last().click({position:{x:20,y:10}});
-      await page.waitForFunction(()=>document.querySelector('input[aria-label="Textstorlek i direktredigering"]')?.value==='44',{timeout:5000});
+      await selectRun(1,'Beta');
+      await page.waitForFunction(()=>document.querySelector('input[aria-label="Textstorlek i direktredigering"]')?.value==='44',null,{timeout:5000});
       assert.equal(await size.inputValue(),'44','second run size must follow the caret');
       assert.equal((await color.inputValue()).toLowerCase(),'#0000cc','second run color must follow the caret');
       await styling.getByRole('button',{name:'Klar'}).click();
