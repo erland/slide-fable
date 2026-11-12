@@ -1,4 +1,6 @@
-# Funktionell specifikation – Slide Fable 0.1
+# Funktionell specifikation – Slide Fable (krav och implementerad profil)
+
+> **Läsanvisning 2026-11-12:** Kravlistan och SF-COMMON-beskrivningarna nedan är normativ målbild och historiska utvecklingsbeslut, inte automatiskt acceptansbevis. Den daterade implementeringsmatrisen från 2026-11-08 är en historisk ögonblicksbild. Se den nya källavstämningen sist i dokumentet, [responsiv UX](responsive-ux.md) och [releasegranskningen](release-review.md).
 
 ## Omfattning och normativ bas
 Originalspecifikationen i `reference/ppd_presentationsverktyg_funktionell_specifikation_v0_3.md`
@@ -107,7 +109,7 @@ Importerade andra effekter bevaras men spelas inte. PDF/PPTX/bildexport är stat
 med samtliga synliga objekt och exportvarning. Ingen avancerad tidslinje,
 ljud-/videohantering eller nya schemafält ingår i denna första version.
 
-## Implementerad funktionsprofil – avstämning 2026-11-08
+## Historisk implementerad funktionsprofil – avstämning 2026-11-08
 
 Den ursprungliga specifikationen ovan är **normerande målbild**; den får inte
 likställas med att alla krav har full acceptans. Följande delmängd kan beläggas
@@ -130,3 +132,19 @@ redigering, rendering och export. Se `docs/ppd-contract.md`.
 MVP:n är färdig. `NOT_READY` kvarstår tills öppna releasegrindar fått
 egna belägg. När en funktion eller ett acceptanskrav ändras bör både
 matrisen och `docs/user-guide.md` uppdateras.
+
+## Källbaserad komplettering – 2026-11-12
+
+Denna komplettering jämför aktuella användarflöden med koden och regressionstesterna efter PR #152–155 och senare dokumentationsuppdateringar. **Implementerat** avser en användarväg i nuvarande kod; **automatiskt verifierat** avser den begränsade omfattningen i nämnda test. Full fysisk/enhets- eller Office-acceptans är fortfarande separat.
+
+| Område | Status i aktuell implementation | Spårbar evidens och återstående gräns |
+| --- | --- | --- |
+| Layoutbyte | Implementerat: layoutstyrda textobjekt får en bevarad roll/slot och återanvänds vid återgång mellan layouter. Ett nytt objekt skapas första gången en saknad platshållare behövs. Vanliga fristående objekt tas inte över. | `src/core/designGallery.ts`, `tests/design-gallery.test.mjs`. Äldre redan duplicerade objekt rensas inte automatiskt. Visuell acceptans på Safari återstår. |
+| Lokala arbetskopior | Implementerat: automatiska IndexedDB-arbetskopior återställs från **Arkiv → Arbetskopior…** efter bekräftelse. Ångra är separat redigeringshistorik och återtar inte en dokumentåterställning. | `src/core/persistence.ts`, `src/ui/EditorApp.tsx`, `tests/lifecycle-browser.mjs`, `tests/editor-browser.mjs`. Verkliga lagringsutkastningar på iOS återstår. |
+| Responsiv panelnavigation | Implementerat: **Bilder / Arbetsyta / Egenskaper** i mindre vyer; egenskapskommandon återöppnar dold panel och behåller markering i testade flöden. | `src/ui/EditorApp.tsx`, `src/ui/editor.css`, `tests/panel-workflow-browser.mjs`, `tests/motion-ribbon-browser.mjs`. Automatiserad Chromium-desktop/iPadstorlek/mobilstorlek, inte fysisk Safari/VoiceOver. |
+| Presentation | Implementerat: presentationsläge, separat publikvy, anteckningar, tidsräkning, svart skärm och proportionell skalning av bildytan; enkla animeringar. | `src/ui/PresentationSlide.tsx`, `src/core/playback.ts`, `tests/motion-ribbon-browser.mjs`, `tests/editor-browser.mjs`. Tvåskärmsacceptans och fysisk Safari saknas. |
+| HTML, PDF, PPTX, PNG/JPG | Implementerat: nedladdningsbara filer och separata export-/förlustrapporter inom dokumenterad objektprofil. | `src/export/exportController.ts`, `docs/export-coverage.json`. Diagnostisk redigerare/PDF-bildjämförelse finns; PowerPoint Mac/Windows och oberoende PDF-läsare är ännu inte manuellt godkända. |
+| Vanlig dokumenthantering | Implementerat: **Spara** hämtar HTML-fil och separata arbetskopior autosparas lokalt. Detta är inte samma sak som att skriva tillbaka till den tidigare öppnade filen. | `src/ui/EditorApp.tsx`, `tests/document-file-browser.mjs`; viktigt att behålla i UI-texter och användarguide. |
+
+Den tidigare texten under **PWA- och enhetskrav** är fortsatt krav, inte ett påstående att alla SF-001–012 är fullt godkända. Detsamma gäller samtliga AT-kriterier. Nya deltester stänger inte automatiskt releasegrindarna RG-005–010, och `NOT_READY` kvarstår.
+
