@@ -34,6 +34,23 @@ try{
   await pane.getByRole('heading',{name:'Objektegenskaper'}).waitFor();
   await pane.getByRole('combobox',{name:'Formtext horisontellt'}).selectOption('left');
   assert.equal((await snapshot(page)).doc.slides[0].view.elements.find(e=>e.id===created).style.align,'left',view.name+': formatting persists');
+
+  // UX-03: the inspector and Start ribbon must edit the same object-level typography.
+  const objectTypography=pane.getByRole('group',{name:'Textformat för hela objektet'});
+  await objectTypography.waitFor();
+  const objectSize=objectTypography.getByRole('spinbutton',{name:'Objektets textstorlek'});
+  const objectColor=objectTypography.getByLabel('Objektets textfärg');
+  await objectSize.fill('42');
+  await objectSize.press('Tab');
+  await objectColor.fill('#2468ac');
+  const formatted=(await snapshot(page)).doc.slides[0].view.elements.find(e=>e.id===created);
+  assert.equal(formatted.style.fontSize,42,view.name+': inspector changes object-wide text size');
+  assert.equal(formatted.style.color,'#2468ac',view.name+': inspector changes object-wide text color');
+  await page.getByRole('tab',{name:'Start',exact:true}).click();
+  const ribbon=page.getByRole('tabpanel',{name:'Start'}).getByRole('group',{name:'Snabbformatering av markerat objekt'});
+  assert.equal(await ribbon.getByRole('spinbutton',{name:'Textstorlek'}).inputValue(),'42',view.name+': Start ribbon reflects inspector font size');
+  assert.equal((await ribbon.getByLabel('Textfärg').inputValue()).toLowerCase(),'#2468ac',view.name+': Start ribbon reflects inspector color');
+
   if(view.name!=='desktop'){
    await nav.getByRole('button',{name:'Bilder'}).click();
    assert.equal(await workspace(page).getAttribute('data-panel'),'slides');
