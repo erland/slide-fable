@@ -20,7 +20,7 @@
 - RG-009: **BLOCKED** – autentiska historiska PPD 0.1/0.2-filer och kontrakt saknas.
 - RG-010: resterande full AT-acceptans.
 
-**Nästa rekommenderade handling:** utred Pages-deployens fel om det kvarstår och kontrollera de senaste `main`-körningarna; därefter fortsätt med releaseacceptans enligt [releasegranskningen](docs/release-review.md). Den ursprungliga DEV-004–015-planens blockerade acceptanskriterier ligger kvar separat och ska inte misstas för att all funktionalitet saknas. [Fortsättningsplan](docs/continuation-plan.md) och [maskinläsbar arbetsstatus](.system-builder/work-status.yaml).
+**Nästa rekommenderade handling:** fortsätt granska dokumentationen mot nuvarande kod (se [DOC-AUDIT-01](docs/doc-audit-01-current-user-ops.md)) och genomför återstående manuella releaseprov enligt [releasegranskningen](docs/release-review.md). Kontrollera alltid ny CI/deploy på den commit som faktiskt ska distribueras. Den ursprungliga DEV-004–015-planens blockerade acceptanskriterier ligger kvar separat och ska inte misstas för att all funktionalitet saknas. [Fortsättningsplan](docs/continuation-plan.md) och [maskinläsbar arbetsstatus](.system-builder/work-status.yaml).
 
 ## Historik
 
