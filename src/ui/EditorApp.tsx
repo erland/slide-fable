@@ -21,7 +21,7 @@ import {currentStrokeStyle,currentEndMarkers,editStrokeStyle,editEndMarker} from
 import {useEffect,useRef,useState,useSyncExternalStore,type PointerEvent} from 'react';
 import {editorStore as store} from '../core/editor';
 import {resolveSelection,movableSelection,marqueeBounds,marqueeCandidates,shouldStartMarquee,type SelectionRect} from '../core/selection';
-import {resizeRect,resizeDirections,lineBounds,moveEndpoint,type ResizeDirection} from '../core/geometry';
+import {resizeRect,resizeRectKeepAspect,resizeDirections,lineBounds,moveEndpoint,type ResizeDirection} from '../core/geometry';
 import {selectionBounds,snapSelectionScaleFromCorner,type ArrangeItem,type ScaleCorner} from '../core/arrange';
 import {snapTranslation,snapResize,type AlignmentGuides} from '../core/smartGuides';
 import {markerGeometry,markerSvgPoints,endMarkers} from '../core/endMarkers';
@@ -257,9 +257,9 @@ export function App(){
  function startDrag(id:string,event:PointerEvent,resize:ResizeDirection|false=false){
   if(!event.isPrimary||event.button!==0||state.readOnly||safety.locked||safety.busy)return;
   const object=slide.view.elements.find((e:D)=>e.id===id);if(!object)return;
-  const choice=resolveSelection(state.selected,id,event.shiftKey);
+  const choice=resolveSelection(state.selected,id,event.shiftKey&&!resize);
   store.select(choice.ids);
-  // Shift modifies selection only. Locked objects can be selected but never dragged.
+  // Shift extends object selection for movement; on resize handles it preserves aspect ratio instead.
   if(!choice.beginDrag||object.locked)return;
   const chosen=movableSelection(choice.ids,slide.view.elements);
   const initial=chosen.map(cid=>({id:cid,geometry:copy(effective(doc,slide,slide.view.elements.find((e:D)=>e.id===cid)).geometry)}));
@@ -275,16 +275,19 @@ export function App(){
   const otherBounds=slide.view.elements.filter((e:D)=>!chosen.includes(e.id)&&e.visible!==false).map((e:D)=>effective(doc,slide,e).geometry);
   const translationBounds=initial.length===1?initial[0].geometry:selectionBounds(initial);
   const translated=(dx:number,dy:number,alt:boolean)=>snapTranslation(translationBounds,otherBounds,dx,dy,Boolean(snap)&&!resize,alt,7,10,doc.document.canvas);
-  const resized=(dx:number,dy:number,alt:boolean)=>{
+  const resized=(dx:number,dy:number,alt:boolean,keepAspect:boolean)=>{
+   // Locked-ratio gestures deliberately bypass snapping so the two axes
+   // cannot acquire independent snapping offsets and distort the ratio.
+   if(keepAspect)return {guides:{},dx,dy};
    const reference=(initial.find(item=>item.id===id)??initial[0]).geometry;
    const result=snapResize(reference,resize as ResizeDirection,otherBounds,dx,dy,snap,alt,7,10,doc.document.canvas);
    return {guides:result.guides,dx:resize&&resize.includes('w')?result.rect.x-reference.x:result.rect.width-reference.width,
     dy:resize&&resize.includes('n')?result.rect.y-reference.y:result.rect.height-reference.height};
   };
-  const preview=(dx:number,dy:number,alt=false)=>{
-   const result=resize?resized(dx,dy,alt):translated(dx,dy,alt);
+  const preview=(dx:number,dy:number,alt=false,keepAspect=false)=>{
+   const result=resize?resized(dx,dy,alt,keepAspect):translated(dx,dy,alt);
    setAlignmentGuides(result.guides);
-   const geometries=slide.view.elements.map((e:D)=>{const changed=initial.find(t=>t.id===e.id);if(!changed)return {id:e.id,geometry:effective(doc,slide,e).geometry};const b=changed.geometry;return {id:e.id,geometry:resize?{...b,...resizeRect(b,resize,result.dx,result.dy)}:{...b,x:b.x+result.dx,y:b.y+result.dy}};});
+   const geometries=slide.view.elements.map((e:D)=>{const changed=initial.find(t=>t.id===e.id);if(!changed)return {id:e.id,geometry:effective(doc,slide,e).geometry};const b=changed.geometry;return {id:e.id,geometry:resize?(keepAspect?{...b,...resizeRectKeepAspect(b,resize,result.dx,result.dy)}:{...b,...resizeRect(b,resize,result.dx,result.dy)}):{...b,x:b.x+result.dx,y:b.y+result.dy}};});
    initial.forEach((item,i)=>{const node=nodes[i];if(!node)return;const next=geometries.find((g:{id:string;geometry:D})=>g.id===item.id)!.geometry;Object.assign(node.style,{left:next.x+'px',top:next.y+'px',width:next.width+'px',height:next.height+'px'});});
    for(const record of connected){
     if(!record.line)continue;
@@ -309,14 +312,14 @@ export function App(){
    }
   };
   const cleanup=()=>{target.removeEventListener('pointermove',move);target.removeEventListener('pointerup',end);target.removeEventListener('pointercancel',cancel);setAlignmentGuides({});};
-  const move=(ev:globalThis.PointerEvent)=>preview((ev.clientX-x)/scale,(ev.clientY-y)/scale,ev.altKey);
+  const move=(ev:globalThis.PointerEvent)=>preview((ev.clientX-x)/scale,(ev.clientY-y)/scale,ev.altKey,ev.shiftKey);
   const end=(ev:globalThis.PointerEvent)=>{
    cleanup();const dx=(ev.clientX-x)/scale,dy=(ev.clientY-y)/scale;
    if(Math.abs(dx)+Math.abs(dy)<2){restore();return;}
    run(()=>store.transaction((_d,s)=>{for(const item of initial){
     const el=s.view.elements.find((e:D)=>e.id===item.id),b=item.geometry;
-    const result=resize?resized(dx,dy,ev.altKey):translated(dx,dy,ev.altKey);
-    el.geometry=resize?{...b,...resizeRect(b,resize,result.dx,result.dy)}:{...b,x:b.x+result.dx,y:b.y+result.dy};
+    const result=resize?resized(dx,dy,ev.altKey,ev.shiftKey):translated(dx,dy,ev.altKey);
+    el.geometry=resize?(ev.shiftKey?{...b,...resizeRectKeepAspect(b,resize,result.dx,result.dy)}:{...b,...resizeRect(b,resize,result.dx,result.dy)}):{...b,x:b.x+result.dx,y:b.y+result.dy};
     const binding=s.placeholderBindings?.find((p:D)=>p.elementId===el.id);
     if(binding)binding.overrides={...binding.overrides,geometry:copy(el.geometry)};
    }}));

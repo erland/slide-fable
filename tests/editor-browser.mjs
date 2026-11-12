@@ -444,6 +444,34 @@ try{
  assert.equal(afterWest.x+afterWest.width,beforeWest.x+beforeWest.width,'West resize must preserve right edge');
  pass('SF-SH-02:eight-handles-and-west-resize');
 
+ // UX-06: Shift resizes proportionally on corner AND side handles.
+ // The preview and committed geometry must agree and Shift must not toggle selection.
+ const lockedRatioBefore=(await model()).slides[2].view.elements.find(e=>e.id===newTextId).geometry;
+ const shiftCorner=page.locator('.resize-handle[data-direction="se"]'),cornerBox=await shiftCorner.boundingBox();
+ assert.ok(cornerBox,'Southeast resize handle is visible');
+ await page.mouse.move(cornerBox.x+cornerBox.width/2,cornerBox.y+cornerBox.height/2);
+ await page.keyboard.down('Shift');
+ await page.mouse.down();
+ await page.mouse.move(cornerBox.x+cornerBox.width/2+50,cornerBox.y+cornerBox.height/2+18,{steps:5});
+ const previewGeometry=await dragEl.evaluate(el=>({width:parseFloat(el.style.width),height:parseFloat(el.style.height)}));
+ assert.ok(Math.abs(previewGeometry.width/previewGeometry.height-lockedRatioBefore.width/lockedRatioBefore.height)<.0005,`Shift preview preserves ratio: preview=${JSON.stringify(previewGeometry)} source=${JSON.stringify(lockedRatioBefore)}`);
+ await page.mouse.up();await page.keyboard.up('Shift');
+ const shiftCornerAfter=(await model()).slides[2].view.elements.find(e=>e.id===newTextId).geometry;
+ assert.ok(shiftCornerAfter.width>lockedRatioBefore.width,'Shift corner grows object');
+ assert.ok(Math.abs(shiftCornerAfter.width/shiftCornerAfter.height-lockedRatioBefore.width/lockedRatioBefore.height)<.000001,'Shift corner commit preserves ratio');
+ assert.deepEqual(await page.evaluate(async()=>(await import('/src/core/editor.ts')).editorStore.getSnapshot().selected),[newTextId],'Shift resize must preserve selection');
+ const shiftEast=page.locator('.resize-handle[data-direction="e"]'),eastBox=await shiftEast.boundingBox();
+ assert.ok(eastBox);
+ await page.mouse.move(eastBox.x+eastBox.width/2,eastBox.y+eastBox.height/2);
+ await page.keyboard.down('Shift');await page.mouse.down();
+ await page.mouse.move(eastBox.x+eastBox.width/2+30,eastBox.y+eastBox.height/2,{steps:5});
+ await page.mouse.up();await page.keyboard.up('Shift');
+ const shiftEastAfter=(await model()).slides[2].view.elements.find(e=>e.id===newTextId).geometry;
+ assert.ok(Math.abs(shiftEastAfter.width/shiftEastAfter.height-shiftCornerAfter.width/shiftCornerAfter.height)<.000001,'Shift side commit preserves ratio');
+ assert.ok(Math.abs((shiftEastAfter.y+shiftEastAfter.height/2)-(shiftCornerAfter.y+shiftCornerAfter.height/2))<.000001,'Shift side keeps vertical centre');
+ pass('UX-06:shift-resize-corners-and-sides');
+
+
  const firstId=(await model()).slides[2].view.elements[0].id;
  await page.locator('.editor-canvas-pane .stage [data-element-id="'+newTextId+'"]').click();
  await page.locator('.editor-canvas-pane .stage [data-element-id="'+firstId+'"]').click({modifiers:['Shift']});
