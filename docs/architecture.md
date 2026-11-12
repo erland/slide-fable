@@ -1,71 +1,53 @@
-# Målarkitektur
+# Slide Fable – implementerad arkitektur
 
-## Beslut och status
-Föreslagen struktur: en statiskt hostad React/TypeScript/Vite-app med domänkärna
-utan React-beroende. DOM/SVG är förstahandsval för gemensam rendering och sökbar
-text. Canvas används bara när det behövs för rasterexport/effektlager; DOM/SVG-
-valet prövas i DEV-002 innan editor byggs brett. Ingen obligatorisk backend.
-DEV-002:s versionslåsning, evidens och återstående begränsningar finns i
-`docs/dev002-technical-decisions.md` och spikens package-lock.json.
+> **Källavstämning 2026-11-12:** Detta avsnitt beskriver implementationen i `main` `fc74c52d9b4d6c79b177ab912cefac5e803efec7`, inte en ännu oprövad målarkitektur. Funktioner är inte automatiskt releasegodkända för att de har kod och tester; se [projektstatus](../STATUS.md) och [releasegranskning](release-review.md).
 
-| Modul | Ansvar | Får inte äga |
-|---|---|---|
-| ppd-core | Schematyper, semantisk validering, migration, kommandon, stabila ID:n | DOM, nätverk, editorpaneler |
-| renderer | Modell → DOM/SVG, textmätning, effektfallback, print | Egen alternativ dokumentmodell |
-| editor | Urval, handtag, interaktion, responsive paneler, undo-transaktioner | Direkt DOM-redigering som enda sanningskälla |
-| persistence | IndexedDB, resurser, revisionskonflikter, återställning | Molnsynk eller garanti om evig lagring |
-| player | Navigering, fragment, publikvy, presentatörsvy | Att läcka anteckningar till publikfönstret |
-| exporters | Enfil-HTML, PDF, PPTX, bildfiler och gemensam rapport | Tyst ändring av semantisk modell |
-| app-shell | Routing, manifest, cache, installation, säker uppdatering | Att lägga användardokument i appens cachepolicy |
+## Systemöversikt
 
-## Data och transaktioner
-Fil → extrahera endast kanonisk JSON/resursdata utan att köra importerad HTML →
-schema/semantik/resurskontroll → säker intern dokumentmodell → kommando → ny
-modellrevision → gemensam renderer och transaktionell arbetskopia. DOM genereras
-från modellen. Under rik-textinmatning får en lokal editorbuffert finnas; den
-översätts till kanoniska runs som en sammanhängande undo-transaktion.
-Editorhistorik, zoom, paneler och markering lagras separat från publikformatet.
-Binary Blobs lagras separat internt men materialiseras enligt filkontrakt vid export.
-En flik/revision är skrivägare; compare-and-swap eller låsning förhindrar tyst konflikt.
+Slide Fable är en statiskt hostad React/TypeScript-app byggd med Vite. Den har ingen obligatorisk server för dokumentlagring eller användarkonton. Redigeringsmodellen är PPD, med `schemaVersion: "0.4.0"` för nya dokument. Applikationsskal och offlineuppdateringar är separata från själva användardokumenten.
 
-## Två offlineprodukter
-PWA-appen hämtas först över HTTPS och cachar appskal, egna fonter och kod för
-offline-start. Appuppdatering är versionsstyrd och väntar på säker kontrollpunkt.
-Den exporterade HTML-filen bäddar däremot in modell, runtime, stilar och resurser;
-den ska inte kräva service worker, konto, server, CDN eller modulhämtning från file://.
-Testa varje väg separat, inklusive återstart av installerad app och kall filöppning.
+| Del | Faktisk kod | Ansvar och avgränsning |
+| --- | --- | --- |
+| Modell och format | `src/core/model.ts`, `src/core/contract.ts`, `src/core/ppd040Preflight.ts`, `schemas/ppd.schema.json` | Skapa PPD 0.4.0, validera struktur och semantik, förhandla version och hantera begränsad äldre migration |
+| Redigeringskommandon | `src/core/editor.ts`, övriga moduler i `src/core/` | Transaktioner, selektion, historik, geometri, layout, objekt och text |
+| Användargränssnitt | `src/ui/EditorApp.tsx`, `src/editor/Renderer.tsx`, komponenter i `src/editor/` | React-ribbon, paneler, objektredigering och DOM/SVG-rendering utifrån modellen |
+| Arbetskopior | `src/core/persistence.ts`, `src/core/persistenceController.ts` | IndexedDB, debouncerad lokal autosparning, versionskontroll och explicit återställning; ingen synk mellan enheter |
+| Presentationsläge | `src/ui/PresentationSlide.tsx`, `src/core/playback.ts` | Visning, fragment, klickstyrda effekter, anteckningar och separat publikläge |
+| Export | `src/export/exportController.ts`, `src/export/html.tsx`, `src/export/pdfWriter.ts`, `src/export/pptxWriter.ts` | Fristående HTML, PDF, PPTX, PNG/JPG samt format- och objektbaserade förlustvarningar |
+| PWA | `src/pwa/client.ts`, `src/pwa/safety.ts`, `src/pwa/sw-template.js` | Installations-/offlineflöde och uppdateringssäkerhet; användarens arbetskopior hanteras inte i cachelagret |
 
-## Lagring och återställning
-IndexedDB med versionshanterade migreringar och atomiska snapshots. Be om beständig
-lagring där det går, men anta aldrig att den beviljas. Fånga kvotfel och erbjud
-filbackup. Visa avbrott och radera lokal data på användarens begäran. Ny databasversion
-ska inte göra återställning omöjlig när en äldre flik fortfarande är öppen.
+## Modell, import och redigering
 
-## Export och motorval
-- HTML: liten egen presentationsruntime som återanvänder renderer; Reveal.js behövs
-  inte i grunden. Välj först efter pilot av navigering/fragment och filstorlek.
-- PPTX: PptxGenJS är kandidat för klientlokala texter, former, bilder och tabeller.
-  Faktiskt stöd för grupp/diagram/effektlager bevisas med fixtures, OOXML-inspektion
-  och Office-prov. Ingen löftesparitet utifrån bibliotekets API-lista.
-- PDF: DEV-002 väljer klientlokal pdf-lib/fontkit med browsermätta textrader för
-  fortsatt utveckling. Browserutskrift och lokal Chromium-CLI är alternativ.
-  Sökbar export är bevisad i Chromium; faktisk iPad och full objektkatalog återstår.
-- Ekvationer: KaTeX kandidat för säker LaTeX; begränsa trust, expansion och storlek.
-  MathML kräver separat allowlist/säker normalisering; LaTeX-stöd innebär inte MathML-input.
-- SVG: allowlist-baserad sanering, ingen script, foreignObject, eventhandlers eller
-  externa resurser. Automatisk testning av XSS och komplexitetsgränser.
+Filer med PPD-JSON eller HTML med en inert PPD-payload hanteras av `importDocument` i `src/core/contract.ts`: inläsning → format- och versionskontroll → struktur- och semantikvalidering → resurskontroller → läsbar/redigerbar modell eller ett begränsat skrivskyddsläge. Importerad HTML körs inte som programkod.
 
-## Driftsättning
-Statisk HTTPS-hosting med rätt basväg och cache headers. Ingen databas behövs.
-Node används vid build; lokal PDF-CLI är separat valfri komponent. Coolify/static
-container kan läggas till senare; ingen publik driftsättning utförs i planeringssteget.
-Inga obligatoriska externa API:er. Diagnostik stannar lokalt med exportbar rapport.
+Nya dokument skapas med PPD 0.4.0. `src/core/contract.ts` innehåller verifiering för 0.3.1, migration av en specificerad 0.3.0-profil och begränsade 0.1/0.2-profiler genom `src/core/legacy.ts`. Detta är **inte** generell bakåtkompatibilitet. Läs även [PPD-kontraktet](ppd-contract.md).
 
-### Enkla animeringar (COMMON-06)
+Redigeringskommandon ändrar dokumentmodellen och dess revision. Renderern bygger visningen från modellen. Objekt som tillkommer som layoutplatshållare kan återanvändas mellan layoutbyten. Redigeringshistorik, paneler och markering är användargränssnittets tillstånd – inte delar av ett normaliserat PPD-publikformat.
 
-`core/playback.ts` planerar klickgrupper och automatiska starttider ur befintliga
-PPD 0.4 `slide.animations`. Övergångar lagras i `delivery.transition`.
-`PresentationSlide` och fristående HTML delar planering och DOM-uppspelning via
-Web Animations API; HTML bäddar in samma fristående funktioner utan nätberoenden.
-Navigering avbryter pågående effekter och rekonstruerar synlighet. Redigeraren
-visar alltid statiskt innehåll. Ingen schemamigrering eller ny dependency behövs.
+## Arbetskopior och offline
+
+`src/core/persistence.ts` använder IndexedDB-databasen `slide-fable-workspace`, version **1**, med lagring av kompletta dokumentmodeller i `drafts`. `saveDraft` utför versionsjämförelse och avvisar en inaktuell skrivare. `DraftPersistenceController` schemalägger debouncerad autosparning och håller ordning på sparade revisioner.
+
+Det finns **ingen genomförd databasschemamigration över flera IndexedDB-versioner** i denna implementation. Versionerade migreringar och långsiktig lagringslivscykel är vidareutvecklingsbehov, inte en etablerad funktion. Användaren kan återställa hela lokala arbetskopior genom **Arkiv → Arbetskopior…**, men kan inte använda Ångra för att återgå från en sådan återställning. En HTML-export är den flyttbara säkerhetskopian.
+
+PWA-versionen kan cachelagra appkod och resurser för offline-start. Den fristående HTML-exporten bygger i stället på en inbäddad dokumentmodell, resurser och en separat player som kan visas utan service worker och konto. Båda flödena behöver egna tester; stöd i Chromium motsvarar inte fullständigt godkännande på fysiska iOS-enheter.
+
+## Exportarkitektur – faktiskt motorval
+
+- **HTML:** `src/export/html.tsx` skapar en fristående visningsfil med PPD och inbäddade resurser; `src/core/playback.ts` bidrar med navigerings- och animationslogik.
+- **PDF:** `src/export/pdfWriter.ts` använder `pdf-lib` och `@pdf-lib/fontkit`; text och enkla objekt exporteras där det stöds som egna PDF-objekt, andra egenskaper kan rasteriseras. Den genererade PDF:en kan innehålla bilagda källposter för diagram och formler.
+- **PPTX:** `src/export/pptxWriter.ts` använder `pptxgenjs` med egna OOXML-anpassningar för källposter i `customXml`. Native former, text, tabeller och diagram används inom avgränsade scenarier. Fler effekter kan förlora redigerbarhet och rapporteras.
+- **PNG/JPG:** `src/export/html.tsx` rasteriserar den valda bildmängden med `html-to-image` och paketerar filerna i ZIP.
+- **Gemensam planering:** `src/export/plan.ts` klassificerar objekts förväntade exportrepresentation som native, hybrid, rasterized eller unsupported. `src/export/exportController.ts` väljer bilder och format, laddar ned fil och en separat JSON-rapport.
+
+Avvikelser mellan redigerarens bild och Poppler-renderad PDF mäts dessutom diagnostiskt av `scripts/report_export_fidelity.mjs`, men det ersätter inte manuellt PowerPoint- eller PDF-läsarprov. Läs [exportpolicyn](export-policy.md) och [exporttäckningen](export-coverage.json).
+
+## Säkerhet och drift
+
+`src/core/contract.ts` innehåller URL-/SVG-kontroller, resursbudget och kanoniska hashberäkningar. Import- och exportunterlag får inte exekvera godtycklig användar-JavaScript. Säkerhetsprövning gäller hela import-/exportkedjan, inte bara schemastrukturen.
+
+Statisk GitHub Pages-publicering sker först efter lyckad kandidatverifiering av aktuell `main`-commit, enligt `.github/workflows/verify.yml` och `.github/workflows/deploy-pages.yml`. Node krävs för byggning, inte för normal användning. Se [driftinstruktionerna](operations.md).
+
+## Tidigare målarkitektur och öppna gränser
+
+Den första designen beskrev DOM/SVG-rendering, en separat presentation-player, PDF via pdf-lib, PPTX via PptxGenJS och säker HTML-export som **föreslagna val**. Dessa motorer är nu implementerade i ovanstående moduler. Däremot är bland annat generell historisk formatmigration, databasschemamigration, full Office-paritet, självständig Safari-/iOS-acceptans och avancerad exportkomposition fortfarande öppna krav. Historiska beslut finns i [DEV-002:s tekniska beslut](dev002-technical-decisions.md); de ska inte användas som ersättning för den implementerade arkitekturen.
