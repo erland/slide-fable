@@ -1,6 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {EditorStore} from '../src/core/editor.ts';
+import {textOf} from '../src/core/model.ts';
 
 test('duplicateSelected clones text and geometry in one undoable edit',()=>{
  const store=new EditorStore();
@@ -19,9 +20,8 @@ test('duplicateSelected clones text and geometry in one undoable edit',()=>{
  assert.ok(clone);
  assert.equal(clone.geometry.x,original.geometry.x+24);
  assert.equal(clone.geometry.y,original.geometry.y+24);
- assert.notEqual(clone.contentRef,original.contentRef);
- assert.deepEqual(store.slide.content.blocks.find(b=>b.id===clone.contentRef.split('#')[0])?.paragraphs,
-   store.slide.content.blocks.find(b=>b.id===original.contentRef.split('#')[0])?.paragraphs);
+ assert.deepEqual(textOf(store.slide,clone),textOf(store.slide,original),'Rich text and formatting must be preserved');
+ if(original.contentRef)assert.notEqual(clone.contentRef,original.contentRef,'Referenced text blocks must be cloned');
  store.undo();
  assert.deepEqual(store.getSnapshot().doc,before);
  store.redo();
