@@ -259,7 +259,7 @@ try{
  const multiIds=await api("const a=store.add('shape'),b=store.add('shape'),locked=store.add('shape');store.updateElement(locked,{locked:true});store.updateElement(b,{style:{...store.slide.view.elements.find(e=>e.id===b).style,fill:{color:'#ffcc00'}}});store.select([a,b,locked]);return {a,b,locked};");
  const multiPanel=page.locator('.multi-selection-formatting');
  await multiPanel.waitFor();
- assert.match(await multiPanel.innerText(),/Blandade värden/);
+ assert.match(await multiPanel.innerText(),/Blandade färger/);
  await multiPanel.getByLabel('Gemensam fyllning',{exact:true}).fill('#112233');
  let multiDoc=await model(),multiElements=multiDoc.slides[0].view.elements;
  for(const id of [multiIds.a,multiIds.b])assert.equal(multiElements.find(e=>e.id===id).style.fill.color,'#112233');
