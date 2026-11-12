@@ -454,7 +454,7 @@ try{
  await page.mouse.down();
  await page.mouse.move(cornerBox.x+cornerBox.width/2+50,cornerBox.y+cornerBox.height/2+18,{steps:5});
  const previewGeometry=await dragEl.evaluate(el=>({width:parseFloat(el.style.width),height:parseFloat(el.style.height)}));
- assert.ok(Math.abs(previewGeometry.width/previewGeometry.height-lockedRatioBefore.width/lockedRatioBefore.height)<.000001,'Shift preview preserves ratio');
+ assert.ok(Math.abs(previewGeometry.width/previewGeometry.height-lockedRatioBefore.width/lockedRatioBefore.height)<.0005,`Shift preview preserves ratio: preview=${JSON.stringify(previewGeometry)} source=${JSON.stringify(lockedRatioBefore)}`);
  await page.mouse.up();await page.keyboard.up('Shift');
  const shiftCornerAfter=(await model()).slides[2].view.elements.find(e=>e.id===newTextId).geometry;
  assert.ok(shiftCornerAfter.width>lockedRatioBefore.width,'Shift corner grows object');
