@@ -1,7 +1,14 @@
 # Verifiering och releasegrindar
 
-Planeringspaketets verifiering gäller bara filintegritet, referensschema, exemplet,
-kravtäckning och återupptagbar plan. Appen har inga verifierade funktioner ännu.
+**Historiskt verifieringsupplägg från projektets planeringsfas.**
+
+Planeringspaketets ursprungliga verifiering gällde filintegritet, referensschema,
+exemplet, kravtäckning och återupptagbar plan. Sedan dess har appen byggts och
+flera funktioner fått automatiserade tester. För faktisk testsvit, senaste CI-
+resultat och öppna releasegrindar, se [README](../README.md),
+[projektstatus](../STATUS.md), [driftinstruktioner](operations.md) och
+[releasegranskning](release-review.md). De återstående provkraven nedan är
+planerade acceptanskrav, **inte** ett påstående att allt redan är verifierat.
 
 ## Automatiserat under implementation
 Domäntest för commands/undo, ID:n, referenser, grupper, migration och säkerhet.
