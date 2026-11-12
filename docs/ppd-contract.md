@@ -1,6 +1,6 @@
 # Slide Fable – PPD-kontrakt och versionsstatus
 
-> **Aktuell implementering (kontrollerad mot `main` 2026-11-08):** Nya presentationer skapas med `schemaVersion: "0.4.0"` i `src/core/model.ts`. Kanoniskt schema är `schemas/ppd.schema.json` (PPD 0.4.0), medan `schemas/ppd-0.3.1.schema.json` behålls för äldre data. `src/core/contract.ts` validerar 0.4.0 via `inspectPpd040` och har separata vägar för 0.3.0/0.3.1 och begränsade 0.1/0.2-profiler. Schema-/API-stöd garanterar **inte** full redigerings- eller exportparitet. Produktionsstatus: **NOT_READY**.
+> **Implementerad formatprofil (omkontrollerad mot `main` 2026-11-12):** Nya presentationer skapas med `schemaVersion: "0.4.0"` i `src/core/model.ts`. Kanoniskt schema är `schemas/ppd.schema.json` (PPD 0.4.0), medan `schemas/ppd-0.3.1.schema.json` behålls för äldre data. `src/core/contract.ts` validerar 0.4.0 via `inspectPpd040` och har separata vägar för 0.3.0/0.3.1 och begränsade 0.1/0.2-profiler. Schema-/API-stöd garanterar **inte** full redigerings- eller exportparitet. Produktionsstatus: **NOT_READY**.
 
 ## Aktiva formatkällor
 
@@ -15,6 +15,34 @@
 
 0.3.0 kan migreras till 0.3.1 via den dokumenterade verifierade vägen, men detta innebär inte generell migration av alla äldre dokument till 0.4.0. Okända framtida versioner och okända obligatoriska funktioner måste hanteras enligt versionsförhandling och säkerhetsvalidering. Historisk 0.1/0.2-kompatibilitet är fortfarande en **öppen releasegrind**.
 
+## Import, versionering och begränsningar i aktuell kod
+
+I `src/core/contract.ts` förhandlar `negotiate` om format, funktionskrav,
+`minReaderVersion` och kända objekt-/diagramtyper. Okända obligatoriska
+funktioner blockerar importen; okända objekt eller diagramtyper utanför
+redigeringsprofilen kan kräva skrivskyddad inspektionsmodell. Ett sådant läsläge
+är inte en garanti för full visning av det importerade dokumentet.
+
+- `createDocument` skapar PPD **0.4.0** och `validateCore` kontrollerar
+  den versionen genom `inspectPpd040` och ytterligare semantiska regler.
+- `migrate030` migrerar **0.3.0 → 0.3.1** under validerad delprofil.
+  Import av giltig 0.3.1 hanteras separat. Det finns **ingen generell
+  automatisk migration från 0.3.1 till 0.4.0 i `importDocument`**;
+  `stagePpd040` är en separat, uttryckligt anropad anpassningsväg.
+- `src/core/legacy.ts` försöker migrera **endast en begränsad 0.1/0.2-profil**.
+  Historisk kompatibilitet för godtyckliga filer är fortfarande ett öppet krav.
+- `validateFull` kan anropas med profilen `offline-single-file`; då kontrolleras
+  bland annat metadata, `build.selfContained`, inbäddade resurser och
+  `sourceModelHash`. Grundläggande schema- och semantikvalidering är inte
+  detsamma som full offlineprofil.
+- `hash` beräknar SHA-256 över kanoniserad JSON utan det härledda `build`-fältet.
+  Resurs-hash och MIME-signatur kontrolleras separat av `validateAssets`.
+
+Dessa uppgifter gäller programmets formatkontrakt och ska inte förväxlas med
+att alla 0.4.0-egenskaper är fullt redigerbara eller bevaras visuellt i
+PPTX/PDF. Se [arkitektur](architecture.md), [exportpolicy](export-policy.md)
+och [releasegranskning](release-review.md).
+
 ## Tidigare PPD 0.3.1-kontrakt (historiskt underlag)
 
 Texten nedan är bevarad som specifikation för det tidigare DEV-001-kontraktet. Påståenden om vad som **ännu inte** var implementerat avser det steget 2026-10-19 och är **inte** en aktuell beskrivning av applikationens funktionalitet eller standardformat. För aktuell funktionalitet gäller kod och verifieringsrapporter.
@@ -25,8 +53,8 @@ Texten nedan är bevarad som specifikation för det tidigare DEV-001-kontraktet.
 
 Fastställt för DEV-001 2026-10-19. Projektlokal profil, inte en publicerad extern
 PPD-standard. Produktversion och schemaVersion är separata. Bifogat 0.3.0-schema
-och specifikationer ligger oförändrade i reference. Det nya schemat finns i
-`schemas/ppd.schema.json`; maskinell referens i `scripts/ppd_contract.py`.
+och specifikationer ligger oförändrade i reference. Vid DEV-001 kallades den då nya profilens schema 
+`schemas/ppd.schema.json`; **i dagens repository är den sökvägen ompekad till 0.4.0**. Historiskt 0.3.1-schema finns nu i `schemas/ppd-0.3.1.schema.json`; äldre Python-kontrakt är kvar för dess avgränsade verifiering.
 
 ## Strukturell kompatibilitet
 0.3.1 preciserar 0.3.0: canonical geometry ersätter box, name är tillåtet,
