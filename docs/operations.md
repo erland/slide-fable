@@ -2,7 +2,7 @@
 
 ## Lokal utveckling
 
-Node 22.12 eller senare, npm och Python 3.12 rekommenderas. Låsfilen äger
+Node.js **22.16.0 eller senare**, npm och Python 3.12 rekommenderas. Minimikravet för Node styrs av `package.json` (`engines.node`). Låsfilen äger
 paketversionerna. Paketets version är 0.5.0 och finns i package.json; genererat
 manifest och byggidentitet kommer från källprojektet. Ingen servernyckel eller
 miljöhemlighet krävs.
@@ -42,9 +42,15 @@ manifest och service-worker-scope avser katalogen där appen installeras.
 Använd ingen generisk fallback som svarar med HTML för saknade JS-filer.
 Servera sw.js och index.html utan lång HTTP-cache. Hashade resurser kan ha
 lång cache. Lägg ut nya resurser innan index/sw och behåll äldre hashade resurser
-under övergången. GitHub Pages-workflowen i `.github/workflows/deploy-pages.yml` triggas av
-push till `main` eller manuell körning och försöker publicera `dist/`.
-En startad workflow är inte bevis för genomförd publicering; kontrollera status.
+under övergången. GitHub Pages-workflowen i `.github/workflows/deploy-pages.yml` triggas av att
+`Verify Slide Fable candidate` **avslutas**, inte direkt av push till `main`.
+`build`-jobbet kräver lyckad verifiering på `main` (push eller manuellt startad
+verifiering), att committen fortfarande är `main` och att den kommer från samma
+repository. Jobbet checkar ut den **exakt verifierade committen** och kör
+`npm ci` samt `npm run build` utan att upprepa testerna. Misslyckad verifiering
+leder till överhoppad deploy, inte till att ny kod publiceras. En startad
+workflow är inte bevis för genomförd publicering; kontrollera både verifiering
+och deploy i GitHub Actions.
 
 En väntande uppdatering aktiveras först när användaren väljer det och alla
 svarande flikar inom scope är rena och utan pågående export/import. Spara HTML i
@@ -55,6 +61,16 @@ Appcacher behålls konservativt för äldre öppna flikar. Verifierad cachegallr
 är fortfarande ett öppet krav före långvarig produktion. Rensa inte webbplatsens
 lagring som en rutinuppgradering: då kan även lokala arbetskopior försvinna.
 Säkerhetskopiera till HTML först. Lagringskvot och rensning styrs av webbläsaren.
+
+## Arbetskopior och historik
+
+**Ångra/Gör om** arbetar med redigerarens ändringshistorik för den öppna
+presentationen. **Arkiv → Arbetskopior…** öppnar en lista över lokalt
+IndexedDB-sparade hela presentationer, med titel och tidpunkt. Att öppna en
+arbetskopia kräver separat bekräftelse och ersätter den öppna modellen; det går
+inte att återgå via Ångra. Borttagning bekräftas separat. Sparade kopior kan ha
+samma titel, men särskiljs internt med dokument-ID. Katalogen kan försvinna
+om webbläsarens lagring rensas; exportera HTML för beständig backup.
 
 ## Säkerhet och felåterhämtning
 

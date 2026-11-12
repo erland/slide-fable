@@ -6,7 +6,7 @@ Slide Fable är ett svenskspråkigt presentationsverktyg byggt med React, TypeSc
 
 **[Öppna Slide Fable på GitHub Pages](https://erland.github.io/slide-fable/)**
 
-> **Utvecklingsversion:** GitHub Pages-adressen är den avsedda installationsadressen, och kan publiceras genom push till `main` eller manuell körning av deploy-workflowen, förutsatt att GitHub Pages är konfigurerat med **GitHub Actions** som källa. Projektets aktuella releasebedömning är **NOT_READY** för fullständig MVP/produktion; se [releasegranskningen](docs/release-review.md). En tillgänglig demo är inte ett godkännande av alla funktioner.
+> **Utvecklingsversion:** GitHub Pages-adressen är den avsedda installationsadressen. Publicering sker **endast efter en lyckad `Verify Slide Fable candidate`-körning för aktuell `main`-commit**; en push till `main` i sig räcker inte. GitHub Pages måste vara konfigurerat med **GitHub Actions** som källa. Projektets aktuella releasebedömning är **NOT_READY** för fullständig MVP/produktion; se [releasegranskningen](docs/release-review.md). En tillgänglig demo är inte ett godkännande av alla funktioner.
 
 ## Kom igång
 
@@ -22,7 +22,7 @@ Besök appen med internetanslutning första gången. När appen anger att den ä
 
 ### Kör lokalt från källkod
 
-Kräver Node.js 22.12 eller senare.
+Kräver **Node.js 22.16.0 eller senare**, enligt `package.json` (GitHub Actions använder 22.16.0).
 
 ```sh
 npm ci
@@ -36,7 +36,7 @@ npm run build
 npm run preview
 ```
 
-Den medföljande förbyggda utvecklingsversionen i `preview/` kan också provas med:
+Om katalogen `preview/` har genererats eller följer med din distribution kan den statiska förhandsversionen provas med:
 
 ```sh
 python -m http.server 8000 --directory preview
@@ -68,7 +68,7 @@ python scripts/verify_release_candidate.py
 
 ## Release och GitHub Pages
 
-[Deploy-workflow](.github/workflows/deploy-pages.yml) startar vid **push till `main`** eller manuell `workflow_dispatch`, inte när en GitHub-release publiceras. Den checkar ut den aktuella koden, installerar Node-beroenden och Playwright Chromium, kör lint och `npm test`, bygger med `SF_BUILD_ID` satt till commit-SHA och försöker distribuera `dist/` till GitHub Pages. Visad byggidentitet är därför baserad på commit-SHA, inte automatiskt på en release-tagg.
+[Deploy-workflow](.github/workflows/deploy-pages.yml) startar via `workflow_run` **efter att `Verify Slide Fable candidate` avslutats**. Publiceringsjobbet körs bara när verifieringen lyckats på `main` genom push eller manuell verifieringskörning, källrepositoryt stämmer och den verifierade committen fortfarande är aktuell `main`. Det checkar ut **exakt verifierad commit**, kör `npm ci` och `npm run build` med `SF_BUILD_ID` satt till commit-SHA och publicerar `dist/`. Lint, fullständiga tester och Playwright-verifiering utförs i [verifieringsworkflowen](.github/workflows/verify.yml), inte på nytt i deploy-jobbet. GitHub-releaser eller manuell start av deploy-workflowen är **inte** publiceringstriggers. Visad byggidentitet baseras på commit-SHA, inte på en release-tagg.
 
 Första gången behöver **Settings → Pages → Build and deployment → Source** ställas in på **GitHub Actions**. Kontrollera att deploy-jobbet verkligen passerar och att tjänsten fungerar innan installationslänken betraktas som tillgänglig. Deploy och releaseacceptans är skilda beslut; projektet är fortfarande **NOT_READY** för full MVP/produktion.
 
@@ -77,6 +77,9 @@ Första gången behöver **Settings → Pages → Build and deployment → Sourc
 Nya dokument skapas som **PPD 0.4.0** i `src/core/model.ts`; `schemas/ppd.schema.json` är det aktiva 0.4.0-schemat. Äldre 0.3.1-schema finns separat i `schemas/ppd-0.3.1.schema.json`. Detta beskriver **implementerad formatversion**, inte att alla formatfunktioner har fullständig UI-/PDF-/PPTX-paritet eller att releasen är accepterad. Se [PPD-kontraktet](docs/ppd-contract.md).
 
 ## Dokumentation
+
+**För aktuell CI- och driftstatus:** se [STATUS.md](STATUS.md). Dokument under `docs/` med ett uttryckligt historiskt datum beskriver en tidigare avstämning och ska inte läsas som status för senaste `main`.
+
 
 - [Användarguide](docs/user-guide.md) – redigering, tabeller och diagram, paneler, sparande, återställning och export.
 - [Funktionell specifikation](docs/functional-specification.md) – målet för MVP samt källbelagd implementerad funktionsprofil.

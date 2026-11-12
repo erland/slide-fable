@@ -1,12 +1,13 @@
 # Använd Slide Fable 0.5
 
-Starta den färdigbyggda appen från projektroten:
+Starta utvecklingsversionen från projektroten med **Node.js 22.16.0 eller senare**:
 
 ```sh
-python -m http.server 8000 --directory preview
+npm ci
+npm run dev
 ```
 
-Öppna http://localhost:8000. För telefon och läsplatta på en annan enhet behövs
+Öppna adressen som Vite visar. För att förhandsgranska den byggda produktionsversionen kör du `npm run build` följt av `npm run preview`. Om en färdig `preview/`-katalog finns i distributionen kan den också serveras med `python -m http.server 8000 --directory preview`. För telefon och läsplatta på en annan enhet behövs
 statisk HTTPS-hosting för installation och offlinefunktion. Öppna appen med nät
 första gången och invänta ”redo för offline”. Den här appen har ingen serverdel för dokumentlagring. En GitHub Pages-
 publicering är konfigurerad via Actions, men kontrollera att den faktiskt lyckats
@@ -99,12 +100,22 @@ Spara HTML skapar en ensam flyttbar presentation med redigeringsmodell, resurser
 typsnitt och visningsläge. Öppna filen direkt för visning, eller välj Öppna i appen
 för fortsatt redigering. Webbläsaren bestämmer var nedladdningar hamnar.
 
-Arbetskopian sparas automatiskt i webbläsaren på denna enhet. Vid omstart väljer
-du uttryckligen om en arbetskopia ska återställas. En annan flik får aldrig skriva
+Arbetskopian sparas automatiskt i webbläsaren på denna enhet. För att öppna en
+sparad version väljer du **Arkiv → Arbetskopior…**. Dialogen visar lokala
+presentationer med titel och senast sparad tid. Välj **Öppna** och bekräfta
+innan den sparade presentationen ersätter den öppna. Du kan också välja
+**Ta bort**, med separat bekräftelse. Två arbetskopior kan ha samma titel;
+de är separata dokument med olika identiteter. Dialogen visas inte automatiskt
+som en panel över redigeringsytan. En annan flik får aldrig skriva
 över en nyare arbetskopia utan konfliktmeddelande. Skapa då en separat kopia eller
 hämta din HTML-fil. Arbetskopian ersätter inte en nedladdad säkerhetskopia och kan
 försvinna om webbläsarens data rensas. Sparandet kan misslyckas vid lagringsbrist;
 statusraden visar detta.
+
+**Ångra** går tillbaka i ändringshistoriken för den aktuella redigeringen,
+medan **Arbetskopior** återställer en helt sparad presentation efter ett
+uttryckligt val. Återställning ersätter arbetsytan och kan **inte** ångras med
+Ångra. Hämta gärna den öppna presentationen som HTML innan du återställer.
 
 Ctrl/Cmd+S skapar HTML, Ctrl/Cmd+Z ångrar, Ctrl/Cmd+Skift+Z gör om och
 Ctrl/Cmd+C/V kopierar objekt inom appen. Kopieringen använder appens eget
@@ -155,8 +166,12 @@ sparar utsnittet; Avbryt beskärning lämnar bilden oförändrad. Ta bort beskä
 ## Layout- och temagalleri
 
 Välj Design → Layout och tema. Layoutkorten ändrar aktuell bild och bevarar texten.
-Saknade textplatshållare tillkommer; objekt utan motsvarighet i den nya layouten
-behåller sin placering. Temakorten gäller hela presentationen. Anpassa färger och
+Saknade textplatshållare tillkommer vid det första behovet. Layoutstyrda
+textobjekt som tillfälligt kopplats loss återanvänds vid senare byten mellan
+exempelvis **Innehåll** och **Två kolumner**, i stället för att nya skapas varje
+gång. Objekt utan motsvarighet behåller sitt innehåll och sin placering;
+fristående objekt som användaren själv infogat tas inte över som platshållare.
+Objekt som redan blivit duplicerade i äldre versioner raderas inte automatiskt. Temakorten gäller hela presentationen. Anpassa färger och
 typsnitt i samma panel; manuella objektformat behålls. Ändringar kan ångras.
 
 Spara designmall skapar en JSON-fil med temat, masters och deras nödvändiga resurser.
