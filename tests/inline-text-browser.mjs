@@ -57,18 +57,10 @@ try {
       const color=tool.getByLabel('Textfärg i direktredigering');
       await size.fill('32');
       await color.fill('#cc0000');
-      await target.press('End');
-      await target.press('ControlOrMeta+Shift+ArrowLeft');
-      await size.fill('44');
-      await color.fill('#0000cc');
-      // Set the DOM caret inside each run, away from the style boundary. A
-      // pixel click can land on a resize handle or adjacent run in some
-      // Chromium renderings, causing an unrelated CI-only false failure.
-      // Assert the caret's actual text before checking the toolbar state.
-      const selectRun=async expectedText=>{
-        // Formatting extensions may wrap text in different inline elements;
-        // locate the rendered text itself rather than relying on strong indexes.
-        const selected=await target.evaluate((element,expectedText)=>{
+      // Select the exact word before applying formatting. Keyboard shortcuts
+      // such as Ctrl+Shift+Left may select different ranges in Chrome versions.
+      const selectRun=async (expectedText,wholeWord=false)=>{
+        const selected=await target.evaluate((element,{expectedText,wholeWord})=>{
           const walker=document.createTreeWalker(element,NodeFilter.SHOW_TEXT);
           let text;
           while((text=walker.nextNode())){
@@ -77,18 +69,23 @@ try {
             const offset=start+Math.max(1,Math.floor(expectedText.length/2));
             element.focus();
             const range=document.createRange();
-            range.setStart(text,offset);
-            range.collapse(true);
+            range.setStart(text,wholeWord?start:offset);
+            range.setEnd(text,wholeWord?start+expectedText.length:offset);
             const selection=window.getSelection();
             selection?.removeAllRanges();
             selection?.addRange(range);
             document.dispatchEvent(new Event('selectionchange'));
-            return selection?.anchorNode===text&&selection.anchorOffset===offset;
+            return selection?.anchorNode===text &&
+              (wholeWord?selection?.toString()===expectedText:selection?.anchorOffset===offset);
           }
           return false;
-        },expectedText);
-        assert.equal(selected,true,'caret must be inside '+expectedText);
+        },{expectedText,wholeWord});
+        assert.equal(selected,true,'selection must be inside '+expectedText);
       };
+      await selectRun('Beta',true);
+      await size.fill('44');
+      await color.fill('#0000cc');
+      // Check each run with a collapsed caret, not a range selection.
       await selectRun('Alfa');
       await page.waitForFunction(()=>document.querySelector('input[aria-label="Textstorlek i direktredigering"]')?.value==='32',null,{timeout:5000});
       assert.equal(await size.inputValue(),'32','first run size must follow the caret');
