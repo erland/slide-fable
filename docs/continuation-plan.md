@@ -1,6 +1,6 @@
 # Slide Fable – fortsättning efter nulägesavstämning
 
-> **Aktuell läsanvisning efter DOC-FIX-03 (2026-11-08):** Detta dokument innehåller kronologisk historik och äldre rekommendationer. Aktuellt beslut, aktuell commit och nästa åtgärd står i [STATUS.md](../STATUS.md); tidigare SF-NEXT-09-noteringar om obekräftat CI-fel ersätts av verifierad GitHub-körning på PR #120 och tidigare main. All releaseacceptans är fortfarande `NOT_READY`.
+> **Historisk fortsättningsplan (upprättad 2026-11-08):** Stegstatusar, prioriteringar, körningar och uttryck som ”nästa åtgärd” nedan avser sina ursprungliga datum. Även hänvisningen till PR #120 är historisk: senare arbete har mergats. För aktuell användning och kodstatus, börja i [dokumentationsöversikten](README.md), [projektstatus](../STATUS.md) och [DOC-AUDIT-04](doc-audit-04-history-reference-integrity.md). Enskilda automatiska PASS-resultat innebär inte full releaseacceptans; `NOT_READY` kvarstår tills grindar stängts med belägg.
 
 
 Denna **kompletterande** plan avser kvalitet och användarupplevelse på den befintliga redigeraren. Den ersätter inte de ursprungliga DEV-001–015-kraven eller deras releasegrindar (`docs/development-plan.md`, `docs/release-review.md`). Kör ett steg per utvecklingsomgång. För att undvika att bryta det validerade äldre arbetsstatusschemat ligger SF-NEXT-steget här i stället för att omnumrera den historiska DEV-listan.

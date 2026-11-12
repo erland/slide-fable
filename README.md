@@ -78,6 +78,9 @@ Nya dokument skapas som **PPD 0.4.0** i `src/core/model.ts`; `schemas/ppd.schema
 
 ## Dokumentation
 
+Börja gärna i [dokumentationsöversikten](docs/README.md), som skiljer aktuell produktvägledning från äldre steg- och verifieringsrapporter. Historiska dokument behålls som spårbarhet, inte som dagens rekommenderade arbetsordning.
+
+
 **För aktuell CI- och driftstatus:** se [STATUS.md](STATUS.md). Dokument under `docs/` med ett uttryckligt historiskt datum beskriver en tidigare avstämning och ska inte läsas som status för senaste `main`.
 
 
