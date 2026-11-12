@@ -1,5 +1,12 @@
 # Granskning av PPD-underlaget
 
+> **Historisk formatgranskning från DEV-001:** GAP-01–GAP-12 gäller det
+> ursprungliga bifogade 0.3-underlaget, inte en ny granskning av aktuellt
+> PPD 0.4.0-schema. De ursprungliga fynden behålls för spårbarhet. Se
+> [PPD-kontraktet](ppd-contract.md) för aktivt schema, aktuell importprofil
+> och begränsad migrationskompatibilitet. Ingen GAP-rad nedan betyder i sig
+> att en motsvarande brist finns kvar oförändrad i dagens kod.
+
 ## Faktiskt verifierat
 Bifogat JSON Schema är ett giltigt Draft 2020-12-schema och det bifogade
 exemplet validerar med formatkontroller. Det bevisar struktur för just exemplet,
