@@ -265,8 +265,9 @@
       ],
       "evidenceLevel": "automated_visual_scoped",
       "evidence": [
-        "scripts/generate_export_acceptance.mjs",
-        "scripts/report_export_fidelity.mjs",
+        "docs/sf-qual-07-export-acceptance-package.md",
+        "docs/sf-qual-09-editor-reference-screenshots.md",
+        "docs/sf-qual-10-editor-pdf-difference-report.md",
         "tests/export-fidelity-metrics.test.mjs"
       ],
       "verified": "Tre bildpar renderas oberoende från Chromium-redigeraren och Poppler-PDF; matchande bild-ID, checksummor, bilddimensioner, RGB-mätvärden och skillnadsbilder med diagnostisk tröskel kontrolleras.",
