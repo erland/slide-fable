@@ -24,6 +24,6 @@
 
 1. **DOC-AUDIT-02 – arkitektur och format:** jämför `docs/architecture.md`, `docs/ppd-contract.md`, `docs/format-review.md`, `docs/export-policy.md` och `docs/export-coverage.json` med `src/core/`, `schemas/`, `src/export/` och aktiva tester. Separera föreslagen målarkitektur och äldre PPD-profiler från faktisk PPD 0.4.0.
 2. **DOC-AUDIT-03 – funktionalitet, UI och acceptans:** gå igenom `docs/functional-specification.md`, `docs/responsive-ux.md`, `docs/release-review.md`, `docs/release-gates.json` samt automatiska webbläsartester. Klassificera varje påstående som implementerat, delvis verifierat, krav eller historiskt.
-3. **DOC-AUDIT-04 – historiska etappdokument och länkar:** inventera `docs/sf-*.md`, `docs/dev*.md`, planer och `reference/`. Bevara historiska resultat, upptäck döda filhänvisningar, märk tydligt vad som inte beskriver senaste `main`.
+3. **DOC-AUDIT-04 – historiska etappdokument och länkar:** inventera SF- och DEV-etappdokumenten i dokumentationskatalogen, planer och referensmaterialet. Bevara historiska resultat, upptäck döda filhänvisningar, märk tydligt vad som inte beskriver senaste `main`.
 
 **Omfattningsgräns i denna PR:** Avslutar endast DOC-AUDIT-01; punkterna 1–3 är efterföljande separata granskningar, inte påståenden om att de redan utförts.
