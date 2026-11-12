@@ -428,7 +428,8 @@ try{
   await page.getByRole('navigation',{name:'Arkiv och redigering'}).getByRole('button',{name:'Arbetskopior…'}).click();
   const recovery=page.getByRole('dialog');
   await recovery.getByRole('heading',{name:'Lokala arbetskopior'}).waitFor();
-  const savedCopy=recovery.locator('.draft-recovery-entry').filter({hasText:before.document.title});
+  const savedCopy=recovery.locator('.draft-recovery-entry[data-draft-id="'+before.document.id+'"]');
+  assert.equal(await savedCopy.count(),1,'Recover the exact saved document even when titles are duplicated');
   await savedCopy.getByRole('button',{name:'Öppna'}).click();
   assert.notDeepEqual(await model(),before,'Selecting an entry must not restore before confirmation');
   await recovery.getByRole('button',{name:'Bekräfta öppning'}).click();
