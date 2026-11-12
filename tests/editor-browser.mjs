@@ -391,6 +391,32 @@ try{
  assert.equal(await page.locator('.canvas-inline-editor').count(),0);
  pass('SF-UX-06:escape-closes-inline-edit');
 
+ // UX-05: Ctrl/Cmd+D and object menu duplicate selection without changing
+ // the internal clipboard. Both operations are individually undoable.
+ await page.evaluate(async id=>(await import('/src/core/editor.ts')).editorStore.select([id]),newTextId);
+ const beforeDuplicate=await model(),originalCount=beforeDuplicate.slides[2].view.elements.length;
+ const sourceForDuplicate=beforeDuplicate.slides[2].view.elements.find(e=>e.id===newTextId);
+ await page.locator('.editor-header').getByRole('button',{name:'Ångra',exact:true}).focus();
+ await page.keyboard.press('ControlOrMeta+d');
+ const afterShortcut=await model(),cloneElements=afterShortcut.slides[2].view.elements;
+ assert.equal(cloneElements.length,originalCount+1,'Ctrl/Cmd+D adds one duplicate');
+ const cloneId=await page.evaluate(async()=>(await import('/src/core/editor.ts')).editorStore.getSnapshot().selected[0]);
+ assert.ok(cloneId&&cloneId!==newTextId,'Duplicate is selected and has a new ID');
+ const clone=cloneElements.find(e=>e.id===cloneId);
+ assert.equal(clone.geometry.x,sourceForDuplicate.geometry.x+24,'Duplicate is offset horizontally');
+ assert.equal(clone.geometry.y,sourceForDuplicate.geometry.y+24,'Duplicate is offset vertically');
+ await page.locator('.editor-header').getByRole('button',{name:'Ångra',exact:true}).click();
+ assert.equal((await model()).slides[2].view.elements.length,originalCount,'Undo removes duplicate');
+ await page.evaluate(async id=>(await import('/src/core/editor.ts')).editorStore.select([id]),newTextId);
+ await page.locator('.editor-canvas-pane .stage [data-element-id="'+newTextId+'"]').click({button:'right'});
+ await page.getByRole('menu',{name:'Objektåtgärder'}).getByRole('menuitem',{name:/Duplicera/}).click();
+ assert.equal((await model()).slides[2].view.elements.length,originalCount+1,'Object menu duplicates the selected object');
+ await page.locator('.editor-header').getByRole('button',{name:'Ångra',exact:true}).click();
+ assert.equal((await model()).slides[2].view.elements.length,originalCount,'Context-menu duplicate is undoable');
+ await page.evaluate(async id=>(await import('/src/core/editor.ts')).editorStore.select([id]),newTextId);
+ pass('UX-05:keyboard-and-context-menu-duplicate');
+
+
  const dragEl=page.locator('.editor-canvas-pane .stage [data-element-id="'+newTextId+'"]');
  const startGeometry=(await model()).slides[2].view.elements.find(e=>e.id===newTextId).geometry;
  const dragBounds=await dragEl.boundingBox();assert.ok(dragBounds,'Text object must be visible');
