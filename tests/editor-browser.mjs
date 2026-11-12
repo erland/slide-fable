@@ -280,6 +280,12 @@ try{
  const commonTextId=await api("const id=store.add('text');store.editText(id,{paragraphs:[{id:'common-p1',runs:[{text:'Första stycket',marks:{bold:true}}]},{id:'common-p2',runs:[{text:'Andra stycket'}]}]});return id;");
  const textEditor=page.locator('#slide-properties .rich-editor');
  const commonEditable=textEditor.locator('.ProseMirror');
+ const advancedTools=textEditor.locator('.rich-tools-more');
+ assert.equal(await advancedTools.evaluate(el=>el.open),false,'Advanced text tools start collapsed');
+ assert.equal(await textEditor.getByRole('button',{name:'Fetstil'}).isVisible(),true,'Bold stays visible');
+ assert.equal(await textEditor.getByRole('button',{name:'Kursiv'}).isVisible(),true,'Italic stays visible');
+ await advancedTools.locator('summary').click();
+ assert.equal(await advancedTools.evaluate(el=>el.open),true,'Advanced text tools can be expanded');
  await commonEditable.click();await page.keyboard.press('ControlOrMeta+A');
  await textEditor.getByLabel('Typsnitt för markering',{exact:true}).selectOption('Georgia');
  // Each paragraph operation must explicitly target all paragraphs; toolbar focus can change the selection.
