@@ -22,7 +22,7 @@ Detta är **inte** en fullständig semantisk länkkontroll. Externa webbadresser
 | --- | --- | --- |
 | `docs/continuation-plan.md` | Den ”aktuella läsanvisningen” pekade framåt utifrån PR #120 och kunde misstolkas som dagens arbetsordning | Märkt hela fortsättningsplanen som historisk och länkat till aktuella dokumentationsingångar |
 | `docs/current-state-2026-11-08.md` | Äldre CI-/PR-status och dåvarande ”nästa steg” kunde fortfarande blandas ihop med dagens status | Förtydligat att uppgifterna enbart avser snapshot 2026-11-08 |
-| `reference/README.md` | Det gamla PPD 0.3-referenspaketet saknade explicit varning om att aktivt schema nu är 0.4.0 | Tillfört historikmarkering och länkar till aktivt formatkontrakt; referensschema och ursprungsdata är orörda |
+| Det ursprungliga PPD 0.3-underlaget i `reference/` | Äldre referensfiler kan förväxlas med dagens aktiva PPD 0.4-schema | Förklarat underlagets historiska roll i den nya dokumentationsöversikten. **Alla sex SHA-skyddade originalfiler, inklusive referenskatalogens README, lämnas oförändrade.** |
 | `STATUS.md` | Kallades ”aktuell” trots att det visade en äldre `main` och äldre deploy | Avstämt nytt `main` och en **daterad** verifierad körning; deployens dåvarande status anges som pågående, inte godkänd |
 | `README.md` | Ingen enda ingång som skilde nuvarande användar-/teknikdokumentation från historiska verifieringsrapporter | Lagt in länk till ny [dokumentationsöversikt](README.md) |
 | `docs/README.md` | Saknades | Skapat en sammanhållen översikt med kanoniska ingångar och kategorisering av historiska rapporter |
