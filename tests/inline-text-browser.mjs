@@ -44,6 +44,36 @@ try {
     await page.locator('.editor-header').getByRole('button',{name:'Gör om',exact:true}).click();
     const redone=await page.evaluate(async()=>JSON.stringify((await import('/src/core/editor.ts')).editorStore.getSnapshot().doc));
     assert.equal(redone,changed,viewport.name+': Redo should restore the formatting transaction');
+    // UX-01 regression: the inline controls must reflect the selected run, not stale defaults.
+    if (viewport.name === 'desktop') {
+      const styledElement=page.locator('.editor-canvas-pane .stage .render-element.type-text').first();
+      await styledElement.dblclick();
+      const styling=page.getByRole('group',{name:'Redigera text på bilden'});
+      const target=styling.getByRole('textbox',{name:'Redigera objektets text'});
+      const tool=styling.getByRole('toolbar',{name:'Snabbformatera markerad text'});
+      await target.fill('Alfa Beta');
+      await target.press('ControlOrMeta+A');
+      const size=tool.getByRole('spinbutton',{name:'Textstorlek i direktredigering'});
+      const color=tool.getByLabel('Textfärg i direktredigering');
+      await size.fill('32');
+      await color.fill('#cc0000');
+      await target.press('End');
+      await target.press('ControlOrMeta+Shift+ArrowLeft');
+      await size.fill('44');
+      await color.fill('#0000cc');
+      // Select a character inside the run (not at a style boundary).
+      // DOM selection synchronizes through ProseMirror's selectionchange handler.
+      await target.locator('strong').first().click({position:{x:30,y:10}});
+      await page.waitForFunction(()=>document.querySelector('input[aria-label="Textstorlek i direktredigering"]')?.value==='32',{timeout:5000});
+      assert.equal(await size.inputValue(),'32','first run size must follow the caret');
+      assert.equal((await color.inputValue()).toLowerCase(),'#cc0000','first run color must follow the caret');
+      await target.locator('strong').last().click({position:{x:20,y:10}});
+      await page.waitForFunction(()=>document.querySelector('input[aria-label="Textstorlek i direktredigering"]')?.value==='44',{timeout:5000});
+      assert.equal(await size.inputValue(),'44','second run size must follow the caret');
+      assert.equal((await color.inputValue()).toLowerCase(),'#0000cc','second run color must follow the caret');
+      await styling.getByRole('button',{name:'Klar'}).click();
+      console.log('PASS UX-01 selection-aware format controls',viewport.name);
+    }
     const changedElement=page.locator('.editor-canvas-pane .stage .render-element.type-text').first();
     await changedElement.dblclick();
     const again=page.getByRole('group',{name:'Redigera text på bilden'});
