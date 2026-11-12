@@ -11,6 +11,24 @@ inte att alla föregående klarkriterier är uppfyllda. Originalkraven har inte
 skrivits om för att passa implementationen. Auktoritativ stegstatus finns i
 `.system-builder/work-status.yaml`; denna rapport redovisar skälen och beläggen.
 
+## Uppdaterad källavstämning av funktioner och releasegrindar (2026-11-12)
+
+Den detaljerade DEV-004–015- och AT-matrisen nedan är en **historisk,
+delvis genomförd acceptansgranskning**. Den ska inte läsas som en inventering
+av alla senare PR:er. Bland senare kodändringar finns återanvändning av
+platshållarobjekt, flytt av arbetskopior till Arkiv-dialogen och reviderad
+skalning i presentationsläge. Se [aktuell funktionsavstämning](functional-specification.md)
+och [DOC-AUDIT-03](doc-audit-03-functions-ux-acceptance.md).
+
+De maskinläsbara grindarna i `docs/release-gates.json` står fortfarande som
+`PENDING` för RG-001–008 och RG-010 respektive `BLOCKED` för RG-009.
+Detta är **inte samma sak som att alla automatiska tester misslyckas**.
+En grön kandidat-CI är evidens på en viss commit och inom en viss testomfattning,
+men statusen i den maskinläsbara filen har inte formellt omvärderats eller
+stängts med fullständiga acceptansunderlag. Särskilt manuella grindar kräver
+faktisk iOS/Safari, PowerPoint Mac/Windows, hjälpmedel/visuell granskning och
+oberoende PDF-läsare. Inga grindstatusar ändras i denna dokumentationsgranskning.
+
 ## Genomfört i återstående utvecklingssteg
 
 | Steg | Implementerat | Verifiering och återstående gräns |

@@ -1,5 +1,7 @@
 # SF-NEXT-02 – arbetsflödesbaserad UX-granskning
 
+> **Historisk, statisk UX-granskning:** Fynden nedan avser koden vid granskningstillfället, inte automatiskt nuvarande `main`. I synnerhet är UX-02-01 åtgärdad med `openProperties('animations')` i `src/ui/EditorApp.tsx` och regressionstest i `tests/motion-ribbon-browser.mjs`. Den nya återställningsdialogen under Arkiv och senare layout-/presentationsrättningar beskrivs i [användarguiden](user-guide.md) och [funktionell specifikation](functional-specification.md). Fysisk Safari-acceptans saknas fortfarande.
+
 **Datum:** 2026-11-08  
 **Källa:** bifogad SF-NEXT-01-källkopia, `src/ui/EditorApp.tsx`, `src/ui/editor.css`, komponenter och browser-tester under `tests/`.  
 **Metod:** statisk genomgång av faktiska UI-vägar och existerande testfall. **Ingen ny körning i webbläsare eller test på fysisk iPad** gjordes i denna miljö (inga installerade npm-beroenden). Fynd markeras därför *kodbelagd risk* respektive *implementerad begränsning*, inte som observerat fel i körande app.
