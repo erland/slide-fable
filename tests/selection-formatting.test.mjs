@@ -2,7 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {EditorStore} from '../src/core/editor.ts';
 import {effective,textOf} from '../src/core/model.ts';
-import {formatValues,sharedFormat} from '../src/core/selectionFormatting.ts';
+import {formatValues,sharedFormat,formatValueStatus} from '../src/core/selectionFormatting.ts';
 import {readOutline} from '../src/core/outline.ts';
 
 test('selection format preserves unrelated properties and skips locked/unsupported/unselected objects',()=>{
@@ -71,4 +71,12 @@ test('formatting shared content does not alter a locked instance',()=>{
  const after=store.slide.view.elements;
  assert.deepEqual(textOf(store.slide,after.find(e=>e.id===b.id)),before);
  assert.notEqual(after.find(e=>e.id===a.id).contentRef,after.find(e=>e.id===b.id).contentRef);
+});
+
+test('formatting controls distinguish mixed colors from unset and unavailable values',()=>{
+ assert.equal(formatValueStatus(['#112233','#aabbcc']),'mixed');
+ assert.equal(formatValueStatus(['#112233','#112233']),'shared');
+ assert.equal(formatValueStatus([undefined,undefined]),'unset');
+ assert.equal(formatValueStatus([undefined,'#112233']),'mixed');
+ assert.equal(formatValueStatus([]),'unavailable');
 });
