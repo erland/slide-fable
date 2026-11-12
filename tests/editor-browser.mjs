@@ -421,7 +421,20 @@ try{
 
 
  await page.getByRole('button',{name:'Textfält',exact:true}).click();const edit=page.getByRole('textbox',{name:'Redigera objektets text'});await edit.fill('Svensk berättelse ÅÄÖ');await page.getByRole('button',{name:'Fetstil',exact:true}).click();await edit.press('End');await edit.type(' med rik text');await page.getByRole('button',{name:'Bild',exact:true}).click();await page.getByRole('tab',{name:'Visa'}).click();await page.locator('.workspace-controls-disclosure > summary').click();await page.getByRole('group',{name:'Visa eller dölj paneler'}).getByRole('button',{name:'Visa anteckningar',exact:true}).click();await page.getByRole('tab',{name:'Infoga'}).click();await page.getByLabel('Talaranteckningar',{exact:true}).fill('HEMLIG ANTECKNING');await page.getByLabel('Talaranteckningar',{exact:true}).press('Tab');assert.ok(JSON.stringify(await model()).includes('Svensk berättelse'));pass('DEV008:rich-text-edit-and-save');
- await page.getByRole('status').filter({hasText:'Arbetskopia sparad'}).waitFor();const before=await model();await page.reload();await page.getByRole('button',{name:/Min presentation ·/}).first().click();assert.deepEqual(await model(),before);pass('DEV006:reload-explicit-recovery');
+ await page.getByRole('status').filter({hasText:'Arbetskopia sparad'}).waitFor();
+  const before=await model();
+  await page.reload();
+  await page.locator('.editor-header .editor-menu-disclosure > summary').click();
+  await page.getByRole('navigation',{name:'Arkiv och redigering'}).getByRole('button',{name:'Arbetskopior…'}).click();
+  const recovery=page.getByRole('dialog');
+  await recovery.getByRole('heading',{name:'Lokala arbetskopior'}).waitFor();
+  const savedCopy=recovery.locator('.draft-recovery-entry[data-draft-id="'+before.document.id+'"]');
+  assert.equal(await savedCopy.count(),1,'Recover the exact saved document even when titles are duplicated');
+  await savedCopy.getByRole('button',{name:'Öppna'}).click();
+  assert.notDeepEqual(await model(),before,'Selecting an entry must not restore before confirmation');
+  await recovery.getByRole('button',{name:'Bekräfta öppning'}).click();
+  assert.deepEqual(await model(),before);
+  pass('DEV006:reload-explicit-recovery');
  const cas=await page.evaluate(async()=>{const p=await import('/src/core/persistence.ts'),doc=(await import('/src/core/editor.ts')).editorStore.getSnapshot().doc;let conflict=false;try{await p.saveDraft(doc,null,'other-tab');}catch(e){conflict=String(e).includes('CONFLICT');}return conflict;});assert.equal(cas,true);pass('DEV006:atomic-stale-tab-conflict');
  const quota=await page.evaluate(async()=>{const proto=IDBObjectStore.prototype,old=proto.put;proto.put=function(){throw new DOMException('test quota','QuotaExceededError');};try{const p=await import('/src/core/persistence.ts'),d=(await import('/src/core/model.ts')).createDocument();await p.saveDraft(d,null,'test');return false;}catch(e){return String(e).includes('Quota');}finally{proto.put=old;}});assert.equal(quota,true);pass('DEV006:quota-error-does-not-report-success');
  await api("for(const type of ['table','chart','semanticDiagram','equation','vectorPath'])store.add(type);return true;");

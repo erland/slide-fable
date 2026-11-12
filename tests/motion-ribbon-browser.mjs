@@ -45,14 +45,25 @@ try{
   const slideshow=page.getByRole('group',{name:'Bildspelsverktyg'});
   await slideshow.getByRole('button',{name:'Från aktuell bild'}).click();
   // Actual slide must occupy the visible presentation viewport, not just exist in DOM.
-  await page.waitForFunction(()=>{
-   const fit=document.querySelector('.presenter .presentation-fit');
-   const slide=fit?.querySelector('.playback-slide');
-   if(!fit||!slide)return false;
-   const frame=fit.getBoundingClientRect(),rendered=slide.getBoundingClientRect();
-   return frame.width>100&&frame.height>50&&rendered.width>100&&rendered.height>50&&
-    Math.abs(frame.width-rendered.width)<3&&Math.abs(frame.height-rendered.height)<3;
-  });
+  try{
+   await page.waitForFunction(()=>{
+    const fit=document.querySelector('.presenter .presentation-fit');
+    const slide=fit?.querySelector('.playback-slide');
+    if(!fit||!slide)return false;
+    const frame=fit.getBoundingClientRect(),rendered=slide.getBoundingClientRect();
+    return frame.width>100&&frame.height>50&&rendered.width>100&&rendered.height>50&&
+     Math.abs(frame.width-rendered.width)<3&&Math.abs(frame.height-rendered.height)<3;
+   },null,{timeout:10000});
+  }catch(error){
+   const bounds=await page.evaluate(()=>{
+    const frame=document.querySelector('.presenter .presentation-fit');
+    const slide=frame?.querySelector('.playback-slide');
+    const screen=document.querySelector('.presenter .presentation-screen');
+    const size=node=>{const box=node?.getBoundingClientRect();return box?{width:box.width,height:box.height}:null;};
+    return {screen:size(screen),frame:size(frame),slide:size(slide),scale:slide?.getAttribute('data-playback-scale'),frameCss:frame?getComputedStyle(frame).width:null};
+   });
+   throw Error(viewport.name+': slide frame failed to fit viewport: '+JSON.stringify(bounds)+'; '+String(error));
+  }
   assert.ok(Number(await page.locator('.presenter .playback-slide').getAttribute('data-playback-scale'))>0,viewport.name+': slideshow must have a positive scale');
   const rgb=await page.locator('.presenter .presentation-fit').screenshot({animations:'disabled'});
   const {default:sharp}=await import('sharp');
