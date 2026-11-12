@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {lineBounds,moveEndpoint,resizeDirections,resizeRect} from '../src/core/geometry.ts';
+import {lineBounds,moveEndpoint,resizeDirections,resizeRect,resizeRectKeepAspect} from '../src/core/geometry.ts';
 const rect={x:100,y:200,width:120,height:80};
 test('all eight resize handles change only their respective edges',()=>{
  const expected={
@@ -25,4 +25,34 @@ test('line endpoint movement preserves the other endpoint, including diagonal an
  assert.deepEqual(vertical.end,{x:10,y:90});
  assert.deepEqual(lineBounds(vertical.start,vertical.end),{x:10,y:20,width:1,height:70});
  assert.deepEqual(moveEndpoint(start,end,'start',20,-10).end,end);
+});
+
+test('Shift keeps aspect ratio for every corner while anchoring the opposite corner',()=>{
+ for(const direction of ['nw','ne','se','sw']){
+  const dx=direction.includes('w')?-36:36,dy=direction.includes('n')?-15:15;
+  const changed=resizeRectKeepAspect(rect,direction,dx,dy);
+  assert.ok(Math.abs(changed.width/changed.height-rect.width/rect.height)<1e-10,direction);
+  if(direction.includes('w'))assert.equal(changed.x+changed.width,rect.x+rect.width);
+  else assert.equal(changed.x,rect.x);
+  if(direction.includes('n'))assert.equal(changed.y+changed.height,rect.y+rect.height);
+  else assert.equal(changed.y,rect.y);
+  assert.ok(changed.width>rect.width&&changed.height>rect.height);
+ }
+});
+test('Shift on side handles anchors the opposite side and centers perpendicular resizing',()=>{
+ const east=resizeRectKeepAspect(rect,'e',60,1000);
+ assert.deepEqual(east,{x:100,y:180,width:180,height:120});
+ const north=resizeRectKeepAspect(rect,'n',1000,-20);
+ assert.deepEqual(north,{x:85,y:180,width:150,height:100});
+ const west=resizeRectKeepAspect(rect,'w',-60,0);
+ assert.deepEqual(west,{x:40,y:180,width:180,height:120});
+ const south=resizeRectKeepAspect(rect,'s',0,40);
+ assert.deepEqual(south,{x:70,y:200,width:180,height:120});
+});
+test('Shift resizing clamps both dimensions and rejects invalid geometry',()=>{
+ const small=resizeRectKeepAspect(rect,'se',-10000,-10000);
+ assert.ok(small.width>=10&&small.height>=10);
+ assert.ok(Math.abs(small.width/small.height-1.5)<1e-10);
+ assert.throws(()=>resizeRectKeepAspect(rect,'se',NaN,0));
+ assert.throws(()=>resizeRectKeepAspect({...rect,width:0},'e',20,0));
 });
