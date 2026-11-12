@@ -11,14 +11,29 @@ export function PresentationSlide({doc,slide,step,onNavigate}:{doc:D;slide:D;ste
  const ref=useRef<HTMLDivElement>(null),previous=useRef({id:"",step:0});
  const [width,setWidth]=useState(0);
  useLayoutEffect(()=>{
-  const parent=ref.current?.parentElement;
-  if(!parent)return;
-  const update=()=>setWidth(parent.getBoundingClientRect().width);
+  const holder=ref.current?.parentElement;
+  if(!holder)return;
+  const screen=holder.classList.contains('presentation-fit')?holder.parentElement:null;
+  const canvasWidth=doc.document.canvas.width,canvasHeight=doc.document.canvas.height;
+  const update=()=>{
+   if(screen&&canvasWidth>0&&canvasHeight>0){
+    // Measure the real available viewport instead of relying on nested CSS
+    // multiplication/division, which can resolve to auto on older browsers.
+    const bounds=screen.getBoundingClientRect();
+    const fittedWidth=Math.max(0,Math.min(bounds.width,bounds.height*canvasWidth/canvasHeight));
+    holder.style.width=fittedWidth+'px';
+    holder.style.height=(fittedWidth*canvasHeight/canvasWidth)+'px';
+   }
+   setWidth(holder.getBoundingClientRect().width);
+  };
   update();
   const observer=new ResizeObserver(update);
-  observer.observe(parent);
-  return ()=>observer.disconnect();
- },[]);
+  observer.observe(screen??holder);
+  return ()=>{
+   observer.disconnect();
+   if(screen){holder.style.removeProperty('width');holder.style.removeProperty('height');}
+  };
+ },[doc.document.canvas.width,doc.document.canvas.height]);
  useLayoutEffect(()=>{if(!ref.current)return;const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
  const changed=previous.current.id!==slide.id;const forward=changed||step>previous.current.step;previous.current={id:slide.id,step};
  const clean=applyPlayback(ref.current,slide,step,reduced,forward);
