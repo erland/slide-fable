@@ -395,7 +395,7 @@ try{
  // the internal clipboard. Both operations are individually undoable.
  await page.evaluate(async id=>(await import('/src/core/editor.ts')).editorStore.select([id]),newTextId);
  const beforeDuplicate=await model(),originalCount=beforeDuplicate.slides[2].view.elements.length;
- const originalText=beforeDuplicate.slides[2].view.elements.find(e=>e.id===newTextId);
+ const sourceForDuplicate=beforeDuplicate.slides[2].view.elements.find(e=>e.id===newTextId);
  await page.locator('.editor-header').getByRole('button',{name:'Ångra',exact:true}).focus();
  await page.keyboard.press('ControlOrMeta+d');
  const afterShortcut=await model(),cloneElements=afterShortcut.slides[2].view.elements;
@@ -403,8 +403,8 @@ try{
  const cloneId=await page.evaluate(async()=>(await import('/src/core/editor.ts')).editorStore.getSnapshot().selected[0]);
  assert.ok(cloneId&&cloneId!==newTextId,'Duplicate is selected and has a new ID');
  const clone=cloneElements.find(e=>e.id===cloneId);
- assert.equal(clone.geometry.x,originalText.geometry.x+24,'Duplicate is offset horizontally');
- assert.equal(clone.geometry.y,originalText.geometry.y+24,'Duplicate is offset vertically');
+ assert.equal(clone.geometry.x,sourceForDuplicate.geometry.x+24,'Duplicate is offset horizontally');
+ assert.equal(clone.geometry.y,sourceForDuplicate.geometry.y+24,'Duplicate is offset vertically');
  await page.locator('.editor-header').getByRole('button',{name:'Ångra',exact:true}).click();
  assert.equal((await model()).slides[2].view.elements.length,originalCount,'Undo removes duplicate');
  await page.evaluate(async id=>(await import('/src/core/editor.ts')).editorStore.select([id]),newTextId);
