@@ -36,6 +36,20 @@ try{
   assert.notDeepEqual(await doc(),before,'Shape quick formatting changes presentation');
   await page.evaluate(async id=>{const {editorStore:s}=await import('/src/core/editor.ts');s.select([id,s.getSnapshot().selected[0]]);},info.text);
   assert.equal(await tab.getByText('2 objekt markerade').count(),1);
+  // Different fills should never be presented as one authoritative swatch.
+  await page.evaluate(async()=>{
+   const {editorStore:s}=await import('/src/core/editor.ts');
+   const ids=s.getSnapshot().selected;
+   s.select([ids[0]]);s.formatSelected({key:'fill',value:'#cc0000'});
+   s.select([ids[1]]);s.formatSelected({key:'fill',value:'#0000cc'});
+   s.select(ids);
+  });
+  const fill=quick.getByLabel('Fyllning',{exact:true});
+  assert.match(await fill.getAttribute('aria-describedby'),/ribbon-format-fill-status/);
+  assert.equal(await quick.locator('#ribbon-format-fill-status').textContent(),'Blandade färger');
+  await tab.getByRole('button',{name:'Visa Formatera'}).click();
+  assert.equal(await page.getByRole('tabpanel',{name:'Formatera'}).locator('#ribbon-format-fill-status').textContent(),'Blandade färger');
+  await start.click();
   await quick.getByRole('spinbutton',{name:'Textstorlek'}).waitFor();
   await page.evaluate(async()=>{const {editorStore:s}=await import('/src/core/editor.ts');s.select([]);});
   assert.equal(await tab.getByRole('group',{name:'Snabbformatering av markerat objekt'}).count(),0);

@@ -20,6 +20,11 @@ export function formatValues(doc:D,slide:D,ids:readonly string[],key:SelectionFo
   return runs.length?runs.map((r:D)=>key==='fontSize'?(r.size??fallback):(r.color??fallback)):[fallback];
  });
 }
+export function formatValueStatus(values:readonly (string|number|undefined)[]):'unavailable'|'mixed'|'unset'|'shared'{
+ if(!values.length)return 'unavailable';
+ if(!values.every(value=>value===values[0]))return 'mixed';
+ return values[0]===undefined?'unset':'shared';
+}
 export function sharedFormat(values:readonly (string|number|undefined)[]){
  return values.length&&values.every(value=>value===values[0])?values[0]:undefined;
 }

@@ -1,4 +1,4 @@
-import {formatValues,sharedFormat,type SelectionFormatChange,type SelectionFormatKey} from '../core/selectionFormatting';
+import {formatValueStatus,formatValues,sharedFormat,type SelectionFormatChange,type SelectionFormatKey} from '../core/selectionFormatting';
 import {textOf,type D} from '../core/model';
 import {textOverflowOptions,textOverflowPolicy,type TextOverflowPolicy} from '../core/textOverflowControls';
 
@@ -18,10 +18,11 @@ export function RibbonFormatting({doc,slide,ids,selectedType,disabled,onFormat,o
  });
  return <div className="ribbon-actions ribbon-formatting" role="group" aria-label="Snabbformatering av markerat objekt">
   {visible.map(field=>{
-   const values=formatValues(doc,slide,ids,field.key),value=sharedFormat(values),mixed=values.length>1&&value===undefined;
+   const values=formatValues(doc,slide,ids,field.key),value=sharedFormat(values),status=formatValueStatus(values),mixed=status==='mixed';
+   const statusText=status==='mixed'?(field.kind==='color'?'Blandade färger':'Blandade värden'):status==='unset'?'Inget värde angivet':'';
    const id='ribbon-format-'+field.key;
    return <label key={field.key} htmlFor={id}>{field.label}
-    {field.kind==='color'?<input id={id} type="color" aria-label={field.label} disabled={disabled||!values.length} value={typeof value==='string'&&/^#[a-f0-9]{6}$/i.test(value)?value:'#183641'} onChange={event=>onFormat({key:field.key,value:event.target.value})}/>
+    {field.kind==='color'?<><input id={id} type="color" aria-label={field.label} aria-describedby={id+'-status'} disabled={disabled||!values.length} value={typeof value==='string'&&/^#[a-f0-9]{6}$/i.test(value)?value:'#183641'} onChange={event=>onFormat({key:field.key,value:event.target.value})}/><span id={id+'-status'} aria-live="polite">{statusText}</span></>
     :<input id={id} type="number" aria-label={field.label} min={field.key==='fontSize'?1:0} max={field.key==='fontSize'?200:50} disabled={disabled||!values.length} key={`${field.key}:${ids.join(',')}:${String(value)}`} placeholder={mixed?'Blandat':''} defaultValue={typeof value==='number'?value:''} onBlur={event=>{const raw=event.target.value.trim(),n=Number(raw);if(raw&&Number.isFinite(n)&&n>=(field.key==='fontSize'?1:0)&&n<=(field.key==='fontSize'?200:50)&&n!==value)onFormat({key:field.key,value:n});}} onKeyDown={event=>{if(event.key==='Enter')event.currentTarget.blur();}}/>}
    </label>;
   })}
