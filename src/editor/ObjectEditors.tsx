@@ -1,5 +1,7 @@
+import {useState} from 'react';
 import {copy,uid,type D} from '../core/model';
 import {splitHorizontalCell,removeTableRow,removeTableColumn} from './tableCells';
+import {moveDiagramNode,removeDiagramNode,createDiagramEdge,retargetDiagramEdge,removeDiagramEdge} from './diagramOperations';
 export function TableEditor({element,onChange}:{element:D;onChange:(p:D)=>void}){
  const edit=(fn:(cells:D[][])=>void)=>{const cells=copy(element.cells);fn(cells);onChange({cells});};
  const setEdge=(row:number,col:number,side:'top'|'right'|'bottom'|'left',field:'width'|'color',value:string)=>edit(cells=>{const cell=cells[row][col];const edges=cell.borders??{};const prev=edges[side]??{width:2,paint:{color:'#70858a'}};edges[side]={...prev,...(field==='width'?{width:Math.max(0,Number(value))}:{paint:{color:value}})};cell.borders=edges;});
@@ -49,4 +51,37 @@ export function ChartEditor({element,onChange}:{element:D;onChange:(p:D)=>void})
   <div className="button-row"><button type="button" onClick={()=>edit(d=>{d.categories.push('Ny kategori');d.series.forEach((s:D)=>s.values.push(0));})}>Ny kategori</button><button type="button" onClick={()=>edit(d=>d.series.push({id:uid('series'),name:'Serie '+(d.series.length+1),values:d.categories.map(()=>0)}))}>Ny serie</button></div>
  </div>;
 }
-export function DiagramEditor({element,onChange}:{element:D;onChange:(p:D)=>void}){const d=element.semanticDiagram;const edit=(fn:(data:D)=>void)=>{const next=copy(d);fn(next);onChange({semanticDiagram:next});};return <><label>Diagramstruktur<select aria-label="Diagramstruktur" value={d.kind} onChange={e=>edit(d=>d.kind=e.target.value)}>{['process','hierarchy','timeline'].map(v=><option key={v}>{v}</option>)}</select></label><label>Riktning<select aria-label="Riktning" value={d.layout?.direction??'lr'} onChange={e=>edit(d=>d.layout={...d.layout,direction:e.target.value})}>{['lr','rl','tb','bt'].map(v=><option key={v}>{v}</option>)}</select></label>{d.nodes.map((n:D,i:number)=><label key={n.id}>Nod {i+1}<input value={n.label} onChange={e=>edit(d=>d.nodes[i].label=e.target.value)}/></label>)}<button onClick={()=>edit(d=>{const id=uid('node'),previous=d.nodes.at(-1);d.nodes.push({id,label:'Nytt steg'});if(previous){d.edges??=[];d.edges.push({id:uid('edge'),from:previous.id,to:id});}})}>Lägg till nod</button></>;}
+export function DiagramEditor({element,onChange}:{element:D;onChange:(p:D)=>void}){
+ const d:D=element.semanticDiagram;
+ const [from,setFrom]=useState(''),[to,setTo]=useState('');
+ const nodes:D[]=d.nodes??[],edges:D[]=d.edges??[];
+ const validFrom=nodes.some(n=>n.id===from)?from:nodes[0]?.id??'';
+ const validTo=nodes.some(n=>n.id===to)?to:nodes.find(n=>n.id!==validFrom)?.id??'';
+ const edit=(fn:(data:D)=>void)=>{const next=copy(d);fn(next);onChange({semanticDiagram:next});};
+ const apply=(next:D|null)=>{if(next)onChange({semanticDiagram:next});};
+ const nodeChoices=nodes.map((n:D,i:number)=><option key={n.id} value={n.id}>{i+1}. {n.label||'Namnlös nod'}</option>);
+ return <section className="diagram-editor" aria-label="Redigera diagramstruktur">
+  <label>Diagramstruktur<select aria-label="Diagramstruktur" value={d.kind} onChange={e=>edit(data=>data.kind=e.target.value)}>{['process','hierarchy','timeline'].map(v=><option key={v}>{v}</option>)}</select></label>
+  <label>Riktning<select aria-label="Riktning" value={d.layout?.direction??'lr'} onChange={e=>edit(data=>data.layout={...data.layout,direction:e.target.value})}>{['lr','rl','tb','bt'].map(v=><option key={v}>{v}</option>)}</select></label>
+  <h3>Noder</h3>
+  {nodes.map((node:D,i:number)=><div key={node.id} className="button-row" role="group" aria-label={'Nod '+(i+1)}>
+   <label>Nod {i+1}<input aria-label={'Nod '+(i+1)+' text'} value={node.label} onChange={e=>edit(data=>{data.nodes[i].label=e.target.value;})}/></label>
+   <button type="button" aria-label={'Flytta nod '+(i+1)+' upp'} disabled={i===0} onClick={()=>apply(moveDiagramNode(d,i,-1))}>Uppåt</button>
+   <button type="button" aria-label={'Flytta nod '+(i+1)+' ned'} disabled={i===nodes.length-1} onClick={()=>apply(moveDiagramNode(d,i,1))}>Nedåt</button>
+   <button type="button" aria-label={'Ta bort nod '+(i+1)} disabled={nodes.length<=1} onClick={()=>apply(removeDiagramNode(d,node.id))}>Ta bort</button>
+  </div>)}
+  <button type="button" onClick={()=>edit(data=>{const id=uid('node'),previous=data.nodes.at(-1);data.nodes.push({id,label:'Nytt steg'});if(previous){data.edges??=[];data.edges.push({id:uid('edge'),from:previous.id,to:id});}})}>Lägg till nod</button>
+  <h3>Kopplingar</h3>
+  <p>Kopplingarna bevaras när noder flyttas. Kopplingar till en borttagen nod tas bort automatiskt.</p>
+  {edges.map((edge:D,i:number)=><div key={edge.id} className="button-row" role="group" aria-label={'Koppling '+(i+1)}>
+   <label>Från<select aria-label={'Koppling '+(i+1)+' från'} value={edge.from} onChange={e=>apply(retargetDiagramEdge(d,edge.id,e.target.value,edge.to))}>{nodeChoices}</select></label>
+   <label>Till<select aria-label={'Koppling '+(i+1)+' till'} value={edge.to} onChange={e=>apply(retargetDiagramEdge(d,edge.id,edge.from,e.target.value))}>{nodeChoices}</select></label>
+   <button type="button" aria-label={'Ta bort koppling '+(i+1)} onClick={()=>apply(removeDiagramEdge(d,edge.id))}>Ta bort koppling</button>
+  </div>)}
+  {nodes.length>1&&<div className="button-row" role="group" aria-label="Ny koppling">
+   <label>Från<select aria-label="Ny koppling från" value={validFrom} onChange={e=>{setFrom(e.target.value);if(e.target.value===validTo)setTo(nodes.find(n=>n.id!==e.target.value)?.id??'');}}>{nodeChoices}</select></label>
+   <label>Till<select aria-label="Ny koppling till" value={validTo} onChange={e=>setTo(e.target.value)}>{nodeChoices}</select></label>
+   <button type="button" disabled={!validFrom||!validTo||validFrom===validTo||edges.some((edge:D)=>edge.from===validFrom&&edge.to===validTo)} onClick={()=>apply(createDiagramEdge(d,validFrom,validTo,uid('edge')))}>Lägg till koppling</button>
+  </div>}
+ </section>;
+}
