@@ -1,7 +1,7 @@
 import {useState} from 'react';
 import {copy,uid,type D} from '../core/model';
 import {splitHorizontalCell,removeTableRow,removeTableColumn} from './tableCells';
-import {moveDiagramNode,removeDiagramNode,createDiagramEdge,retargetDiagramEdge,removeDiagramEdge} from './diagramOperations';
+import {moveDiagramNode,removeDiagramNode,createDiagramEdge,retargetDiagramEdge,removeDiagramEdge,type DiagramData} from './diagramOperations';
 export function TableEditor({element,onChange}:{element:D;onChange:(p:D)=>void}){
  const edit=(fn:(cells:D[][])=>void)=>{const cells=copy(element.cells);fn(cells);onChange({cells});};
  const setEdge=(row:number,col:number,side:'top'|'right'|'bottom'|'left',field:'width'|'color',value:string)=>edit(cells=>{const cell=cells[row][col];const edges=cell.borders??{};const prev=edges[side]??{width:2,paint:{color:'#70858a'}};edges[side]={...prev,...(field==='width'?{width:Math.max(0,Number(value))}:{paint:{color:value}})};cell.borders=edges;});
@@ -52,7 +52,7 @@ export function ChartEditor({element,onChange}:{element:D;onChange:(p:D)=>void})
  </div>;
 }
 export function DiagramEditor({element,onChange}:{element:D;onChange:(p:D)=>void}){
- const d:D=element.semanticDiagram;
+ const d:D & DiagramData=element.semanticDiagram;
  const [from,setFrom]=useState(''),[to,setTo]=useState('');
  const nodes:D[]=d.nodes??[],edges:D[]=d.edges??[];
  const validFrom=nodes.some(n=>n.id===from)?from:nodes[0]?.id??'';
