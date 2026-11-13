@@ -91,3 +91,38 @@ export function moveTableRow<T extends {id:string;colSpan?:number;rowSpan?:numbe
  [result[rowIndex],result[target]]=[result[target],result[rowIndex]];
  return result;
 }
+
+/** Swap two adjacent logical columns across every row. A span covering either
+ * column is rejected; spans elsewhere may be preserved unchanged.
+ * Explicit column widths travel with their cells.
+ */
+export function moveTableColumn<T extends {id:string;colSpan?:number;rowSpan?:number}>(
+ cells:T[][],columnIndex:number,direction:-1|1,columnWidths?:number[]
+):{cells:T[][];columnWidths?:number[]}|null{
+ const width=safeGrid(cells);
+ if(width===null||width<=1||!Number.isInteger(columnIndex)||columnIndex<0||
+   columnIndex>=width||(direction!==-1&&direction!==1))return null;
+ const target=columnIndex+direction;
+ if(target<0||target>=width)return null;
+ if(columnWidths!==undefined&&(!Array.isArray(columnWidths)||columnWidths.length!==width||
+   columnWidths.some(value=>!Number.isFinite(value)||value<=0)))return null;
+ const result:T[][]=[];
+ for(const row of cells){
+  let position=0;
+  const indices=new Map<number,number>();
+  for(let i=0;i<row.length;i++){
+   const span=row[i].colSpan??1;
+   if(span===1)indices.set(position,i);
+   position+=span;
+  }
+  const first=indices.get(columnIndex),second=indices.get(target);
+  if(first===undefined||second===undefined)return null;
+  const next=row.map(cell=>({...cell}));
+  [next[first],next[second]]=[next[second],next[first]];
+  result.push(next);
+ }
+ if(!columnWidths)return {cells:result};
+ const nextWidths=[...columnWidths];
+ [nextWidths[columnIndex],nextWidths[target]]=[nextWidths[target],nextWidths[columnIndex]];
+ return {cells:result,columnWidths:nextWidths};
+}
