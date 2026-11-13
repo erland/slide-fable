@@ -19,6 +19,18 @@ try {
   await tools.getByRole('button',{name:'Fler egenskaper'}).click();
   const read=()=>page.evaluate(async()=>{const s=(await import('/src/core/editor.ts')).editorStore.getSnapshot();return structuredClone(s.doc.slides[0].view.elements.find(e=>e.type==='table').cells);});
   const start=await read();
+  // UX-16: append a safe logical row through UI and verify undo before other edits.
+  await page.getByRole('button',{name:'Lägg till rad'}).click();
+  const appended=await read();
+  assert.equal(appended.length,start.length+1,viewport.name+': append one row');
+  assert.equal(appended.at(-1).length,start[0].reduce((n,cell)=>n+(cell.colSpan??1),0),viewport.name+': appended row logical width');
+  assert.equal(new Set(appended.flat().map(cell=>cell.id)).size,appended.flat().length,viewport.name+': all cell IDs unique');
+  await page.evaluate(async()=>(await import('/src/core/editor.ts')).editorStore.undo());
+  assert.deepEqual(await read(),start,viewport.name+': undo appended row');
+  await page.evaluate(async()=>(await import('/src/core/editor.ts')).editorStore.redo());
+  assert.deepEqual(await read(),appended,viewport.name+': redo appended row');
+  await page.evaluate(async()=>(await import('/src/core/editor.ts')).editorStore.undo());
+  await page.evaluate(async()=>{const store=(await import('/src/core/editor.ts')).editorStore;const table=store.slide.view.elements.find(e=>e.type==='table');store.select([table.id]);});
   await page.getByRole('button',{name:'Sammanfoga →'}).first().click();
   const merged=await read();assert.equal(merged[0][0].colSpan,2);
   const split=page.getByRole('button',{name:'Dela cell 1 1'});await split.click();
