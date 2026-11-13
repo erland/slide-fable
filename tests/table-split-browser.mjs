@@ -33,6 +33,15 @@ try {
   const initialRows=await read();
   const selectTable=()=>page.evaluate(async()=>{const store=(await import('/src/core/editor.ts')).editorStore;const el=store.slide.view.elements.find(e=>e.type==='table');store.select([el.id]);});
   await selectTable();
+  // UX-14: compact actions retain stable accessible names in every viewport.
+  const rowActions=page.getByRole('group',{name:'Åtgärder för rad 2'});
+  const columnActions=page.getByRole('group',{name:'Åtgärder för kolumn 2'});
+  assert.equal(await rowActions.isVisible(),true,viewport.name+': row action group visible');
+  assert.equal(await columnActions.isVisible(),true,viewport.name+': column action group visible');
+  assert.equal(await rowActions.getByRole('button',{name:'Flytta rad 2 uppåt'}).textContent(),'↑');
+  assert.equal(await columnActions.getByRole('button',{name:'Flytta kolumn 2 åt höger'}).textContent(),'→');
+  assert.equal(await rowActions.getByRole('button',{name:'Duplicera rad 2'}).textContent(),'Duplicera');
+  assert.equal(await columnActions.getByRole('button',{name:'Ta bort kolumn 2'}).textContent(),'Ta bort');
   const rowDelete=page.getByRole('button',{name:'Ta bort rad 2'});
   await rowDelete.click();
   const withoutRow=await read();
