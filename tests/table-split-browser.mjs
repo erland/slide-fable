@@ -29,10 +29,6 @@ try {
   assert.deepEqual(await read(),merged);
   await page.evaluate(async()=>{(await import('/src/core/editor.ts')).editorStore.redo();});
   assert.deepEqual(await read(),cells);
-  const exported=await page.evaluate(async()=>{const {editorStore}=await import('/src/core/editor.ts');const doc=structuredClone(editorStore.getSnapshot().doc);editorStore.load(doc);const {pptxExport}=await import('/src/export/pptxWriter.ts');const result=await pptxExport(doc,doc.slides,'editable-first',false);return Array.from(result.file);});
-  assert.deepEqual(await read(),cells);
-  const zip=await JSZip.loadAsync(Uint8Array.from(exported));const xml=await zip.file('ppt/slides/slide1.xml').async('string');
-  assert.match(xml,/<a:tbl>/);assert.ok((xml.match(/<a:tc[ >]/g)??[]).length>=cells.flat().length);
   // UX-08: Row/column deletion uses the same UI and undo history on all viewports.
   const initialRows=await read();
   const rowDelete=page.getByRole('button',{name:'Ta bort rad 2'});
@@ -74,6 +70,10 @@ try {
   assert.ok((deletedXml.match(/<a:tc[ >]/g)??[]).length>=deleted.flat().length,viewport.name+': surviving cells exported');
   await page.evaluate(async()=>(await import('/src/core/editor.ts')).editorStore.undo());
   assert.deepEqual(await read(),initialRows,viewport.name+': deleting exported column is undoable');
+  const exported=await page.evaluate(async()=>{const {editorStore}=await import('/src/core/editor.ts');const doc=structuredClone(editorStore.getSnapshot().doc);editorStore.load(doc);const {pptxExport}=await import('/src/export/pptxWriter.ts');const result=await pptxExport(doc,doc.slides,'editable-first',false);return Array.from(result.file);});
+  assert.deepEqual(await read(),cells);
+  const zip=await JSZip.loadAsync(Uint8Array.from(exported));const xml=await zip.file('ppt/slides/slide1.xml').async('string');
+  assert.match(xml,/<a:tbl>/);assert.ok((xml.match(/<a:tc[ >]/g)??[]).length>=cells.flat().length);
   assert.deepEqual(errors,[]);
   console.log('PASS table split '+viewport.name);
   await context.close();
