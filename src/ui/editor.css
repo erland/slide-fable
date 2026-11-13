@@ -564,3 +564,12 @@
 .draft-recovery-entry>span{flex:1 1 14rem;overflow-wrap:anywhere}
 .draft-recovery-confirm{border-top:1px solid var(--border,#c8d1d2);padding-top:.7rem;margin-top:.8rem}
 .draft-recovery-confirm button{margin-right:.5rem;margin-bottom:.3rem}
+
+/* UX-14: keep structural table commands compact and usable on narrow panels. */
+.table-editor .table-column-control{display:flex;align-items:end;flex-wrap:wrap;gap:6px;min-width:0;padding:6px 0;border-bottom:1px solid var(--line)}
+.table-editor .table-column-control>label{flex:1 1 110px;min-width:90px}
+.table-editor .table-column-control input{max-width:100%}
+.table-editor .table-structure-actions{display:flex;flex-wrap:wrap;align-items:center;gap:4px;min-width:0}
+.table-editor .table-structure-actions button{min-height:36px;min-width:36px;white-space:nowrap}
+.table-editor .table-grid>.button-row>.table-structure-actions{flex:1 1 100%;border-top:1px solid var(--line);padding-top:5px}
+@media(max-width:520px){.table-editor .table-structure-actions button{min-height:44px;min-width:44px}.table-editor .table-column-control{align-items:stretch}.table-editor .table-column-control>label{flex-basis:100%}}
