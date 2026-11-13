@@ -10,7 +10,7 @@ const grid=()=>[
 test('duplicates a logical column across rows with fresh IDs and matching width',()=>{
  const source=grid(),before=structuredClone(source);
  let counter=0;
- const result=duplicateTableColumn(source,1,()=>\`new-\${++counter}\`,[100,200,300]);
+ const result=duplicateTableColumn(source,1,()=>`new-${++counter}`,[100,200,300]);
  assert.ok(result);
  assert.deepEqual(result.cells.map(row=>row.map(cell=>cell.id)),[['a','b','new-1','c'],['d','e','new-2','f']]);
  assert.deepEqual(result.columnWidths,[100,200,200,300]);
@@ -23,7 +23,7 @@ test('duplicates a logical column across rows with fresh IDs and matching width'
 test('deep-copies the duplicated cell formatting',()=>{
  const source=grid();
  let index=0;
- const result=duplicateTableColumn(source,0,()=>\`copy-\${++index}\`);
+ const result=duplicateTableColumn(source,0,()=>`copy-${++index}`);
  assert.deepEqual(result.cells[0][1].style,source[0][0].style);
  result.cells[0][1].style.paint.color='#ffffff';
  assert.equal(result.cells[0][0].style.paint.color,'#123456');
@@ -40,7 +40,7 @@ test('preserves unrelated merges and rejects a merged target',()=>{
  assert.equal(canDuplicateTableColumn(source,1),false);
  assert.equal(canDuplicateTableColumn(source,2),true);
  let index=0;
- const result=duplicateTableColumn(source,2,()=>\`copy-\${++index}\`);
+ const result=duplicateTableColumn(source,2,()=>`copy-${++index}`);
  assert.deepEqual(result.cells.map(row=>row.map(cell=>cell.id)),[['a','c','copy-1'],['d','e','f','copy-2']]);
  assert.equal(result.cells[0][0].colSpan,2);
 });
