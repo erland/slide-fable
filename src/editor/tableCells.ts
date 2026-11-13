@@ -127,6 +127,13 @@ export function moveTableColumn<T extends {id:string;colSpan?:number;rowSpan?:nu
  return {cells:result,columnWidths:nextWidths};
 }
 
+/** Whether a row can be duplicated without changing the logical grid. */
+export function canDuplicateTableRow<T extends {id:string;colSpan?:number;rowSpan?:number}>(
+ cells:T[][],rowIndex:number
+):boolean{
+ return safeGrid(cells)!==null&&Number.isInteger(rowIndex)&&rowIndex>=0&&rowIndex<cells.length;
+}
+
 /** Insert a deep copy of a row immediately after its source.
  * New cell IDs are mandatory; unsafe grids or exhausted ID generators are
  * rejected without modifying the original table.
@@ -134,8 +141,7 @@ export function moveTableColumn<T extends {id:string;colSpan?:number;rowSpan?:nu
 export function duplicateTableRow<T extends {id:string;colSpan?:number;rowSpan?:number}>(
  cells:T[][],rowIndex:number,makeId:()=>string
 ):T[][]|null{
- if(safeGrid(cells)===null||!Number.isInteger(rowIndex)||rowIndex<0||
-   rowIndex>=cells.length)return null;
+ if(!canDuplicateTableRow(cells,rowIndex))return null;
  const used=new Set(cells.flat().map(cell=>cell.id));
  const duplicate:T[]=[];
  for(const cell of cells[rowIndex]){
