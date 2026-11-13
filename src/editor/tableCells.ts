@@ -76,3 +76,18 @@ export function removeTableColumn<T extends {id:string;colSpan?:number;rowSpan?:
  }
  return {cells:result,...(columnWidths?{columnWidths:columnWidths.filter((_,index)=>index!==columnIndex)}:{})};
 }
+
+/** Swap adjacent complete rows without rewriting cell identities or contents.
+ * Reject irregular grids and vertical spans rather than corrupting the table.
+ */
+export function moveTableRow<T extends {id:string;colSpan?:number;rowSpan?:number}>(
+ cells:T[][],rowIndex:number,direction:-1|1
+):T[][]|null{
+ if(safeGrid(cells)===null||!Number.isInteger(rowIndex)||rowIndex<0||
+   rowIndex>=cells.length||(direction!==-1&&direction!==1))return null;
+ const target=rowIndex+direction;
+ if(target<0||target>=cells.length)return null;
+ const result=cells.map(row=>row.map(cell=>({...cell})));
+ [result[rowIndex],result[target]]=[result[target],result[rowIndex]];
+ return result;
+}
