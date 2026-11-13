@@ -29,6 +29,52 @@ try {
   assert.deepEqual(await read(),merged);
   await page.evaluate(async()=>{(await import('/src/core/editor.ts')).editorStore.redo();});
   assert.deepEqual(await read(),cells);
+  // UX-08: Row/column deletion uses the same UI and undo history on all viewports.
+  const initialRows=await read();
+  const selectTable=()=>page.evaluate(async()=>{const store=(await import('/src/core/editor.ts')).editorStore;const el=store.slide.view.elements.find(e=>e.type==='table');store.select([el.id]);});
+  await selectTable();
+  const rowDelete=page.getByRole('button',{name:'Ta bort rad 2'});
+  await rowDelete.click();
+  const withoutRow=await read();
+  assert.equal(withoutRow.length,initialRows.length-1,viewport.name+': delete row');
+  assert.deepEqual(withoutRow[0],initialRows[0],viewport.name+': preserve surviving row cells');
+  await page.evaluate(async()=>(await import('/src/core/editor.ts')).editorStore.undo());
+  assert.deepEqual(await read(),initialRows,viewport.name+': undo row deletion');
+  await page.evaluate(async()=>(await import('/src/core/editor.ts')).editorStore.redo());
+  assert.deepEqual(await read(),withoutRow,viewport.name+': redo row deletion');
+  await page.evaluate(async()=>(await import('/src/core/editor.ts')).editorStore.undo());
+  await selectTable();
+  const columnDelete=page.getByRole('button',{name:'Ta bort kolumn 2'});
+  await columnDelete.click();
+  const withoutColumn=await read();
+  assert.equal(withoutColumn[0].length,initialRows[0].length-1,viewport.name+': delete column');
+  assert.equal(withoutColumn[0][0].id,initialRows[0][0].id,viewport.name+': surviving cells retain IDs');
+  await page.evaluate(async()=>(await import('/src/core/editor.ts')).editorStore.undo());
+  assert.deepEqual(await read(),initialRows,viewport.name+': undo column deletion');
+
+  // The first logical column cannot be removed while it intersects a merge.
+  await selectTable();
+  await page.getByRole('button',{name:'Sammanfoga →'}).first().click();
+  assert.equal(await page.getByRole('button',{name:'Ta bort kolumn 1'}).isDisabled(),true,viewport.name+': merged column is protected');
+  await page.evaluate(async()=>(await import('/src/core/editor.ts')).editorStore.undo());
+  assert.deepEqual(await read(),initialRows,viewport.name+': merge guard has no side effects');
+
+  await selectTable();
+  await page.getByRole('button',{name:'Ta bort kolumn 2'}).click();
+  const deleted=await read();
+  const exportedDeletion=await page.evaluate(async()=>{
+    const {editorStore}=await import('/src/core/editor.ts');
+    const doc=structuredClone(editorStore.getSnapshot().doc);
+    const {pptxExport}=await import('/src/export/pptxWriter.ts');
+    const result=await pptxExport(doc,doc.slides,'editable-first',false);
+    return Array.from(result.file);
+  });
+  const deletedZip=await JSZip.loadAsync(Uint8Array.from(exportedDeletion));
+  const deletedXml=await deletedZip.file('ppt/slides/slide1.xml').async('string');
+  assert.match(deletedXml,/<a:tbl>/,viewport.name+': deleted table exports as native PPTX table');
+  assert.ok((deletedXml.match(/<a:tc[ >]/g)??[]).length>=deleted.flat().length,viewport.name+': surviving cells exported');
+  await page.evaluate(async()=>(await import('/src/core/editor.ts')).editorStore.undo());
+  assert.deepEqual(await read(),initialRows,viewport.name+': deleting exported column is undoable');
   const exported=await page.evaluate(async()=>{const {editorStore}=await import('/src/core/editor.ts');const doc=structuredClone(editorStore.getSnapshot().doc);editorStore.load(doc);const {pptxExport}=await import('/src/export/pptxWriter.ts');const result=await pptxExport(doc,doc.slides,'editable-first',false);return Array.from(result.file);});
   assert.deepEqual(await read(),cells);
   const zip=await JSZip.loadAsync(Uint8Array.from(exported));const xml=await zip.file('ppt/slides/slide1.xml').async('string');
