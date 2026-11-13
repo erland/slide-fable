@@ -220,3 +220,39 @@ export function duplicateTableColumn<T extends {id:string;colSpan?:number;rowSpa
   ...columnWidths.slice(columnIndex+1)
  ]}:{})};
 }
+
+/** Appending a logical column must keep an explicit width vector in sync.
+ * Reject malformed grids and exhausted ID generators without partial changes.
+ */
+export function canAppendTableColumn<T extends {id:string;colSpan?:number;rowSpan?:number}>(
+ cells:T[][],columnWidths?:number[]
+):boolean{
+ const width=safeGrid(cells);
+ return width!==null&&(columnWidths===undefined||
+  (Array.isArray(columnWidths)&&columnWidths.length===width&&
+   columnWidths.every(value=>Number.isFinite(value)&&value>0)));
+}
+
+export function appendTableColumn<T extends {id:string;colSpan?:number;rowSpan?:number}>(
+ cells:T[][],makeCell:(id:string)=>T,makeId:()=>string,columnWidths?:number[]
+):{cells:T[][];columnWidths?:number[]}|null{
+ if(!canAppendTableColumn(cells,columnWidths))return null;
+ const used=new Set(cells.flat().map(cell=>cell.id));
+ const result:T[][]=[];
+ for(const row of cells){
+  let nextId:string|undefined;
+  for(let attempt=0;attempt<100;attempt++){
+   const candidate=makeId();
+   if(typeof candidate==='string'&&candidate.length>0&&!used.has(candidate)){
+    used.add(candidate);nextId=candidate;break;
+   }
+  }
+  if(!nextId)return null;
+  const cell=makeCell(nextId);
+  if(!cell||cell.id!==nextId||(cell.colSpan??1)!==1||(cell.rowSpan??1)!==1)return null;
+  result.push([...row.map(existing=>structuredClone(existing)),structuredClone(cell)]);
+ }
+ return {cells:result,...(columnWidths?{columnWidths:[
+  ...columnWidths,columnWidths[columnWidths.length-1]
+ ]}:{})};
+}
