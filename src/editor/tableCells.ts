@@ -126,3 +126,32 @@ export function moveTableColumn<T extends {id:string;colSpan?:number;rowSpan?:nu
  [nextWidths[columnIndex],nextWidths[target]]=[nextWidths[target],nextWidths[columnIndex]];
  return {cells:result,columnWidths:nextWidths};
 }
+
+/** Insert a deep copy of a row immediately after its source.
+ * New cell IDs are mandatory; unsafe grids or exhausted ID generators are
+ * rejected without modifying the original table.
+ */
+export function duplicateTableRow<T extends {id:string;colSpan?:number;rowSpan?:number}>(
+ cells:T[][],rowIndex:number,makeId:()=>string
+):T[][]|null{
+ if(safeGrid(cells)===null||!Number.isInteger(rowIndex)||rowIndex<0||
+   rowIndex>=cells.length)return null;
+ const used=new Set(cells.flat().map(cell=>cell.id));
+ const duplicate:T[]=[];
+ for(const cell of cells[rowIndex]){
+  let nextId:string|undefined;
+  for(let attempt=0;attempt<100;attempt++){
+   const candidate=makeId();
+   if(typeof candidate==='string'&&candidate.length>0&&!used.has(candidate)){
+    used.add(candidate);
+    nextId=candidate;
+    break;
+   }
+  }
+  if(!nextId)return null;
+  duplicate.push({...structuredClone(cell),id:nextId});
+ }
+ const result=cells.map(row=>row.map(cell=>structuredClone(cell)));
+ result.splice(rowIndex+1,0,duplicate);
+ return result;
+}
