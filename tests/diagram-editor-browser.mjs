@@ -30,12 +30,13 @@ try{
   state=await read();
   assert.equal(state.nodes.length,2,view.name+': remove node');
   assert.equal(state.edges.every(e=>state.nodes.some(n=>n.id===e.from)&&state.nodes.some(n=>n.id===e.to)),true,view.name+': no dangling edges');
+  const existingEdges=state.edges.map(edge=>edge.id);
   await editor.getByRole('combobox',{name:'Ny koppling från'}).selectOption(state.nodes[1].id);
   await editor.getByRole('button',{name:'Lägg till koppling'}).click();
   state=await read();
-  assert.equal(state.edges.length,1,view.name+': add edge');
-  await editor.getByRole('button',{name:'Ta bort koppling 1'}).click();
-  assert.equal((await read()).edges.length,0,view.name+': remove edge');
+  assert.equal(state.edges.length,existingEdges.length+1,view.name+': add edge');
+  await editor.getByRole('button',{name:'Ta bort koppling '+state.edges.length}).click();
+  assert.deepEqual((await read()).edges.map(edge=>edge.id),existingEdges,view.name+': remove only new edge');
   await editor.getByRole('button',{name:'Lägg till nod'}).click();
   assert.equal((await read()).nodes.length,3,view.name+': add node');
   await page.evaluate(async()=> (await import('/src/core/editor.ts')).editorStore.undo());
