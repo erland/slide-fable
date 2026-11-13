@@ -31,6 +31,7 @@ try {
   assert.deepEqual(await read(),cells);
   // UX-08: Row/column deletion uses the same UI and undo history on all viewports.
   const initialRows=await read();
+  const selectTable=()=>page.evaluate(async()=>{const store=(await import('/src/core/editor.ts')).editorStore;const el=store.slide.view.elements.find(e=>e.type==='table');store.select([el.id]);});
   const rowDelete=page.getByRole('button',{name:'Ta bort rad 2'});
   await rowDelete.click();
   const withoutRow=await read();
@@ -41,6 +42,7 @@ try {
   await page.evaluate(async()=>(await import('/src/core/editor.ts')).editorStore.redo());
   assert.deepEqual(await read(),withoutRow,viewport.name+': redo row deletion');
   await page.evaluate(async()=>(await import('/src/core/editor.ts')).editorStore.undo());
+  await selectTable();
   const columnDelete=page.getByRole('button',{name:'Ta bort kolumn 2'});
   await columnDelete.click();
   const withoutColumn=await read();
@@ -50,11 +52,13 @@ try {
   assert.deepEqual(await read(),initialRows,viewport.name+': undo column deletion');
 
   // The first logical column cannot be removed while it intersects a merge.
+  await selectTable();
   await page.getByRole('button',{name:'Sammanfoga →'}).first().click();
   assert.equal(await page.getByRole('button',{name:'Ta bort kolumn 1'}).isDisabled(),true,viewport.name+': merged column is protected');
   await page.evaluate(async()=>(await import('/src/core/editor.ts')).editorStore.undo());
   assert.deepEqual(await read(),initialRows,viewport.name+': merge guard has no side effects');
 
+  await selectTable();
   await page.getByRole('button',{name:'Ta bort kolumn 2'}).click();
   const deleted=await read();
   const exportedDeletion=await page.evaluate(async()=>{
