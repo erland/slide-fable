@@ -65,7 +65,7 @@ export function DiagramEditor({element,onChange}:{element:D;onChange:(p:D)=>void
   <label>Riktning<select aria-label="Riktning" value={d.layout?.direction??'lr'} onChange={e=>edit(data=>data.layout={...data.layout,direction:e.target.value})}>{['lr','rl','tb','bt'].map(v=><option key={v}>{v}</option>)}</select></label>
   <h3>Noder</h3>
   {nodes.map((node:D,i:number)=><div key={node.id} className="button-row" role="group" aria-label={'Redigera nod '+(i+1)}>
-   <label>Nod {i+1}<input aria-label={'Nod '+(i+1)+' text'} value={node.label} onChange={e=>edit(data=>{data.nodes[i].label=e.target.value;})}/></label>
+   <label>Nod {i+1}<input aria-label={'Nod '+(i+1)} value={node.label} onChange={e=>edit(data=>{data.nodes[i].label=e.target.value;})}/></label>
    <button type="button" aria-label={'Flytta nod '+(i+1)+' upp'} disabled={i===0} onClick={()=>apply(moveDiagramNode(d,i,-1))}>Uppåt</button>
    <button type="button" aria-label={'Flytta nod '+(i+1)+' ned'} disabled={i===nodes.length-1} onClick={()=>apply(moveDiagramNode(d,i,1))}>Nedåt</button>
    <button type="button" aria-label={'Ta bort nod '+(i+1)} disabled={nodes.length<=1} onClick={()=>apply(removeDiagramNode(d,node.id))}>Ta bort</button>
