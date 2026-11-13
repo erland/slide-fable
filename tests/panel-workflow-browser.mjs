@@ -46,6 +46,37 @@ try{
   const formatted=(await snapshot(page)).doc.slides[0].view.elements.find(e=>e.id===created);
   assert.equal(formatted.style.fontSize,42,view.name+': inspector changes object-wide text size');
   assert.equal(formatted.style.color,'#2468ac',view.name+': inspector changes object-wide text color');
+
+  // UX-07: the layer list must remain usable without an active object.
+  // Select through the layer list, change a property, switch slides and
+  // return. This must behave the same on desktop, tablet and mobile.
+  const originalSlideId=(await snapshot(page)).doc.slides[0].id;
+  await page.evaluate(async id=>{
+   const {editorStore:s}=await import('/src/core/editor.ts');
+   s.updateElement(id,{name:'UX-07 lagerobjekt'});
+   s.select([]);
+  },created);
+  const layers=pane.getByRole('region',{name:'Lager'});
+  await layers.waitFor({state:'visible'});
+  assert.equal(await layers.getByRole('button',{name:'UX-07 lagerobjekt',exact:true}).count(),1,view.name+': layer is present without object selection');
+  await layers.getByRole('button',{name:'UX-07 lagerobjekt',exact:true}).click();
+  assert.deepEqual((await snapshot(page)).selected,[created],view.name+': layer click restores object selection');
+  await pane.getByRole('spinbutton',{name:'X',exact:true}).fill('250');
+  await pane.getByRole('spinbutton',{name:'X',exact:true}).press('Tab');
+  assert.equal((await snapshot(page)).doc.slides[0].view.elements.find(e=>e.id===created).geometry.x,250,view.name+': property editing after layer selection');
+  await page.evaluate(async()=>{
+   const {editorStore:s}=await import('/src/core/editor.ts');
+   s.addSlide('content');
+   s.select([]);
+  });
+  assert.equal(await layers.isVisible(),true,view.name+': layers remain visible on another slide without selection');
+  assert.equal(await layers.getByRole('button',{name:'UX-07 lagerobjekt',exact:true}).count(),0,view.name+': layers show current slide only');
+  await page.evaluate(async slideId=>{
+   (await import('/src/core/editor.ts')).editorStore.selectSlide(slideId);
+  },originalSlideId);
+  await layers.getByRole('button',{name:'UX-07 lagerobjekt',exact:true}).click();
+  assert.deepEqual((await snapshot(page)).selected,[created],view.name+': layer selection works after returning to slide');
+
   await page.getByRole('tab',{name:'Start',exact:true}).click();
   const ribbon=page.getByRole('tabpanel',{name:'Start'}).getByRole('group',{name:'Snabbformatering av markerat objekt'});
   assert.equal(await ribbon.getByRole('spinbutton',{name:'Textstorlek'}).inputValue(),'42',view.name+': Start ribbon reflects inspector font size');
