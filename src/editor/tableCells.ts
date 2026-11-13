@@ -256,3 +256,38 @@ export function appendTableColumn<T extends {id:string;colSpan?:number;rowSpan?:
   ...columnWidths,columnWidths[columnWidths.length-1]
  ]}:{})};
 }
+
+/** A row may be appended only to a rectangular logical grid without
+ * vertical spans or duplicate/invalid cell IDs. */
+export function canAppendTableRow<T extends {id:string;colSpan?:number;rowSpan?:number}>(
+ cells:T[][]
+):boolean{
+ return safeGrid(cells)!==null;
+}
+
+/** Append a blank row matching the table's logical number of columns.
+ * Allocate unique cell IDs before publishing the new grid, so a failure
+ * cannot partially change existing rows. Horizontal merges in older rows
+ * do not reduce the new row's column count. */
+export function appendTableRow<T extends {id:string;colSpan?:number;rowSpan?:number}>(
+ cells:T[][],makeCell:(id:string)=>T,makeId:()=>string
+):T[][]|null{
+ const width=safeGrid(cells);
+ if(width===null)return null;
+ const used=new Set(cells.flat().map(cell=>cell.id));
+ const newRow:T[]=[];
+ for(let column=0;column<width;column++){
+  let id:string|undefined;
+  for(let attempt=0;attempt<100;attempt++){
+   const candidate=makeId();
+   if(typeof candidate==='string'&&candidate.length>0&&!used.has(candidate)){
+    used.add(candidate);id=candidate;break;
+   }
+  }
+  if(!id)return null;
+  const cell=makeCell(id);
+  if(!cell||cell.id!==id||(cell.colSpan??1)!==1||(cell.rowSpan??1)!==1)return null;
+  newRow.push(structuredClone(cell));
+ }
+ return [...cells.map(row=>row.map(cell=>structuredClone(cell))),newRow];
+}
