@@ -161,3 +161,62 @@ export function duplicateTableRow<T extends {id:string;colSpan?:number;rowSpan?:
  result.splice(rowIndex+1,0,duplicate);
  return result;
 }
+
+/** Return true when the requested logical column is a standalone cell in
+ * every row. Merges elsewhere in the table may remain untouched. */
+export function canDuplicateTableColumn<T extends {id:string;colSpan?:number;rowSpan?:number}>(
+ cells:T[][],columnIndex:number,columnWidths?:number[]
+):boolean{
+ const width=safeGrid(cells);
+ if(width===null||!Number.isInteger(columnIndex)||columnIndex<0||columnIndex>=width)return false;
+ if(columnWidths!==undefined&&(!Array.isArray(columnWidths)||columnWidths.length!==width||
+   columnWidths.some(value=>!Number.isFinite(value)||value<=0)))return false;
+ for(const row of cells){
+  let position=0,found=false;
+  for(const cell of row){
+   const span=cell.colSpan??1;
+   if(position<=columnIndex&&columnIndex<position+span){
+    if(span!==1)return false;
+    found=true;
+    break;
+   }
+   position+=span;
+  }
+  if(!found)return false;
+ }
+ return true;
+}
+
+/** Duplicate the same logical column in each row, immediately to its right.
+ * Preserve original cell IDs, deep-copy formatting, and allocate fresh IDs for
+ * copies. Reject irregular grids, merged targets, and ID exhaustion atomically. */
+export function duplicateTableColumn<T extends {id:string;colSpan?:number;rowSpan?:number}>(
+ cells:T[][],columnIndex:number,makeId:()=>string,columnWidths?:number[]
+):{cells:T[][];columnWidths?:number[]}|null{
+ if(!canDuplicateTableColumn(cells,columnIndex,columnWidths))return null;
+ const used=new Set(cells.flat().map(cell=>cell.id));
+ const result:T[][]=[];
+ for(const row of cells){
+  let logical=0,index=-1;
+  for(let i=0;i<row.length;i++){
+   if(logical===columnIndex){index=i;break;}
+   logical+=row[i].colSpan??1;
+  }
+  if(index<0)return null;
+  let nextId:string|undefined;
+  for(let attempt=0;attempt<100;attempt++){
+   const candidate=makeId();
+   if(typeof candidate==='string'&&candidate.length>0&&!used.has(candidate)){
+    used.add(candidate);nextId=candidate;break;
+   }
+  }
+  if(!nextId)return null;
+  const next=row.map(cell=>structuredClone(cell));
+  next.splice(index+1,0,{...structuredClone(row[index]),id:nextId});
+  result.push(next);
+ }
+ return {cells:result,...(columnWidths?{columnWidths:[
+  ...columnWidths.slice(0,columnIndex+1),columnWidths[columnIndex],
+  ...columnWidths.slice(columnIndex+1)
+ ]}:{})};
+}
