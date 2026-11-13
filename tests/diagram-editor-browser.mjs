@@ -30,6 +30,7 @@ try{
   state=await read();
   assert.equal(state.nodes.length,2,view.name+': remove node');
   assert.equal(state.edges.every(e=>state.nodes.some(n=>n.id===e.from)&&state.nodes.some(n=>n.id===e.to)),true,view.name+': no dangling edges');
+  await editor.getByRole('combobox',{name:'Ny koppling från'}).selectOption(state.nodes[1].id);
   await editor.getByRole('button',{name:'Lägg till koppling'}).click();
   state=await read();
   assert.equal(state.edges.length,1,view.name+': add edge');
